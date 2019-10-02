@@ -32,7 +32,8 @@ app.post('/', (req, res) => {
   console.log("파일 수신 시작");
 	console.log("파일 이름:" + req.body.startTime + "-" + req.body.extension + "-" + req.body.transType);
 	
-	var filePath = "D:\\TeAnaApi\\file\\";
+  var filePath = "D:\\TeAnaApi\\file\\";
+  //var filePath = "/app/TeAna/TeAnaApi/file";
   var fileName = filePath + req.body.startTime + "-" + req.body.extension + "-" + req.body.transType;
 	var data = JSON.stringify(req.body);
  
@@ -95,7 +96,7 @@ var server = http.createServer(app);
 server.listen(port);
 server.setTimeout(timeout);
 server.on('listening', onListening);
-//file_check();
+file_check();
 
 console.log("process.pid:"+process.pid);
 
@@ -114,84 +115,88 @@ function onListening() {
   console.log('Listening on ' + bind);
 }
 
+var promiseR = function (file_name) {
+	return new Promise(function (resolve, reject) {
+        fs.readFile(file_name, 'utf-8' ,(err,data)=>{
+            if(err) reject('read fileR failed!');
+            file1 = JSON.parse(data);
+            file1.timeNtalkT = file1.timeNtalk;
+            resolve();
+        });
+	});
+};
 
+var promiseT = function (file_name) {
+	return new Promise(function (resolve, reject) {
+        fs.readFile(file_name, 'utf-8' ,(err,data)=>{
+            if(err) reject('read fileT failed!');
+            file2 = JSON.parse(data);
+            file2.timeNtalkR = file2.timeNtalk;
+            resolve();
+        });
+	});
+};
 
-
-
-var file_merge_async = function (file_nr, file_nt){
-  var file1;
-  var file2;
-  var promiseT = function (file_name) {
-    return new Promise(function (resolve, reject) {
-          fs.readFile(file_name, 'utf-8' ,(err,data)=>{
-              if(err) throw err;
-              file2 = data;
-              if(file2 != undefined){
-                resolve();
-              } else {
-                reject();
-              }
-          });
-    }).catch();
-  };
-  var promiseR = function (file_name) {
-    return new Promise(function (resolve, reject) {
-          fs.readFile(file_name, 'utf-8' ,(err,data)=>{
-              if(err) throw err;
-              file1 = data;
-              if( file1 != undefined){
-                resolve();
-              } else {
-                reject();
-              }
-          });
-    }).catch();
-  };
+var file_merge = function (file_nr, file_nt){
   Promise.all([promiseR(file_nr), promiseT(file_nt)])
            .then(function(){
-            mergeTalk(JSON.parse(file1), JSON.parse(file2));
-          }).catch("merge file failed!");
-}
-
-var file_merge = function( file_name_r, file_name_t){
-  data_file_r = fs.readFileSync( file_name_r, 'utf-8', (err,data) => {
-    if(err) throw err;
-  });  
-  data_file_t = fs.readFileSync( file_name_t, 'utf-8', (err,data) => {
-    if(err) throw err;
-  });  
-  mergeTalk(JSON.parse(data_file_t), JSON.parse(data_file_r));
+              // file인지 확인
+              mergeTalk(file1,file2)
+              }).catch("merge file failed!");
 }
 
 function mergeTalk( dataT, dataR ){
-
-  dataT.timeNtalkT = dataT.timeNtalk;
-  dataR.timeNtalkR = dataR.timeNtalk;
+  console.log(dataT);
+  console.log(dataR);
   let merged_talk = []; // 병합한 대화를 담을 배열
-  dataT.timeNtalkT = dataT.timeNtalkT.split("\n");
-  for(i in dataT.timeNtalkT){
-    dialog = dataT.timeNtalkT[i].replace(/(^\s*)|(\s*$)/g, '');
-    if( dialog !== '')
-      merged_talk.push(dialog);
-  }
   dataR.timeNtalkR = dataR.timeNtalkR.split("\n");  // 스트링을 배열로 변환
   for(i in dataR.timeNtalkR){
     dialog = dataR.timeNtalkR[i].replace(/(^\s*)|(\s*$)/g, ''); // 앞뒤 공백 제거
     if( dialog !== '')  // 대화내용이 있으면
       merged_talk.push(dialog);
   }
-  
+  dataT.timeNtalkT = dataT.timeNtalkT.split("\n");
+  for(i in dataT.timeNtalkT){
+    dialog = dataT.timeNtalkT[i].replace(/(^\s*)|(\s*$)/g, '');
+    if( dialog !== '')
+      merged_talk.push(dialog);
+  }
+
   merged_talk.sort();
   let merged_data = mergejson(dataR,dataT)
   merged_data.timeNtalk = merged_talk;
-  //fs.writeFile('', merged_data,'utf-8',)
-  
-  fs.writeFile(config.write_path + merged_data.startTime + "-" + merged_data.extension + ".JSON", JSON.stringify(merged_data), 'utf8', function(err) {
-    if(err) 
-        console.log('파일 쓰기 실패');
-    else
-        console.log('파일 쓰기 완료');
-    });
+  console.log(merged_data);
+}
+
+function file_check() {
+
+  const pr_index = 19;    // file_nt.lastIndexOf('-')
+  const su_index = 20;    // file_nr.lastIndexOf('-')+1
+  const file_path = 'D:\\TeAnaApi\\file\\'
+
+  cron.schedule('1 * * * * *', function(){
+
+    var file_list = fs.readdirSync(file_path);
+    var file_list_r = file_list.filter(el => /\-R$/.test(el));
+    var file_list_t = file_list.filter(el => /\-T$/.test(el));
+
+    for( i in file_list_r ){
+      file_nr = file_list_r[i];
+
+      for ( j in file_list_t ){
+        file_nt = file_list_t[j];
+
+        if(file_nt.substr(0, 19) == file_nr.substr(0, 19) && file_nr.substr(20) != file_nt.substr(20))
+          
+          file_merge(file_path + file_nr, file_path + file_nt);
+          /** 
+          dataR = fs.readFileSync(file_path + '\\' + file_nr, 'utf-8' ,(err,data) => {
+            if(err) throw err;
+          }).toString();
+          */
+      }
+    }
+  });
 }
 
 /************************************************************
@@ -202,28 +207,3 @@ process.on('uncaughtException', function (err) {
   console.error('uncaughtException 발생 : ' + err);
 });
 
-cron.schedule('1 * * * * *', () => {
-  const pr_index = 19;    // file_nt.lastIndexOf('-')
-  const su_index = 20;    // file_nr.lastIndexOf('-')+1
-  const file_path = config.save_path;
-
-  var file_list = fs.readdirSync(file_path);
-  var file_list_r = file_list.filter(el => /\-R$/.test(el));
-  var file_list_t = file_list.filter(el => /\-T$/.test(el));
-
-  for( i in file_list_r ){
-    file_nr = file_list_r[i];
-
-    //var write_file_list = fs.readdirSync(config.write_path);
-
-    for ( j in file_list_t ){
-      file_nt = file_list_t[j];
-
-      if(file_nt.substr(0, 19) == file_nr.substr(0, 19) && file_nr.substr(20) != file_nt.substr(20))     
-        file_merge_async(file_path + file_nr, file_path + file_nt);
-        //file_merge(file_path + file_nr, file_path + file_nt);
-        fs.unlinkSync(file_path+file_nt);
-        fs.unlinkSync(file_path+file_nr);
-      }
-    }
-});
