@@ -6,6 +6,8 @@ var http = require('http');
 var res_err = require(approot + '/lib/res_err');
 var cron = require('node-cron');
 var mergejson = require('mergejson');
+//var Promise = require("bluebird");
+
 require('log-timestamp');
 
 /************************************************************
@@ -112,75 +114,86 @@ function onListening() {
   console.log('Listening on ' + bind);
 }
 
-function file_check() {
+var promiseR = function (file_name) {
+	return new Promise(function (resolve, reject) {
+        fs.readFile(file_name, 'utf-8' ,(err,data)=>{
+            if(err) reject('read fileR failed!');
+            file1 = JSON.parse(data);
+            file1.timeNtalkT = file1.timeNtalk;
+            resolve();
+        });
+	});
+};
 
-  const pr_index = 19;    // fnj.lastIndexOf('-')
-  const su_index = 20;    // fni.lastIndexOf('-')+1
-  const file_path = 'D:\\TeAnaApi\\file'
-  let data1;
-  let data2;
+var promiseT = function (file_name) {
+	return new Promise(function (resolve, reject) {
+        fs.readFile(file_name, 'utf-8' ,(err,data)=>{
+            if(err) reject('read fileT failed!');
+            file2 = JSON.parse(data);
+            file2.timeNtalkR = file2.timeNtalk;
+            resolve();
+        });
+	});
+};
 
-  cron.schedule('1 * * * * *', function(){
-
-    var file_list = fs.readdirSync(file_path);
-
-    file_list_r = file_list.filter(el => /\-R$/.test(el));
-    file_list_t = file_list.filter(el => /\-T$/.test(el));
-
-    for( i in file_list_r ){
-      fni = file_list_r[i];
-
-      for ( j in file_list_t ){
-        fnj = file_list_t[j];
-
-        if(fnj.substr(0, 19) == fni.substr(0, 19) && fni.substr(20) != fnj.substr(20))
-
-          if(true){
-            // 파일명 중복생성되지 않게 체크!
-          }  
-          
-          data1 = fs.readFileSync(file_path + '\\' + fni, 'utf-8' ,(err,data) => {
-            if(err) throw err;
-          }).toString();
-
-          data2 = fs.readFileSync(file_path + '\\' + fnj, 'utf-8' ,(err,data) => {
-            if(err) throw err;
-          });
-
-          /* 비동기방식
-          fs.readFile(file_path + '\\' + fni, 'utf-8' ,(err,data) => {
-            if(err) throw err;
-            data1 = data;
-            console.log(data1); // 여기선 OK
-          });
-          */
-          mergeTalk(JSON.parse(data1), JSON.parse(data2));
-      }
-    }
-  });
+var file_merge = function (file_nr, file_nt){
+  Promise.all([promiseR(file_nr), promiseT(file_nt)])
+           .then(function(){
+              mergeTalk(file1,file2)
+              }).catch("merge file failed!");
 }
 
-function mergeTalk(data1, data2){
+function mergeTalk( dataT, dataR ){
 
-  console.log(mergejson(data2, data1));
-  /** 
-  let merged_talk = [];
-  data1.timeNtalk = data1.timeNtalk.split("\n");
-  for(i in data1.timeNtalk){
-    dialog = data1.timeNtalk[i].replace(/(^\s*)|(\s*$)/g, '');
-    if( dialog !== '')
+  let merged_talk = []; // 병합한 대화를 담을 배열
+  dataR.timeNtalkR = dataR.timeNtalkR.split("\n");  // 스트링을 배열로 변환
+  for(i in dataR.timeNtalkR){
+    dialog = dataR.timeNtalkR[i].replace(/(^\s*)|(\s*$)/g, ''); // 앞뒤 공백 제거
+    if( dialog !== '')  // 대화내용이 있으면
       merged_talk.push(dialog);
   }
-  data2.timeNtalk = data2.timeNtalk.split("\n");
-  for(i in data2.timeNtalk){
-    dialog = data2.timeNtalk[i].replace(/(^\s*)|(\s*$)/g, '');
+  dataT.timeNtalkT = dataT.timeNtalkT.split("\n");
+  for(i in dataT.timeNtalkT){
+    dialog = dataT.timeNtalkT[i].replace(/(^\s*)|(\s*$)/g, '');
     if( dialog !== '')
       merged_talk.push(dialog);
   }
 
   merged_talk.sort();
-  console.log(merged_talk);
-    */
+  let merged_data = mergejson(dataR,dataT)
+  merged_data.timeNtalk = merged_talk;
+  console.log(merged_data);
+}
+
+function file_check() {
+
+  const pr_index = 19;    // file_nt.lastIndexOf('-')
+  const su_index = 20;    // file_nr.lastIndexOf('-')+1
+  const file_path = 'D:\\TeAnaApi\\file\\'
+
+  cron.schedule('1 * * * * *', function(){
+
+    var file_list = fs.readdirSync(file_path);
+    var file_list_r = file_list.filter(el => /\-R$/.test(el));
+    var file_list_t = file_list.filter(el => /\-T$/.test(el));
+
+    for( i in file_list_r ){
+      file_nr = file_list_r[i];
+
+      for ( j in file_list_t ){
+        file_nt = file_list_t[j];
+
+        if(file_nt.substr(0, 19) == file_nr.substr(0, 19) && file_nr.substr(20) != file_nt.substr(20))
+
+          file_merge(file_path + file_nr, file_path + file_nt);
+          /** 
+          dataR = fs.readFileSync(file_path + '\\' + file_nr, 'utf-8' ,(err,data) => {
+            if(err) throw err;
+          }).toString();
+          */
+      }
+    }
+  });
 }
 
 /************************************************************
