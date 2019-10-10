@@ -2,12 +2,14 @@
 	"local" : {
 		"save_path" : "D:\\TeAnaApi\\file\\",
 		"write_path" : "D:\\TeAnaApi\\file_write\\",
+		"backup_path" : "D:\\TeAnaApi\\file_bak\\",
 		"app_host" : "localhost",
 		"app_port" : 3000,
 		"app_timeout" : 3000
 	},
 	"dev" : {
-		"save_path" : "",
+		"save_path" : "/app/TeAna/TeAnaApi2/",
+		"write_path" : "/app/TeAna/TeAnaApi2/file_write",
 		"app_host" : "localhost",
 		"app_port" : 3000,
 		"app_timeout" : 3000
