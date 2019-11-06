@@ -42,7 +42,7 @@ var options2 = {
 var sj01 = schedule.scheduleJob('30 30 * * * *', function(){
     console.log("sj01 start");
     var now = dateFormat(new Date(), "yyyymmddHHMMss");
-    param = { "standardTime": now , "channel" : "03" , clientId : "daeunextier", clientPw : "3B604775904A5C7535E2670F28"};
+    param = { "standardTime": now , "channel" : "01" , clientId : "daeunextier", clientPw : "3B604775904A5C7535E2670F28"};
     options2.body = JSON.stringify(param);
     rp(options2)
     .then(function ( data ){
@@ -56,7 +56,7 @@ var sj01 = schedule.scheduleJob('30 30 * * * *', function(){
 var sj02 = schedule.scheduleJob('20 30 * * * *', function(){
     console.log("sj02 start");
     var now = dateFormat(new Date(), "yyyymmddHHMMss");
-    param = { "standardTime": now , "channel" : "03" , clientId : "daeunextier", clientPw : "3B604775904A5C7535E2670F28"};
+    param = { "standardTime": now , "channel" : "02" , clientId : "daeunextier", clientPw : "3B604775904A5C7535E2670F28"};  
     options2.body = JSON.stringify(param);
     rp(options2)
     .then(function ( data ){
@@ -85,7 +85,7 @@ var sj03 = schedule.scheduleJob('10 30 * * * *', function(){
 var sj04 = schedule.scheduleJob('0 30 * * * *', function(){
     console.log("sj04 start");
     var now = dateFormat(new Date(), "yyyymmddHHMMss");
-    param = { "standardTime": now , "channel" : "03" , clientId : "daeunextier", clientPw : "3B604775904A5C7535E2670F28"};
+    param = { "standardTime": now , "channel" : "04" , clientId : "daeunextier", clientPw : "3B604775904A5C7535E2670F28"};
     options2.body = JSON.stringify(param);
     rp(options2)
     .then(function ( data ){
@@ -104,15 +104,15 @@ function getData(){
         options2.headers.Authorization = "OAuth " + token.access_token;
 
         sj01.invoke();
-        sj02.invoke();
-        sj03.invoke();
-        sj04.invoke();
+        //sj02.invoke();
+        //sj03.invoke();
+        //sj04.invoke();
     })
     .catch(function (err) {
         console.error("error 1 : " + err);
     });
 }
 
-//getData();
+// getData();
 
 module.exports = getData;

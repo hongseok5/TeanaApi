@@ -24,6 +24,7 @@ router.post("/top", function(req, res){
     var body = common.getBody(req.body.start_dt, req.body.end_dt, 10);
     var should = [];
     var index = common.getIndex(req.body.channel);
+    
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
     if(req.body.category2 !== undefined)

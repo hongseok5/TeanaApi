@@ -254,3 +254,163 @@
     }
 
 }
+
+//PUT _template/ua_call
+{
+  "index_patterns" : "ua_call*",
+   "settings" : {
+    "analysis": {
+      "analyzer": {
+        "ngram_analyzer" : {
+          "tokenizer" : "ngram_tokenizer"
+        }
+      },
+      "tokenizer" : {
+        "ngram_tokenizer" : {
+          "type" : "ngram",
+          "min_gram" : "2",
+          "max_gram" : "5"
+        }
+      }
+    }
+  },
+  "mappings" : {
+    "doc" : {
+      "properties" : {
+        "call_num" : {
+          "type" : "keyword"
+        },
+        "start_time" : {
+          "type" : "date",
+          "format" : "yyyyMMddHHmmss"
+        },
+        "extension" : {
+          "type" : "keyword"
+        },
+        "call_id" : {
+          "type" : "keyword"
+        },
+        "cti_id" : {
+          "type" : "keyword"
+        },
+        "emp_id" : {
+          "type" : "keyword"
+        },
+        "emp_nm" : {
+          "type" : "text",
+          "analyzer" : "ngram_analyzer",
+          "fields" : {
+              "keyword" : {
+                "type" : "keyword",
+                "ignore_above" : 256
+              }
+            }
+        },
+        "caller_num" : {
+          "type" : "keyword"
+        },
+        "receiver_num" : {
+          "type" : "keyword"
+        },
+        "pc_ip" : {
+          "type" : "keyword"
+        },
+        "cust_nm" : {
+          "type" : "text",
+          "analyzer" : "ngram_analyzer",
+          "fields" : {
+              "keyword" : {
+                "type" : "keyword",
+                "ignore_above" : 256
+              }
+            }
+        },
+        "call_stat_cd" : {
+          "type" : "keyword"
+        },
+        "call_start_dtm" : {
+          "type" : "date",
+          "format" : "yyyyMMddHHmmss"
+        },
+        "call_end_dtm" : {
+          "type" : "date",
+          "format" : "yyyyMMddHHmmss"
+        },
+        "call_start_tm" : {
+          "type" : "date",
+          "format" : "HH:mm:ss"
+        },
+        "call_end_tm" : {
+          "type" : "date",
+          "format" : "HH:mm:ss"
+        },
+        "call_dt" : {
+          "type" : "date",
+          "format" : "yyyy-MM-dd"
+        },
+        "dept_id" : {
+          "type" : "keyword"
+        },
+        "dept_nm" : {
+          "type" : "text",
+          "analyzer" : "ngram_analyzer",
+          "fields" : {
+              "keyword" : {
+                "type" : "keyword",
+                "ignore_above" : 256
+              }
+            }
+        },
+        "duration" : {
+          "type" : "long"
+        },
+        "direction" : {
+          "type" : "keyword"
+        },
+        "direction_nm" : {
+          "type" : "keyword"
+        },
+        "file_path" : {
+          "type" : "keyword"
+        },
+        "negative_use_yn" : {
+          "type" : "keyword"
+        },
+        "prohibit_use_yn" : {
+          "type" : "keyword"
+        },
+        "ai_yn" : {
+          "type" : "keyword"
+        },
+        "ai_score" : {
+          "type" : "long"
+        },
+        "hum_yn" : {
+          "type" : "keyword"
+        },
+        "hum_score" : {
+          "type" : "long"
+        },
+        "qa_emp_id" : {
+          "type" : "keyword"
+        },
+        "summary" : {
+          "type" : "text",
+          "analyzer" : "kobrick",
+          "search_analyzer" : "kobrick_search"
+        },
+        "talk_content" : {
+          "type" : "text",
+          "analyzer" : "kobrick",
+          "search_analyzer" : "kobrick_search"
+        },
+        "talk_time" : {
+          "type" : "keyword"
+        },
+        "qa_emp_nm" : {
+          "type" : "keyword"
+        },
+      }
+    }
+  }
+}
