@@ -38,6 +38,11 @@ router.post("/count", function(req, res){
         var term_obj = { term : { productCode : req.body.productCode[p]}};
         should.push(term_obj);
     } 
+
+    body.query.bool.must = [
+        { bool : { should } }
+    ]
+
     body.aggs.cate1_terms = {
         terms : {
             field : "category1Nm",

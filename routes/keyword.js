@@ -21,7 +21,6 @@ client.ping({
 router.post("/top", function(req, res){
     console.log("Router for IF_DMA_00101");
     let size = req.body.size || 10;
-
     var body = common.getBody(req.body.start_dt, req.body.end_dt, 10);
     var should = [];
     var index = common.getIndex(req.body.channel);
@@ -89,11 +88,8 @@ router.post("/top/statistics", function(req, res){
     var size = req.body.size || 0;
     var keyword = req.body.keyword;
     var interval = req.body.interval || "week";
-
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
     var index = common.getIndex(req.body.channel);
-
-
 
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});

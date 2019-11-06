@@ -12,6 +12,10 @@ const winston = require('winston');
 //const if0004 = require('./if_dma_00004.js');
 //const if0003 = require('./if_dma_00003.js');
 const elasticsearch = require('elasticsearch');
+var client = new elasticsearch.Client({
+  host : '10.253.42.185:9200',
+  log: 'trace'
+});
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
@@ -50,8 +54,8 @@ wss.on("connection", function(ws){
       result.startTime = data.startTime;
       result.extension = data.extension;
       result.agentId = data.agentId;
-      result.transType = data.transType;
-   
+      //result.transType = data.transType;
+      
       fs.writeFile(fileName, message, 'utf-8', function(err) {
         if(err) {
             result.code = "99";
@@ -82,7 +86,7 @@ app.use(express.json());
 app.use("/channel", require("./routes/channel"));
 app.use("/keyword", require("./routes/keyword"));
 app.use("/class", require("./routes/class"));
-// app.use("/call", require("./routes/call"));
+app.use("/call", require("./routes/call"));
 app.use("/positive", require("./routes/positive"));
 app.use("/receive", require("./routes/receive"));
 app.use("/product", require("./routes/product"));
@@ -94,36 +98,6 @@ app.get('/', (req, res) => {
     res.send('ROOT');
 });
 
-/*
-app.post('/', (req, res) =>{
-    logger.info("HTTP POST /" + req.ip + Date());
-});
-
-app.post('/receive/call', (req, res) => {
-   logger.info("HTTP POST /receive/call" + req.ip + Date());
-   result = {};
-   result.ifId = req.body.ifId || undefined;
-   if (result.ifId === undefined){
-    result.code = "99";
-    result.message = "필수값 누락";
-    res.send(JSON.stringify(result));
-   } else {
-    fs.writeFile(config.write_path + result.ifId + ".JSON",  'utf-8', function(err) {
-      if(err) {
-        result.code = "99";
-        result.message = "파일 수신 실패";
-        res.send(JSON.stringify(result));
-        console.log('파일 쓰기 실패');
-      } else {
-        result.code = "10";
-        result.message = "파일 정상 수신";
-        res.send(JSON.stringify(result));
-        console.log('파일 쓰기 완료');
-      }
-    });
-   }
- });
- */
 /***********************************************************************
  * 에러처리
  **********************************************************************/
@@ -198,15 +172,24 @@ var file_merge_async = function (file_nr, file_nt){
             mergeTalk(JSON.parse(file_r), JSON.parse(file_t))
           }).catch("merge file failed!");
 }
-/** 
-var file_merge_sync = function( file_name_r, file_name_t){
-  data_file_r = fs.readFileSync( file_name_r, 'utf-8', (err,data) => {
-    if(err) throw err;
-  });  
-  data_file_t = fs.readFileSync( file_name_t, 'utf-8', (err,data) => {
-    if(err) throw err;
-  });  
-  mergeTalk(JSON.parse(data_file_t), JSON.parse(data_file_r));
+/*
+var file_merge_async2 = function(file_nr, file_nt){
+
+  var promiseFile2 = function(file_name, type){
+    return new Promise(function (resolve, reject){
+      fs.readFile(file_name, 'utf-8', (err, data)=>{
+        if(err) throw err;
+        if(data !== undefined){
+          resolve(data);
+        } else {
+          reject("reject!");
+        }
+      })
+    }).catch();
+  };
+
+  Promise.all([promiseFile2(),promiseFile2()]).then(function(){
+  });
 }
 */
 function mergeTalk( dataT, dataR ){
@@ -269,7 +252,7 @@ cron.schedule('*/10 * * * * *', () => {
 
   const file_path = config.save_path;
   var file_list = fs.readdirSync(file_path);
-  var file_list_m = fs.readdirSync(config.write_path);
+  // var file_list_m = fs.readdirSync(config.write_path);
   var file_list_r = file_list.filter(el => /\-R$/.test(el));
   var file_list_t = file_list.filter(el => /\-T$/.test(el));
 

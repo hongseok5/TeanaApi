@@ -6,7 +6,7 @@ var client = new elasticsearch.Client({
     log: 'trace'
 });
 var common = require('./common');
-var flatten = require('flat');
+//var flatten = require('flat');
 
 router.post("/list", function(req, res){
     console.log("Router for IF_DMA_00004");
@@ -15,7 +15,7 @@ router.post("/list", function(req, res){
     var fields = ["no", "company", "companyNm", "productCode", "productNm", "Mcate", "McateNm", "mdId", "mdNm"];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, fields);
     var index = common.getIndex(req.body.channel);
-
+    var should = [];
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
     if(req.body.category2 !== undefined)
@@ -43,12 +43,16 @@ router.post("/list", function(req, res){
         should.push(term_obj);
     } 
 
+    body.query.bool.must = [
+        { bool : { should } }
+    ]
+
     body.aggs.aggs_product = {
         terms : {
             field : "productCode"
         }
     }
-
+  
     client.search({
         index,
         body 
