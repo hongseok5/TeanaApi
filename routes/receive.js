@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var fs = require('fs');
-router.post('/receive/call', (req, res) => {
+router.post('/call', (req, res) => {
     logger.info("HTTP POST /receive/call" + req.ip + Date());
     result = {};
     result.ifId = req.body.ifId || undefined;
