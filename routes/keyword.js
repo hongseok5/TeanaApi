@@ -57,6 +57,8 @@ router.post("/top", function(req, res){
                 terms : {
                     field : "keyword_count.word.keyword", // field name
                     size : size
+
+
                 }
             }
         }
@@ -208,27 +210,64 @@ router.get("/relation", function(req, res){
 });
 
 router.post("/issue", function(req, res){
-    // 데이터 준비 필요
+
     console.log("Router for IF_DMA_00106");
-    let size = req.body.size || 10;
+    let size = req.body.size || 0;
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
     var index = common.getIndex(req.body.channel);
-    var interval;
+    var interval = req.body.interval || "day";
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
     if(req.body.category2 !== undefined)
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }})
-    if(req.body.keyword !== undefined)
-        body.query.bool.filter.push({ term : { keyword : req.body.keyword }});
+    if(req.body.keyword !== undefined){
+        var nest_obj = {
+            nested : {
+                path : "keyword_count",
+                query : {
+                    term : {
+                        "keyword_count.word" : req.body.keyword
+                    }
+                }
+            }
+        }
+        body.query.bool.filter.push(nest_obj);
+    }
+
+    body.aggs.keyword_hist = {
+        date_histogram : {
+            field : "startTime",
+            interval : interval
+        }
+    }
 
     client.search({
         index,
         body
     }).then(function(resp){
-        result = [];
-        res.send(resp);
+        var result = common.getResult("10", "OK", "issue_keyword");
+        result.data.count = resp.aggregations.keyword_hist.buckets.length;
+        result.data.interval = req.body.interval;
+        result.data.result = [];
+        for(i in resp.aggregations.keyword_hist.buckets){
+            var obj = {};
+            if ( req.body.interval == "day" ){
+                obj.key = resp.aggregations.keyword_hist.buckets[i].key_as_string.substr(0, 8);
+            } else if ( req.body.interval == "month" ) {
+                obj.key = resp.aggregations.keyword_hist.buckets[i].key_as_string.substr(0, 6);
+            } else {
+                obj.key = resp.aggregations.keyword_hist.buckets[i].key_as_string.substr(0, 10);
+            }
+            
+            obj.count = resp.aggregations.keyword_hist.buckets[i].doc_count;
+            obj.word = req.body.keyword;
+            result.data.result.push(obj);
+        }
+
+        res.send(result);
     }, function(err){
-        console.log(err);
+        var result = common.getResult("99", "ERROR", "issue_keyword");
+        res.send(result);
     });
 });
 
