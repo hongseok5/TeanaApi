@@ -61,20 +61,46 @@ router.post("/count", function(req, res){
         var term_obj = { term : { productCode : req.body.productCode[p]}};
         should.push(term_obj);
     } 
-    body.query.bool.should = should;
-    body.aggs.aggs_top_keyword = {
+    body.query.bool.must = [
+        { bool : {should}}
+    ];
+
+    body.aggs.neutral = {
         nested : {
-            path : "keyword_count"   // field name
+            path : "neutral_word"
         },
         aggs : {
-            top_keyword : {
-                terms : {
-                    field : "keyword_count.word.keyword", // field name
-                    size : size
+            count : {
+                value_count : {
+                    field : "neutral_word"
                 }
             }
         }
-    }
+    };
+    body.aggs.positive = {
+        nested : {
+            path : "positive_word"
+        },
+        aggs : {
+            count : {
+                value_count : {
+                    field : "positive_word"
+                }
+            }
+        }
+    };
+    body.aggs.negative = {
+        nested : {
+            path : "negative_word"
+        },
+        aggs : {
+            count : {
+                value_count : {
+                    field : "negative_word"
+                }
+            }
+        }
+    };
 
     var index = common.getIndex(req.body.channel);
 
@@ -101,12 +127,34 @@ router.post("/count", function(req, res){
         var term_obj = { term : { productCode : req.body.productCode[p]}};
         should.push(term_obj);  // should 쿼리 적용
     } 
-
+    body.query.bool.should = [] // exist
     client.search({
         index,
         body
     }).then(function(resp){
-        res.send(resp);
+        
+        var result = common.getResult("10", "OK", "count_by_positive")
+        var total = resp.aggregations.neutral.doc_count + resp.aggregations.negative.doc_count + resp.aggregations.positive.doc_count;
+        result.data.count = 0;
+        result.data.result = [];
+        test = Object.entries(resp.aggregations);
+        for(i in test){
+            var obj = {
+                key : test[i][0],
+                count : test[i][1].doc_count,
+                rate : Math.round( test[i][1].doc_count / total * 100 )
+            }
+            result.data.result.push(obj);
+        }
+
+        // 인터페이스에서 삭제
+        for( i in result.data.result ){
+            if(result.data.result[i].count > 0){
+                result.data.count++;
+            }
+        }
+
+        res.send(result);
     }, function(err){
         console.log(err);
     });
