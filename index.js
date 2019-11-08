@@ -12,7 +12,7 @@ const winston = require('winston');
 //const if0004 = require('./if_dma_00004.js');
 //const if0003 = require('./if_dma_00003.js');
 const elasticsearch = require('elasticsearch');
-var client = new elasticsearch.Client({
+var client = new elasticsearch.Client({ 
   host : '10.253.42.185:9200',
   log: 'trace'
 });
@@ -170,6 +170,8 @@ var file_merge_async = function (file_nr, file_nt){
   Promise.all([promiseFile(file_nr, "R"), promiseFile(file_nt, "T")])
            .then(function(){
             mergeTalk(JSON.parse(file_r), JSON.parse(file_t))
+            console.log("R : " + file_r );
+            console.log("T : " + file_t );
           }).catch("merge file failed!");
 }
 /*
@@ -192,8 +194,8 @@ var file_merge_async2 = function(file_nr, file_nt){
   });
 }
 */
-function mergeTalk( dataT, dataR ){
-
+function mergeTalk( dataR, dataT  ){
+  // T : SSG , R :CST
   dataT.timeNtalkT = dataT.timeNtalk;
   dataR.timeNtalkR = dataR.timeNtalk;
   let merged_talk = []; // 병합한 대화를 담을 배열
@@ -224,6 +226,7 @@ function mergeTalk( dataT, dataR ){
         console.log('Failed to write file!');
     else {
         console.log('Successed to write file!');
+        // file move
         fs.rename(config.save_path + merged_data.startTime + "-" + merged_data.extension + "-R", 
                   config.backup_path + merged_data.startTime + "-" + merged_data.extension + "-R", 
                   function(err){

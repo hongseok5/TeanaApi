@@ -19,10 +19,10 @@ var options1 = {
     form: {
         // Like <input type="text" name="name">
         grant_type:"password",
-        client_id:"3MVG9Nvmjd9lcjRkjWfoalSWaGExJF.FecDvNfu6vnAOlWwJrST3o8SseKFLekDjvp9JK7CPIyNfBICFxHrK1",
-        client_secret:"E65086E9D12E8912D0954AC1C783AD40080641A8C87D0F9B65D5C46872316C10",
-        username : "sttif@shinsegae.dev",
-        password : "sttdev1234"
+        client_id:"3MVG9iLRabl2Tf4g2XAyYuODanLCeqa3uTma9Ax4ACprTeO5AqZXk6KHnXSDDyn52l7Pukc96mULKLAGGKiOJ",
+        client_secret:"CAA1104F28306FDAF134CA7B711B48F3879EC229AE9A403175028625316605C7",
+        username : "ifuser@shinsegae.com.partsb2",
+        password : "ifpartsb1234"
     },
     headers: {},
     timeout: 5000
@@ -30,7 +30,7 @@ var options1 = {
 
 var options2 = {
     method: 'POST',
-    uri: 'https://ssgtv--devlje.my.salesforce.com/services/apexrest/IF-DMA-00003',
+    uri: 'https://ssgtv--partsb2.my.salesforce.com/services/apexrest/IF_STCS_DMA_00003',
     headers: {
         Authorization : null
     },
@@ -47,8 +47,8 @@ var sj01 = schedule.scheduleJob('30 30 * * * *', function(){
     rp(options2)
     .then(function ( data ){
         data = JSON.parse(data);
-        logger.info(data.data.result.data_list);
-        //console.log(data.data.result.data_list);
+        logger.info(data);
+        console.log(data);
     }).catch(function (err){
         console.error("error sj01 : " + err);
     });
@@ -61,8 +61,8 @@ var sj02 = schedule.scheduleJob('20 30 * * * *', function(){
     rp(options2)
     .then(function ( data ){
         data = JSON.parse(data);
-        logger.info(data.data.result.data_list);
-        //console.log(data.data.result.data_list);
+        logger.info(data);
+        console.log(data);
     }).catch(function (err){
         console.error("error sj02 : " + err);
     });
@@ -76,8 +76,8 @@ var sj03 = schedule.scheduleJob('10 30 * * * *', function(){
     .then(function ( data ){
 
         data = JSON.parse(data);
-        logger.info(data.data.result.data_list);
-        //console.log(data.data.result.data_list);
+        logger.info(data);
+        console.log(data);
     }).catch(function (err){
         console.error("error sj03 : " + err);
     });
@@ -90,8 +90,8 @@ var sj04 = schedule.scheduleJob('0 30 * * * *', function(){
     rp(options2)
     .then(function ( data ){
         data = JSON.parse(data);
-        logger.info(data.data.result.data_list);
-        //console.log(typeof data);
+        logger.info(data);
+        console.log(data);
     }).catch(function (err){
         console.error("error sj04 : " + err);
     });
@@ -104,9 +104,9 @@ function getData(){
         options2.headers.Authorization = "OAuth " + token.access_token;
 
         sj01.invoke();
-        //sj02.invoke();
-        //sj03.invoke();
-        //sj04.invoke();
+        sj02.invoke();
+        sj03.invoke();
+        sj04.invoke();
     })
     .catch(function (err) {
         console.error("error 1 : " + err);

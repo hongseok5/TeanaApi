@@ -414,3 +414,126 @@
     }
   }
 }
+
+//PUT _template/call_info
+{
+  "index_patterns" : "call_info*",
+   "settings" : {
+    "analysis": {
+      "analyzer": {
+        "ngram_analyzer" : {
+          "tokenizer" : "ngram_tokenizer"
+        }
+      },
+      "tokenizer" : {
+        "ngram_tokenizer" : {
+          "type" : "ngram",
+          "min_gram" : "2",
+          "max_gram" : "5"
+        }
+      }
+    }
+  },
+  "mappings" : {
+    "doc" : {
+      "properties" : {
+        "Mcate" : {
+          "type" : "keyword"
+        },
+        "McateNm" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        },
+        "Pcate" : {
+          "type" : "keyword"
+        },
+        "PcateNm" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        },
+        "age" : {
+          "type" : "long"
+        },
+        "category1" : {
+          "type" : "keyword"
+        },
+        "category1Nm" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        },
+        "category2" : {
+          "type" : "keyword"
+        },
+        "category2Nm" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        },
+        "company" : {
+          "type" : "keyword"
+        },
+        "companyNm" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        },
+        "gender" : {
+          "type" : "keyword"
+        },
+        "ifId" : {
+          "type" : "keyword"
+        },
+        "inCate" : {
+          "type" : "keyword"
+        },
+        "inCateNm" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        },
+        "mdId" : {
+          "type" : "keyword"
+        },
+        "mdNm" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        },
+        "productCode" : {
+          "type" : "keyword"
+        },
+        "productNm" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        },
+        "reasonCate1" : {
+          "type" : "keyword"
+        },
+        "reasonCate1Nm" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        },
+        "reasonCate2" : {
+          "type" : "keyword"
+        },
+        "reasonCate2Nm" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        },
+        "vdn" : {
+          "type" : "keyword"
+        },
+        "vdnGrp" : {
+          "type" : "keyword"
+        },
+        "vdnGrpNm" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        },
+        "vdnNm" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        },
+        "caseId" : {
+          "type" : "keyword"
+        }
+      }
+    }
+  }
+}

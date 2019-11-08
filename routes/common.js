@@ -3,20 +3,26 @@ var common = {
     getIndex : function(code){
         switch(code){
             case "00":
-                return "call_dev";
+                return "call_dev1";
             case "01":
-                return "mobile";
+                return "mobile1";
             case "02":
-                return "pc";
+                return "pc1";
             case "03":
-                return "homepage";
+                return "homepage1";
             case "04":
-                return "ars";
+                return "ars1";
             default:
-                return "call_dev,mobile,pc,homepage,ars";
+                return "call_dev,mobile1,pc1,homepage1,ars1";
         }
     },
     getBody : function( start_dt, end_dt, size, source ){
+        if(start_dt === undefined){
+            start_dt = "19870228000000";
+        }
+        if(end_dt === undefined){
+            end_dt = "20490101000000";
+        } 
         obj_body = {
             query : {
                 bool : {

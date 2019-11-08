@@ -41,6 +41,7 @@ router.post("/top", function(req, res){
         body.query.bool.filter.push({ term : { mdNm : req.body.MD }});
     if(req.body.vdn !== undefined)
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
+    // analysisCate
     if(req.body.vdnGrp !== undefined)
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
     for( p in req.body.productCode ){
@@ -57,7 +58,6 @@ router.post("/top", function(req, res){
                 terms : {
                     field : "keyword_count.word.keyword", // field name
                     size : size
-
 
                 }
             }
@@ -79,7 +79,7 @@ router.post("/top", function(req, res){
         for(i in result.data.result){
             result.data.result[i].no = parseInt(i) + 1;
         }
-        res.send(resp);
+        res.send(result);
     }, function(err){
         var result = common.getResult( "99", "ERROR", "top_keyword");
         res.send(result);
@@ -272,7 +272,7 @@ router.post("/issue", function(req, res){
 });
 
 router.post("/issue/statistics", function(req, res){
-    // 데이터 준비 필요
+
     console.log("Router for IF_DMA_00107");
     var size = req.body.size || 10;
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size);

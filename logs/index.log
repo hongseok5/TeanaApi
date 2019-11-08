@@ -6,3 +6,4 @@
 {"message":"HTTP GET /::1Wed Oct 23 2019 10:47:04 GMT+0900 (GMT+09:00)","level":"info","service":"user-service"}
 {"message":"HTTP GET /::1Wed Oct 30 2019 15:29:12 GMT+0900 (GMT+09:00)","level":"info","service":"user-service"}
 {"message":"HTTP GET /::1Wed Oct 30 2019 15:30:39 GMT+0900 (GMT+09:00)","level":"info","service":"user-service"}
+{"message":"WSSThu Nov 07 2019 17:42:47 GMT+0900 (GMT+09:00)","level":"info","service":"user-service"}
