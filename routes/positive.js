@@ -11,7 +11,7 @@ router.post("/statistics", function(req, res){
     console.log("Router for IF_DMA_00402");
     // 긍,부정어 추이
     // let interval = req.body.interval || undefined;  
-    let size = req.body.size || 10;
+    let size = req.body.size || 0;
     var interval = req.body.interval || "1D";
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
     

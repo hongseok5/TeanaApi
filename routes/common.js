@@ -59,6 +59,15 @@ var common = {
     },
     getUpdownRate : function( base_value, current_value){
         return Math.ceil( (current_value - base_value) / base_value * 100 ) ;
+    },
+    insertDocument : function ( insert ){
+        return new Promise( function (resolve, reject){
+            if(insert){
+                resolve("success");
+            } else {
+                reject("failed");
+            }
+        }).catch();
     }
     
 };
