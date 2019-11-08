@@ -13,7 +13,7 @@ var common = {
             case "04":
                 return "ars";
             default:
-                return "call_dev,mobile,pc,homepage,ars";
+                return "call_dev,mobile1,pc1,homepage1,ars1";
         }
     },
     getBody : function( start_dt, end_dt, size, source ){

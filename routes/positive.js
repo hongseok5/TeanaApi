@@ -12,20 +12,102 @@ router.post("/statistics", function(req, res){
     // 긍,부정어 추이
     // let interval = req.body.interval || undefined;  
     let size = req.body.size || 10;
+    var interval = req.body.interval || "1D";
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
+    
 
     if( req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
     if( req.body.category2 !== undefined)
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
-
+        body.aggs.division = {
+        	date_histogram : {
+        		field : "startTime",
+        		interval : interval,
+                min_doc_count : 1
+               },
+        	aggs : {
+        		neutral : {
+        				nested : {
+        	                path : "neutral_word"
+        	            },
+        	            aggs : {
+        	                aggs_name : {
+        	                    terms : {
+        	                        field : "neutral_word.word"
+        	                    }
+        	                }
+        	            }	
+        		},
+        		positive : {
+        	            nested : {
+        	                path : "positive_word"
+        	            },
+        	            aggs : {
+        	            	aggs_name : {
+        	            		terms : {
+        	                        field : "positive_word.word"
+        	                    }
+        	                }
+        	            }
+        		},
+        		negative : {
+        	            nested : {
+        	                path : "negative_word"
+        	            },
+        	            aggs : {
+        	            	aggs_name : {
+        	            		terms : {
+        	                        field : "negative_word.word"
+        	                    }
+        	                }
+        	            }
+        	    }
+        	}
+            
+        };
+    	
     var index = common.getIndex(req.body.channel);
 
     client.search({
         index,
         body
     }).then(function(resp){
-        res.send(resp);
+    	var result = common.getResult("10", "OK", "statistics_by_positive")
+        result.data.count = 0;
+        result.data.result = [];
+        test = Object.entries(resp.aggregations.division.buckets);
+        for(i in test){
+        	var obj = {
+                key : test[i][1].key_as_string,
+                division : "negative",
+                count : test[i][1].negative.doc_count
+            }
+            result.data.result.push(obj);
+        	
+        	var obj2 = {
+                key : test[i][1].key_as_string,
+                division : "neutral",
+                count : test[i][1].neutral.doc_count
+            }
+            result.data.result.push(obj2);
+        	
+        	var obj3 = {
+                key : test[i][1].key_as_string,
+                division : "positive",
+                count : test[i][1].positive.doc_count
+            }
+            result.data.result.push(obj3);
+        }
+
+        // 인터페이스에서 삭제
+        for( i in result.data.result ){
+            if(result.data.result[i].count > 0){
+                result.data.count++;
+            }
+        }
+
+        res.send(result);
     }, function(err){
         console.log(err);
     });
