@@ -7,7 +7,8 @@ router.post("/search", function(req, res){
     console.log("Router for IF_DMA_70001");
 
     let size = req.body.size || 10;
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, req.body.size);
+    var source = ["company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","channel","ifId"];
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, source);
     var index = common.getIndex(req.body.channel);
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
@@ -30,8 +31,27 @@ router.post("/search", function(req, res){
         index ,
         body 
     }).then(function(resp){
-        result = [];
-        res.send(resp);
+    	var result = common.getResult( "10", "OK", "channel_statistics");
+    	result.data.count = resp.hits.total;
+        result.data.result = [];
+        test = Object.entries(resp.hits.hits);
+        for(i in test){
+        	var obj = {
+        		company : test[i][1]._source.company,
+        		companyNm : test[i][1]._source.companyNm,
+        		productCode : test[i][1]._source.productCode,
+        		productNm : test[i][1]._source.productNm,
+        		Mcate : test[i][1]._source.Mcate,
+        		McateNm : test[i][1]._source.McateNm,
+        		mdId : test[i][1]._source.mdId,
+        		mdNm : test[i][1]._source.mdNm,
+        		startTime : test[i][1]._source.startTime,
+        		channel : test[i][1]._source.channel,
+        		ifId : test[i][1]._source.ifId
+            }
+        	result.data.result.push(obj);
+        }
+        res.send(result);
     }, function(err){
         console.log(err);
     });

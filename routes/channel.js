@@ -90,7 +90,7 @@ router.post("/statistics", function(req, res){
         index,
         body 
     }).then(function(resp){
-    	var result = common.getResult( "10", "OK", "channel_count");
+    	var result = common.getResult( "10", "OK", "channel_statistics");
     	var total = 0;
     	result.data.count = 0;
         result.data.result = [];
