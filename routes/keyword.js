@@ -380,21 +380,101 @@ router.post("/issue/statistics", function(req, res){
     var size = req.body.size || 10;
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
     var index = common.getIndex(req.body.channel);
-
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
     if(req.body.category2 !== undefined)
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }})
-    if(req.body.keyword !== undefined)
-        body.query.bool.filter.push({ term : { keyword : req.body.keyword }});
+    if(req.body.keyword !== undefined){
+    	body.query.bool.must = [
+            { 
+            	bool : {
+            		should : [{
+            			nested : {
+            				path : "keyword_count",
+            					query : {
+            						bool : {
+            							must : {
+            								terms : {
+            									"keyword_count.word.keyword" : keyword 
+            								}
+            							}
+            						}
+            					}
+            			}
+            		}]
+            	}
+            }
+        ];
+    }
+
+    body.aggs = {
+    	neutral : {
+    		nested : {
+    			path : "neutral_word"
+	        },
+	        aggs : {
+	        	aggs_name : {
+	        		terms : {
+	        			field : "neutral_word.word"
+	                }
+	            }
+	        }	
+		},
+		positive : {
+	            nested : {
+	                path : "positive_word"
+	            },
+	            aggs : {
+	            	aggs_name : {
+	            		terms : {
+	                        field : "positive_word.word"
+	                    }
+	                }
+	            }
+		},
+		negative : {
+	            nested : {
+	                path : "negative_word"
+	            },
+	            aggs : {
+	            	aggs_name : {
+	            		terms : {
+	                        field : "negative_word.word"
+	                    }
+	                }
+	            }
+	    }
+    }
 
     client.search({
         index,
         body
     }).then(function(resp){
-        res.send(resp);
+    	var result = common.getResult( "10", "OK", "keyword_issue_statistics");
+    	result.data.count = resp.hits.total;
+        result.data.result = [];
+        var obj = {
+        	division : "negative",
+            count : resp.aggregations.negative.doc_count,
+            rate : Math.round((resp.aggregations.negative.doc_count/resp.hits.total)*100)
+        }
+       	result.data.result.push(obj);
+        var obj1 = {
+           	division : "neutral",
+            count : resp.aggregations.neutral.doc_count,
+            rate : Math.round((resp.aggregations.neutral.doc_count/resp.hits.total)*100)
+        }
+        result.data.result.push(obj1);
+        var obj2 = {
+           	division : "positive",
+            count : resp.aggregations.positive.doc_count,
+            rate : Math.round((resp.aggregations.positive.doc_count/resp.hits.total)*100)
+        }
+        result.data.result.push(obj2);
+        res.send(result);
     }, function(err){
-        console.log(err);
+        var result = common.getResult("99", "ERROR", "issue_keyword");
+        res.send(result);
     });
 });
 
