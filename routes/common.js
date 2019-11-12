@@ -3,26 +3,20 @@ var common = {
     getIndex : function(code){
         switch(code){
             case "00":
-                return "call_dev1";
+                return "call_dev";
             case "01":
-                return "mobile1";
+                return "mobile";
             case "02":
-                return "pc1";
+                return "pc";
             case "03":
-                return "homepage1";
+                return "homepage";
             case "04":
-                return "ars1";
+                return "ars";
             default:
                 return "call_dev,mobile1,pc1,homepage1,ars1";
         }
     },
     getBody : function( start_dt, end_dt, size, source ){
-        if(start_dt === undefined){
-            start_dt = "19870228000000";
-        }
-        if(end_dt === undefined){
-            end_dt = "20490101000000";
-        } 
         obj_body = {
             query : {
                 bool : {
@@ -45,6 +39,27 @@ var common = {
 
         return obj_body;
     },
+    getBodyNoSize : function( start_dt, end_dt){
+        obj_body2 = {
+            query : {
+                bool : {
+                    filter :[
+                        {
+                            range : {
+                                startTime : {
+                                    gte : start_dt,
+                                    lte : end_dt
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            aggs : {}
+        };
+
+        return obj_body2;
+    },
     getAgeRange : function( age ){
         return parseInt(age) + 9;
     },
@@ -59,15 +74,6 @@ var common = {
     },
     getUpdownRate : function( base_value, current_value){
         return Math.ceil( (current_value - base_value) / base_value * 100 ) ;
-    },
-    insertDocument : function ( insert ){
-        return new Promise( function (resolve, reject){
-            if(insert){
-                resolve("success");
-            } else {
-                reject("failed");
-            }
-        }).catch();
     }
     
 };

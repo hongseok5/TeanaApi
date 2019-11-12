@@ -41,7 +41,6 @@ router.post("/top", function(req, res){
         body.query.bool.filter.push({ term : { mdNm : req.body.MD }});
     if(req.body.vdn !== undefined)
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
-    // analysisCate
     if(req.body.vdnGrp !== undefined)
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
     for( p in req.body.productCode ){
@@ -58,6 +57,7 @@ router.post("/top", function(req, res){
                 terms : {
                     field : "keyword_count.word.keyword", // field name
                     size : size
+
 
                 }
             }
@@ -79,7 +79,7 @@ router.post("/top", function(req, res){
         for(i in result.data.result){
             result.data.result[i].no = parseInt(i) + 1;
         }
-        res.send(result);
+        res.send(resp);
     }, function(err){
         var result = common.getResult( "99", "ERROR", "top_keyword");
         res.send(result);
@@ -88,36 +88,144 @@ router.post("/top", function(req, res){
 
 router.post("/top/statistics", function(req, res){
     console.log("Router for IF_DMA_00102");
-    var size = req.body.size || 0;
-    var keyword = req.body.keyword;
-    var interval = req.body.interval || "week";
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
+    var keyword = [];
+    var size = req.body.size || 10;
+    var interval = req.body.interval || "1D";
     var index = common.getIndex(req.body.channel);
+    if(req.body.keyword == undefined || req.body.keyword == "" || req.body.keyword == null){
+    	var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
+    	body.aggs = {
+    		keyword_count :{	
+    			nested : {
+    				path : "keyword_count"	 
+    			},
+    			aggs : {
+    				aggs_name : {
+    					terms : {
+    						field : "keyword_count.word.keyword",
+    						size : "5"
+    					}
+    				}
+    			}
+    		}
+    	}
+    	client.search({
+            index,
+            body
+        }).then(function(resp){
+            test = Object.entries(resp.aggregations.keyword_count.aggs_name.buckets);
+            for(i in test){
+            	keyword.push(test[i][1].key);
+            }
+            topKeyword(keyword, req, res);
+        }, function(err){
+            console.log(err);
+        });
+    }else{
+    	keyword = req.body.keyword;
+    	topKeyword(keyword);
+    }
+    
+    
+});
 
+function topKeyword(keyword, req, res){
+	var size = req.body.size || 10;
+    var interval = req.body.interval || "1D";
+    var index = common.getIndex(req.body.channel);
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
     if(req.body.category2 !== undefined)
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
-    for( i in keyword ){
-        body.query.bool
+    body.query.bool.must = [
+        { 
+        	bool : {
+        		should : [{
+        			nested : {
+        				path : "keyword_count",
+        					query : {
+        						bool : {
+        							must : {
+        								terms : {
+        									"keyword_count.word.keyword" : keyword 
+        								}
+        							}
+        						}
+        					}
+        			}
+        		}]
+        	}
+        }
+    ];
+    body.aggs = {
+    	division :{	
+    		date_histogram : {
+    			field : "startTime",
+    			interval : interval,
+    			min_doc_count : "1"
+    		},
+    		aggs : {
+    			keyword_count : {
+    				nested : {
+    					path : "keyword_count"
+    				},
+    				aggs : {
+    					aggs_name : {
+    						terms : {
+    							field : "keyword_count.word.keyword"
+    						} 
+    					}
+    				}
+    			},
+    			"startTime" : {
+    				nested : {
+    					path : "startTime"
+    				},
+    				aggs : {
+    					aggs_name : {
+    						terms : {
+    							field : "startTime.keyword"
+    						}
+    					}
+    				}
+    			}
+    		}
+    	}
     }
-    body.aggs.top_keyword_hist = {
-
-    }
-
     client.search({
         index,
         body
     }).then(function(resp){
         var result = common.getResult( "10", "OK", "top_keyword");
-        result.data.count = resp.aggregations.aggs_top_keyword.top_keyword.buckets.length;
-        result.data.result = resp.aggregations.aggs_top_keyword.top_keyword.buckets;
-        result = [];
-        res.send(resp);
+        result.data.count = 0;
+        result.data.result = [];
+        test = Object.entries(resp.aggregations.division.buckets);
+        var keylen = keyword.length;
+        var keySet = new Array();
+        for(var z=0; z<keylen; z++){
+        	keySet[z] = keyword.pop();
+        }
+        for(i in test){
+        	test2 = Object.entries(test[i][1].keyword_count.aggs_name.buckets);
+        	for(j in test2){
+        		for(var x=0; x<keySet.length; x++){
+        			if(test2[j][1].key == keySet[x]){
+        				var obj = {
+        					key : test[i][1].key_as_string,	
+        		        	word : test2[j][1].key,
+        		            count : test2[j][1].doc_count
+        	        	}
+        	        	result.data.result.push(obj);
+        			}
+        		}
+        	}
+	    }
+        res.send(result);
     }, function(err){
         console.log(err);
     });
-});
+}
 
 router.post("/hot/count", function(req, res){
     console.log("Router for IF_DMA_00103");
@@ -272,7 +380,7 @@ router.post("/issue", function(req, res){
 });
 
 router.post("/issue/statistics", function(req, res){
-
+    // 데이터 준비 필요
     console.log("Router for IF_DMA_00107");
     var size = req.body.size || 10;
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
