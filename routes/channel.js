@@ -56,7 +56,7 @@ router.post("/count", function(req, res){
                 result.data.result.push(obj);
         	}
         }
-        result.data.count = total;
+        result.data.count = resp.hits.total;
         res.send(result);
     }, function(err){
         console.log(err);
