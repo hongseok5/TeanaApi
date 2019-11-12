@@ -14,7 +14,8 @@ const winston = require('winston');
 const elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({ 
   host : '10.253.42.185:9200',
-  log: 'trace'
+  log: 'trace',
+  apiVersion: '6.8' // insert 수행시 필요한 설정
 });
 const logger = winston.createLogger({
   level: 'info',
@@ -26,6 +27,8 @@ const logger = winston.createLogger({
   ]
 });
 require('log-timestamp');
+
+module.exports = client;
 
 /************************************************************
  * 크로스 도메인 처리

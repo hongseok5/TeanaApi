@@ -1,10 +1,6 @@
 var express = require("express");
 var router = express.Router();
-const elasticsearch = require('elasticsearch');
-var client = new elasticsearch.Client({
-    host : '10.253.42.185:9200',
-    log: 'trace'
-});
+var client = require('../index');
 var common = require('./common');
 
 router.post("/statistics", function(req, res){

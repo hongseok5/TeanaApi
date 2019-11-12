@@ -1,12 +1,6 @@
 var express = require("express");
 var router = express.Router();
-var fs = require('fs');
-const elasticsearch = require('elasticsearch');
-var client = new elasticsearch.Client({
-    host : '10.253.42.185:9200',
-    log: 'trace',
-    apiVersion: '6.8' // insert 수행시 필요한 설정
-});
+var client = require('../index');
 var common = require('./common');
 
 router.post('/call', (req, res) => {

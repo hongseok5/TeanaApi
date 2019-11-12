@@ -1,11 +1,6 @@
 var express = require("express");
-const elasticsearch = require('elasticsearch');
-const dateFormat = require('dateformat');
 var router = express.Router();
-var client = new elasticsearch.Client({
-    host : '10.253.42.185:9200',
-    log: 'trace'
-});
+var client = require('../index');
 var common = require('./common');
 
 client.ping({

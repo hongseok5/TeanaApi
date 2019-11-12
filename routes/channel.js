@@ -1,10 +1,6 @@
 var express = require("express");
 var router = express.Router();
-const elasticsearch = require('elasticsearch');
-var client = new elasticsearch.Client({
-    host : '10.253.42.185:9200',
-    log: 'trace'
-});
+var client = require('../index');
 var common = require('./common');
 
 router.post("/count", function(req, res){
@@ -102,13 +98,15 @@ router.post("/statistics", function(req, res){
         for(i in test){
         	total = total + test[i][1].doc_count;
         	test2 = Object.entries(test[i][1].index.buckets);
+        	var z = 1;
         	for(j in test2){
         		var obj = {
-        			no : j,
+        			no : z,
                     channel : test2[j][1].key,
                     count : test2[j][1].doc_count,
                     rate : Math.round((test2[j][1].doc_count/resp.hits.total)*100)
                 }
+        		z++;
                 result.data.result.push(obj);
         	}
         }
