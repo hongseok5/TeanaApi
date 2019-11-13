@@ -37,7 +37,7 @@ var corsOptions = {
     origin: true,
     credentials: true
 };
-
+var today = "20191113";
 //if0003();
 //if0004();
 
@@ -50,7 +50,7 @@ wss.on("connection", function(ws){
     var filePath = config.save_path;
     var fileName = filePath + data.startTime + "-" + data.extension + "-" + data.transType;
     var result = {};
-
+    delete data.code;
     if( data.ifId !== undefined ){
 
       result.ifId = data.ifId;
@@ -64,19 +64,19 @@ wss.on("connection", function(ws){
             result.code = "99";
             result.message = "파일 수신 실패";
             ws.send(JSON.stringify(result));
-            console.log('파일 쓰기 실패');
+            //console.log('파일 쓰기 실패');
         }else{
             result.code = "10";
             result.message = "파일 정상 수신";
             ws.send(JSON.stringify(result));
-            console.log('파일 쓰기 완료');
+            //console.log('파일 쓰기 완료');
           }
       });
     } else {
       result.code = "99";
       result.message = "필수값 누락";
       ws.send(JSON.stringify(result));
-      console.log("필수값 누락");
+      //console.log("필수값 누락");
     }
   });
 });
@@ -177,26 +177,7 @@ var file_merge_async = function (file_nr, file_nt){
             console.log("T : " + file_t );
           }).catch("merge file failed!");
 }
-/*
-var file_merge_async2 = function(file_nr, file_nt){
 
-  var promiseFile2 = function(file_name, type){
-    return new Promise(function (resolve, reject){
-      fs.readFile(file_name, 'utf-8', (err, data)=>{
-        if(err) throw err;
-        if(data !== undefined){
-          resolve(data);
-        } else {
-          reject("reject!");
-        }
-      })
-    }).catch();
-  };
-
-  Promise.all([promiseFile2(),promiseFile2()]).then(function(){
-  });
-}
-*/
 function mergeTalk( dataR, dataT  ){
   // T : SSG , R :CST
   dataT.timeNtalkT = dataT.timeNtalk;
@@ -221,29 +202,35 @@ function mergeTalk( dataR, dataT  ){
   }
   
   merged_talk.sort();
+  merged_talk = merged_talk.join(';');
+  merged_talk = merged_talk.replace(/\t/g,':');
+  dataR.timeNtalkR = dataR.timeNtalkR.join(';');
+  dataR.timeNtalkR = dataR.timeNtalkR.replace(/\t/g, ':');
+  dataT.timeNtalkT = dataT.timeNtalkT.join(';');
+  dataT.timeNtalkT = dataT.timeNtalkT.replace(/\t/g, ':');
   let merged_data = mergejson(dataR,dataT);
   merged_data.timeNtalk = merged_talk;
 
-  fs.writeFile(config.write_path + merged_data.startTime + "-" + merged_data.extension + ".JSON", JSON.stringify(merged_data), 'utf8', function(err) {
+  let merged_data_m = {};
+  merged_data_m.source = merged_data; // for logstash
+
+  fs.writeFile(config.write_path + today + "/" + merged_data.startTime + "-" + merged_data.extension + ".JSON", JSON.stringify(merged_data_m), 'utf8', function(err) {
     if(err) 
         console.log('Failed to write file!');
-    else {
+    else
         console.log('Successed to write file!');
-        // file move
         fs.rename(config.save_path + merged_data.startTime + "-" + merged_data.extension + "-R", 
-                  config.backup_path + merged_data.startTime + "-" + merged_data.extension + "-R", 
+                  config.backup_path + today + '/' + merged_data.startTime + "-" + merged_data.extension + "-R", 
                   function(err){
                     if (err) throw err;
-                    console.log("Move Suceess!");    
+                    //console.log("Move Suceess!");    
                   });
         fs.rename(config.save_path + merged_data.startTime + "-" + merged_data.extension + "-T", 
-                  config.backup_path + merged_data.startTime + "-" + merged_data.extension + "-T", 
+                  config.backup_path + today + '/' + merged_data.startTime + "-" + merged_data.extension + "-T", 
                   function(err){
                     if (err) throw err;
-                    console.log("Move Suceess!");    
-                    // 여기서 쓴 파일 Logstash로 전송
+                    //console.log("Move Suceess!");    
                   });
-                }                  
   });
 }
 
@@ -254,29 +241,25 @@ process.on('uncaughtException', function (err) {
   console.error('uncaughtException 발생 : ' + err);
 });
 
-cron.schedule('*/10 * * * * *', () => {
+cron.schedule('* * * * *', () => {
 
   const file_path = config.save_path;
   var file_list = fs.readdirSync(file_path);
-  // var file_list_m = fs.readdirSync(config.write_path);
   var file_list_r = file_list.filter(el => /\-R$/.test(el));
-  var file_list_t = file_list.filter(el => /\-T$/.test(el));
-
   for( i in file_list_r ){
     file_nr = file_list_r[i];
-    let pr_index = file_nr.lastIndexOf('-');
-    let su_index = file_nr.lastIndexOf('-') + 1;
-    let file_nt = file_nr.substr(0, pr_index) + "-T";
-    fs.stat(file_path + file_nt, (err, stats)=>{
-      if(typeof stats == "undefined"){
-        console.log("No such file!");  
-      } else {
-        if(stats.isDirectory()){
-          console.log("It's a Directory!");
-        } else {
-          file_merge_async(file_path + file_nr, file_path + file_nt);      
-        }       
-      }
-    })
+    let file_nt = file_nr.substr(0, 19) + "-T";
+    file_merge_async(file_path + file_nr, file_path + file_nt); 
     }
 });
+
+cron.schedule('0 0 * * *', () => {
+ 
+  day = new Date().getDate();
+  month = new Date().getMonth() + 1;
+  year = new Date().getFullYear();
+  // make directory 
+  fs.mkdirSync(config.write_path + year.toString() + month.toString() + day.toString());
+  today = year.toString() + month.toString() + day.toString();
+ });
+ 
