@@ -60,6 +60,29 @@ var common = {
 
         return obj_body2;
     },
+    getBodyHour : function(size, source ){
+        obj_body = {
+            query : {
+                bool : {
+                    filter :[
+                        {
+                            range : {
+                                startTime : {
+                                    gte : "now-2h/d",
+                                    lte : "now"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            _source : source,
+            aggs : {},
+            size : size
+        };
+
+        return obj_body;
+    },
     getAgeRange : function( age ){
         return parseInt(age) + 9;
     },

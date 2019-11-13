@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+const dateFormat = require('dateformat');
 var client = require('../index');
 var common = require('./common');
 
@@ -233,10 +234,10 @@ router.post("/hot/count", function(req, res){
     hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
 
     // var body = common.getBody("20110114090910", "20191030093959", 0);   // 하드코딩
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, 0);   // 하드코딩
+    var body = common.getBodyHour(0);   // 하드코딩
     body.aggs.rt_hot_keyword = {
         date_histogram : {
-            field : "start_time",
+            field : "startTime",
             interval : interval,
             order : {
                 _key : "desc"
@@ -244,14 +245,14 @@ router.post("/hot/count", function(req, res){
             min_doc_count : 1   // TEST
         },
         aggs : {
-            neut_keyword : {
+        	keyword_count : {
                 nested : {
-                    path : "neutral_word"   
+                    path : "keyword_count"   
                 },
                 aggs : {
                     aggs_name : {
                         terms : {
-                            field : "neutral_word.word"
+                            field : "keyword_count.word.keyword"
                         }
                     }
                 }
@@ -260,8 +261,7 @@ router.post("/hot/count", function(req, res){
     }
     
     // client.msearch()
-    var index = "call_test3";
-    //common.getIndex(req.body.channel);
+    common.getIndex(req.body.channel);
     client.search({
         index,
         body
@@ -300,11 +300,92 @@ router.post("/hot/count", function(req, res){
     })
 });
 
-router.get("/hot/statistics", function(req, res){
+var hotStatisticsResult;
+
+router.post("/hot/statistics", function(req, res){
     console.log("Router for IF_DMA_00104");
-    // 급상승 키워드는 API 하나로 가능!?
-    res.send("Router for IF_DMA_00104");
+    hotStatisticsResult = common.getResult("10", "OK", "hot_statistics");
+    hotStatisticsResult.data.result = [];
+    if(req.body.keyword !== undefined){
+    	hotStatisticsResult.data.count = req.body.keyword.length;
+    	var finStr ="";
+    	var keyNum = req.body.keyword.length;
+    	keyNum--;
+    	for(i in req.body.keyword){
+    		if(i == keyNum){
+    			finStr = "Y";
+    		}
+    		console.log("bchm i = "+i+" : keyword = "+req.body.keyword.length);
+    		console.log("bchm = "+finStr);
+    		hotStatistics(req.body.keyword[i], req, res, finStr);
+    	}
+    }
 });
+
+function hotStatistics(keyword, req, res, final){
+	var body = common.getBodyHour(0);   // 하드코딩
+	var index = common.getIndex(req.body.channel);
+    if(req.body.category1 !== undefined)
+        body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
+    if(req.body.category2 !== undefined)
+        body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
+    
+    body.query.bool.must = [
+    	{ 
+          	bool : {
+           		should : [{
+           			nested : {
+           				path : "keyword_count",
+           					query : {
+           						bool : {
+           							must : {
+           								term : {
+           									"keyword_count.word.keyword" : keyword 
+           								}
+           							}
+           						}
+           					}
+           			}
+           		}]
+           	}
+        }
+    ];
+    body.aggs = {
+    	day : {
+    		date_histogram : {
+    			field : "startTime",
+    			interval : "1H",
+    			min_doc_count : "1"
+    		}
+    	}
+    };
+    body.sort = [
+    	{startTime : "asc"}	
+    ];
+    
+    client.search({
+        index,
+        body
+    }).then(function(resp){
+    	var obj = new Array();
+    	test = Object.entries(resp.aggregations.day.buckets);
+    	for(i in test){
+    		obj[i] = test[i][1].doc_count;
+    	}
+    	
+		var returnVal = {
+			word : keyword,	
+	       	count : obj[1],
+	        before_count : obj[0]
+        }
+		hotStatisticsResult.data.result.push(returnVal);
+		if(final == "Y"){
+			res.send(hotStatisticsResult);
+		}
+    }, function(err){
+    	console.log(err);
+    });
+}
 
 router.get("/relation", function(req, res){
     console.log("Router for IF_DMA_00105");
