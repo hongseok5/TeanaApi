@@ -326,11 +326,11 @@ router.post("/hot/statistics", function(req, res){
 function hotStatistics(keyword, req, res, final){
 	var now = dateFormat(new Date(), "yyyymmddHHMMss");
 	var hour_ago = new Date().getHours() - 1 ;
+	var now_ago = new Date().getHours() + 1 ;
 	now = now.slice(0,10) + "0000";
 	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
-	console.log("bchm = "+now);
-	console.log("bchm = "+hour_ago);
-	var body = common.getBody(hour_ago, now, 0);
+	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
+	var body = common.getBody(hour_ago, now_ago, 0);
 	var index = common.getIndex(req.body.channel);
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
