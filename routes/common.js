@@ -16,8 +16,9 @@ var common = {
                 return "mobile1,pc1,homepage1,ars1";
         }
     },
-    getBody : function( start_dt, end_dt, size, source ){
-        obj_body = {
+    getBody : function( start_dt, end_dt, size, from, source ){
+    	var fromcheck = (parseInt(from)-1)*parseInt(size);
+    	obj_body = {
             query : {
                 bool : {
                     filter :[
@@ -34,7 +35,8 @@ var common = {
             },
             _source : source,
             aggs : {},
-            size : size
+            size : size,
+            from : fromcheck
         };
 
         return obj_body;

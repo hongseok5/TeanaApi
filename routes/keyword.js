@@ -17,7 +17,8 @@ client.ping({
 router.post("/top", function(req, res){
     console.log("Router for IF_DMA_00101");
     let size = req.body.size || 10;
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, 10);
+    let from = req.body.from || 1;
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
     var should = [];
     var index = common.getIndex(req.body.channel);
     
@@ -354,10 +355,11 @@ router.post("/hot/count", function(req, res){
     var now = dateFormat(new Date(), "yyyymmddHHMMss");
     var hour_ago = new Date().getHours() - 2 ;
     var interval = req.body.interval || "1H";
-
+    var from = 1;
     now = now.slice(0,10) + "0000";
     hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, 0); // 하드코딩
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, 10, from); // 하드코딩
+
     body.aggs.rt_hot_keyword = {
         date_histogram : {
             field : "startTime",
@@ -385,7 +387,7 @@ router.post("/hot/count", function(req, res){
     }
     
     // client.msearch()
-    common.getIndex(req.body.channel);
+    var index = common.getIndex(req.body.channel);
     client.search({
         index,
         body
@@ -397,9 +399,8 @@ router.post("/hot/count", function(req, res){
             let result = common.getResult("40","No Result","statistics_hot_keyword")
             resp.send(result);
         }
-        
-        current_words = time_result[0].neut_keyword.aggs_name.buckets;  // 현재 시간
-        before_words = time_result[1].neut_keyword.aggs_name.buckets;  //  전 시간
+        current_words = time_result[0].keyword_count.aggs_name.buckets;  // 현재 시간
+        before_words = time_result[1].keyword_count.aggs_name.buckets;  //  전 시간
         for( i in current_words){
             for( j in before_words){
                 if( current_words[i].key == before_words[j].key ){

@@ -7,8 +7,9 @@ router.post("/search", function(req, res){
     console.log("Router for IF_DMA_70001");
 
     let size = req.body.size || 10;
+    let from = req.body.from || 1;
     var source = ["company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","channel","ifId"];
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, source);
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from, source);
     var index = common.getIndex(req.body.channel);
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
