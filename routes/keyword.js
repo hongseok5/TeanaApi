@@ -315,8 +315,6 @@ router.post("/hot/statistics", function(req, res){
     		if(i == keyNum){
     			finStr = "Y";
     		}
-    		console.log("bchm i = "+i+" : keyword = "+req.body.keyword.length);
-    		console.log("bchm = "+finStr);
     		hotStatistics(req.body.keyword[i], req, res, finStr);
     	}
     }
