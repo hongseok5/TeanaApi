@@ -234,7 +234,7 @@ router.post("/hot/count", function(req, res){
     hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
 
     // var body = common.getBody("20110114090910", "20191030093959", 0);   // 하드코딩
-    var body = common.getBodyHour(0);   // 하드코딩
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, 0); // 하드코딩
     body.aggs.rt_hot_keyword = {
         date_histogram : {
             field : "startTime",
@@ -324,7 +324,13 @@ router.post("/hot/statistics", function(req, res){
 });
 
 function hotStatistics(keyword, req, res, final){
-	var body = common.getBodyHour(0);   // 하드코딩
+	var now = dateFormat(new Date(), "yyyymmddHHMMss");
+	var hour_ago = new Date().getHours() - 1 ;
+	now = now.slice(0,10) + "0000";
+	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
+	console.log("bchm = "+now);
+	console.log("bchm = "+hour_ago);
+	var body = common.getBody(hour_ago, now, 0);
 	var index = common.getIndex(req.body.channel);
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
@@ -369,21 +375,33 @@ function hotStatistics(keyword, req, res, final){
         body
     }).then(function(resp){
     	var obj = new Array();
+    	var dateObj = new Array();
     	test = Object.entries(resp.aggregations.day.buckets);
     	for(i in test){
     		obj[i] = test[i][1].doc_count;
+    		dateObj[i] = test[i][1].key_as_string;
     	}
-    	var returnVal1;
-    	var returnVal2;
-    	if(obj[0] !== undefined){
-    		returnVal1 = obj[0];
-    	}else{
-    		returnVal1 = "0";
+    	var returnVal1 = 0;
+    	var returnVal2 = 0;
+    	if(dateObj[0] == now){
+    		if(obj[0] !== undefined){
+        		returnVal1 = obj[0];
+        	}
     	}
-    	if(obj[1] !== undefined){
-    		returnVal2 = obj[0];
-    	}else{
-    		returnVal2 = "0";
+    	if(dateObj[0] == hour_ago){
+    		if(obj[0] !== undefined){
+        		returnVal2 = obj[0];
+        	}
+    	}
+    	if(dateObj[1] == now){
+    		if(obj[1] !== undefined){
+        		returnVal1 = obj[0];
+        	}
+    	}
+    	if(dateObj[1] == hour_ago){
+    		if(obj[1] !== undefined){
+        		returnVal2 = obj[0];
+        	}
     	}
 		var returnVal = {
 			word : keyword,	

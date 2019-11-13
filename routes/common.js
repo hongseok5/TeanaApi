@@ -5,15 +5,15 @@ var common = {
             case "00":
                 return "call_dev";
             case "01":
-                return "mobile";
+                return "mobile1";
             case "02":
-                return "pc";
+                return "pc1";
             case "03":
-                return "homepage";
+                return "homepage1";
             case "04":
-                return "ars";
+                return "ars1";
             default:
-                return "call_dev,mobile1,pc1,homepage1,ars1";
+                return "mobile1,pc1,homepage1,ars1";
         }
     },
     getBody : function( start_dt, end_dt, size, source ){
@@ -68,8 +68,8 @@ var common = {
                         {
                             range : {
                                 startTime : {
-                                    gte : "now-2h/d",
-                                    lte : "now"
+                                    gte : "20191113090000",
+                                    lte : "20191113100000"
                                 }
                             }
                         }
