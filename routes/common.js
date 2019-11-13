@@ -60,29 +60,6 @@ var common = {
 
         return obj_body2;
     },
-    getBodyHour : function(size, source ){
-        obj_body = {
-            query : {
-                bool : {
-                    filter :[
-                        {
-                            range : {
-                                startTime : {
-                                    gte : "20191113090000",
-                                    lte : "20191113100000"
-                                }
-                            }
-                        }
-                    ]
-                }
-            },
-            _source : source,
-            aggs : {},
-            size : size
-        };
-
-        return obj_body;
-    },
     getAgeRange : function( age ){
         return parseInt(age) + 9;
     },

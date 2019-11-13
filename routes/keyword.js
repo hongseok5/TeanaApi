@@ -223,6 +223,131 @@ function topKeyword(keyword, req, res){
     });
 }
 
+var topStatisticsResult;
+
+router.post("/top/statistics2", function(req, res){
+    console.log("Router for IF_DMA_00102");
+    var keyword = [];
+    var size = req.body.size || 10;
+    var interval = req.body.interval || "1D";
+    var index = common.getIndex(req.body.channel);
+    if(req.body.keyword == undefined || req.body.keyword == "" || req.body.keyword == null){
+    	var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
+    	body.aggs = {
+    		keyword_count :{	
+    			nested : {
+    				path : "keyword_count"	 
+    			},
+    			aggs : {
+    				aggs_name : {
+    					terms : {
+    						field : "keyword_count.word.keyword",
+    						size : "5"
+    					}
+    				}
+    			}
+    		}
+    	}
+    	client.search({
+            index,
+            body
+        }).then(function(resp){
+        	test = Object.entries(resp.aggregations.keyword_count.aggs_name.buckets);
+        	topStatisticsResult = common.getResult( "10", "OK", "top_keyword");
+        	topStatisticsResult.data.count = 0;
+        	topStatisticsResult.data.result = [];
+        	var finStr = "";
+            for(i in test){
+            	var keyNum = test.length;
+            	keyNum--;
+            	if(i == keyNum){
+        			finStr = "Y";
+        		}
+            	topKeyword2(test[i][1].key, req, res, finStr);
+            }
+            
+        }, function(err){
+            console.log(err);
+        });
+    }else{
+    	topStatisticsResult = common.getResult( "10", "OK", "top_keyword");
+    	topStatisticsResult.data.count = 0;
+    	topStatisticsResult.data.result = [];
+    	var finStr = "";
+    	for(i in req.body.keyword){
+    		var keyNum = req.body.keyword.length;
+        	keyNum--;
+        	if(i == keyNum){
+    			finStr = "Y";
+    		}
+    		topKeyword2(req.body.keyword[i], req, res, finStr);
+    	}
+    	
+    }
+    
+    
+});
+
+function topKeyword2(keyword, req, res, final){
+	var size = req.body.size || 10;
+    var interval = req.body.interval || "1D";
+    var index = common.getIndex(req.body.channel);
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
+    if(req.body.category1 !== undefined)
+        body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
+    if(req.body.category2 !== undefined)
+        body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
+    body.query.bool.must = [
+        { 
+        	bool : {
+        		should : [{
+        			nested : {
+        				path : "keyword_count",
+        					query : {
+        						bool : {
+        							must : {
+        								term : {
+        									"keyword_count.word.keyword" : keyword 
+        								}
+        							}
+        						}
+        					}
+        			}
+        		}]
+        	}
+        }
+    ];
+    body.aggs = {
+    	division :{	
+    		date_histogram : {
+    			field : "startTime",
+    			interval : interval,
+    			min_doc_count : "1"
+    		}
+    	}
+    }
+    client.search({
+        index,
+        body
+    }).then(function(resp){
+    	test = Object.entries(resp.aggregations.division.buckets);
+        for(i in test){
+        	var obj = {
+        		key : test[i][1].key_as_string,	
+        		word : keyword,
+        		count : test[i][1].doc_count
+        	}
+        	topStatisticsResult.data.count = topStatisticsResult.data.count+test[i][1].doc_count;
+        	topStatisticsResult.data.result.push(obj);
+	    }
+        if(final == "Y"){
+			res.send(topStatisticsResult);
+		}
+    }, function(err){
+        console.log(err);
+    });
+}
+
 router.post("/hot/count", function(req, res){
     console.log("Router for IF_DMA_00103");
     
