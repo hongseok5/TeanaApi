@@ -169,32 +169,6 @@ function topKeyword(keyword, req, res){
     			field : "startTime",
     			interval : '1H',
     			min_doc_count : "1"
-    		},
-    		aggs : {
-    			keyword_count : {
-    				nested : {
-    					path : "keyword_count"
-    				},
-    				aggs : {
-    					aggs_name : {
-    						terms : {
-    							field : "keyword_count.word.keyword"
-    						} 
-    					}
-    				}
-    			},
-    			"startTime" : {
-    				nested : {
-    					path : "startTime"
-    				},
-    				aggs : {
-    					aggs_name : {
-    						terms : {
-    							field : "startTime.keyword"
-    						}
-    					}
-    				}
-    			}
     		}
     	}
     }
@@ -468,6 +442,49 @@ router.post("/hot/statistics", function(req, res){
     		}
     		hotStatistics(req.body.keyword[i], req, res, finStr);
     	}
+    }else{
+    	var now = dateFormat(new Date(), "yyyymmddHHMMss");
+    	var hour_ago = new Date().getHours() - 1 ;
+    	var now_ago = new Date().getHours() + 1 ;
+    	now = now.slice(0,10) + "0000";
+    	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
+    	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
+    	var body = common.getBodyNoSize(hour_ago, now_ago);
+    	body.aggs = {
+    		keyword_count :{	
+    			nested : {
+    				path : "keyword_count"	 
+    			},
+    			aggs : {
+    				aggs_name : {
+    					terms : {
+    						field : "keyword_count.word.keyword",
+    						size : "5"
+    					}
+    				}
+    			}
+    		}
+    	}
+    	client.search({
+            index,
+            body
+        }).then(function(resp){
+        	var result = common.getResult( "10", "OK", "top_keyword");
+            result.data.count = 0;
+            result.data.result = [];
+            test = Object.entries(resp.aggregations.keyword_count.aggs_name.buckets);
+            var finStr = "";
+        	for(i in test){
+        		var keyNum = test.length;
+            	keyNum--;
+        		if(i == keyNum){
+        			finStr = "Y";
+        		}
+        		hotStatistics(test[i][1].key, req, res, finStr);
+        	}
+        }, function(err){
+           	console.log(err);
+        });
     }
 });
 
