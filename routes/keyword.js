@@ -85,12 +85,16 @@ router.post("/top", function(req, res){
 
 router.post("/top/statistics", function(req, res){
     console.log("Router for IF_DMA_00102");
-    var keyword = [];
-    var size = req.body.size || 10;
-    var interval = req.body.interval || "1D";
+    var now = dateFormat(new Date(), "yyyymmddHHMMss");
+	var hour_ago = new Date().getHours() - 1 ;
+	var now_ago = new Date().getHours() + 1 ;
+	now = now.slice(0,10) + "0000";
+	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
+	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
+	var body = common.getBodyNoSize(hour_ago, now_ago);
+	var keyword = [];
     var index = common.getIndex(req.body.channel);
     if(req.body.keyword == undefined || req.body.keyword == "" || req.body.keyword == null){
-    	var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     	body.aggs = {
     		keyword_count :{	
     			nested : {
@@ -120,18 +124,22 @@ router.post("/top/statistics", function(req, res){
         });
     }else{
     	keyword = req.body.keyword;
-    	topKeyword(keyword);
+    	topKeyword(keyword, req, res);
     }
     
     
 });
 
 function topKeyword(keyword, req, res){
-	var size = req.body.size || 10;
-    var interval = req.body.interval || "1D";
-    var index = common.getIndex(req.body.channel);
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
-    if(req.body.category1 !== undefined)
+	var now = dateFormat(new Date(), "yyyymmddHHMMss");
+	var hour_ago = new Date().getHours() - 1 ;
+	var now_ago = new Date().getHours() + 1 ;
+	now = now.slice(0,10) + "0000";
+	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
+	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
+	var body = common.getBodyNoSize(hour_ago, now_ago);
+	var index = common.getIndex(req.body.channel);
+	if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
     if(req.body.category2 !== undefined)
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
@@ -159,7 +167,7 @@ function topKeyword(keyword, req, res){
     	division :{	
     		date_histogram : {
     			field : "startTime",
-    			interval : interval,
+    			interval : '1H',
     			min_doc_count : "1"
     		},
     		aggs : {
@@ -229,11 +237,17 @@ var topStatisticsResult;
 router.post("/top/statistics2", function(req, res){
     console.log("Router for IF_DMA_00102");
     var keyword = [];
-    var size = req.body.size || 10;
-    var interval = req.body.interval || "1D";
+    var interval = req.body.interval || "1H";
     var index = common.getIndex(req.body.channel);
+    var now = dateFormat(new Date(), "yyyymmddHHMMss");
+	var hour_ago = new Date().getHours() - 1 ;
+	var now_ago = new Date().getHours() + 1 ;
+	now = now.slice(0,10) + "0000";
+	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
+	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
+	
     if(req.body.keyword == undefined || req.body.keyword == "" || req.body.keyword == null){
-    	var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
+    	var body = common.getBodyNoSize(hour_ago, now_ago);
     	body.aggs = {
     		keyword_count :{	
     			nested : {
@@ -290,10 +304,17 @@ router.post("/top/statistics2", function(req, res){
 });
 
 function topKeyword2(keyword, req, res, final){
-	var size = req.body.size || 10;
-    var interval = req.body.interval || "1D";
+	var interval = req.body.interval || "1H";
     var index = common.getIndex(req.body.channel);
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
+    
+    var now = dateFormat(new Date(), "yyyymmddHHMMss");
+	var hour_ago = new Date().getHours() - 1 ;
+	var now_ago = new Date().getHours() + 1 ;
+	now = now.slice(0,10) + "0000";
+	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
+	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
+	var body = common.getBodyNoSize(hour_ago, now_ago);
+	
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
     if(req.body.category2 !== undefined)
@@ -355,11 +376,13 @@ router.post("/hot/count", function(req, res){
     var now = dateFormat(new Date(), "yyyymmddHHMMss");
     var hour_ago = new Date().getHours() - 2 ;
     var interval = req.body.interval || "1H";
-    var from = 1;
+    let size = req.body.size || 10;
+    let from = req.body.from || 1;
     now = now.slice(0,10) + "0000";
     hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, 10, from); // 하드코딩
 
+    // var body = common.getBody("20110114090910", "20191030093959", 0);   // 하드코딩
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from); // 하드코딩
     body.aggs.rt_hot_keyword = {
         date_histogram : {
             field : "startTime",
@@ -377,8 +400,8 @@ router.post("/hot/count", function(req, res){
                 aggs : {
                     aggs_name : {
                         terms : {
-                            field : "keyword_count.word.keyword"
-                            // size : 100
+                            field : "keyword_count.word.keyword",
+                            size : 1000
                         }
                     }
                 }
@@ -395,9 +418,6 @@ router.post("/hot/count", function(req, res){
 
         if ( resp.aggregations.rt_hot_keyword.buckets.length >= 2 ){
             time_result = resp.aggregations.rt_hot_keyword.buckets.slice(0,2);  // 실제로는 전시간, 현재시간으로 2개만 발생
-        } else {
-            let result = common.getResult("40","No Result","statistics_hot_keyword")
-            resp.send(result);
         }
         current_words = time_result[0].keyword_count.aggs_name.buckets;  // 현재 시간
         before_words = time_result[1].keyword_count.aggs_name.buckets;  //  전 시간
@@ -421,13 +441,10 @@ router.post("/hot/count", function(req, res){
                 }
             }
         }
-        let result = common.getResult("10", "OK", "statistics_hot_keyword")
-        result.data.result = current_words;
-        result.data.count = current_words.length;
-        res.send(result);
+
+        res.send(current_words);
     }, function(err){
-        let result = common.getResult("99", "ERROR", "statistics_hot_keyword");
-        res.send(result);
+        console.log(err);
     })
 });
 
@@ -461,7 +478,7 @@ function hotStatistics(keyword, req, res, final){
 	now = now.slice(0,10) + "0000";
 	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
 	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
-	var body = common.getBody(hour_ago, now_ago, 0);
+	var body = common.getBodyNoSize(hour_ago, now_ago);
 	var index = common.getIndex(req.body.channel);
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
