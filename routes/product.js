@@ -7,9 +7,10 @@ var common = require('./common');
 router.post("/list", function(req, res){
     console.log("Router for IF_DMA_00004");
     let size = req.body.size || 10 ;
+    let from = req.body.from || 1 ;
     let age = parseInt(req.body.age);
     var fields = ["no", "company", "companyNm", "productCode", "productNm", "Mcate", "McateNm", "mdId", "mdNm"];
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, fields);
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from, fields);
     var index = common.getIndex(req.body.channel);
     var should = [];
     if(req.body.category1 !== undefined)

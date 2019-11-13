@@ -6,8 +6,9 @@ var common = require('./common');
 router.post("/statistics", function(req, res){
     console.log("Router for IF_DMA_00601");
     let age = parseInt( req.body.age ); // 전체일 경우 어떤 값으로 오는지 확인?
-    let size = req.body.size || 0;
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
+    let size = req.body.size || 10;
+    let from = req.body.from || 1;
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
     var index = common.getIndex(req.body.channel);
 
     if(req.body.category1 !== undefined)
