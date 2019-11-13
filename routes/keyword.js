@@ -300,6 +300,9 @@ router.post("/hot/count", function(req, res){
     })
 });
 
+/*대역변수 /hot/statistics에서 키워드별로 한건씩 조회하여 값 셋팅
+ * 키워드 별로 hotStatistics(키워드, req, res, 종료 여부) 호출 	
+ * 키워드 수만큼 hotStatistics호출 후 hotStatisticsResult에 데이터 쌓아 놓음. */ 
 var hotStatisticsResult;
 
 router.post("/hot/statistics", function(req, res){
@@ -370,11 +373,22 @@ function hotStatistics(keyword, req, res, final){
     	for(i in test){
     		obj[i] = test[i][1].doc_count;
     	}
-    	
+    	var returnVal1;
+    	var returnVal2;
+    	if(obj[0] !== undefined){
+    		returnVal1 = obj[0];
+    	}else{
+    		returnVal1 = "0";
+    	}
+    	if(obj[1] !== undefined){
+    		returnVal2 = obj[0];
+    	}else{
+    		returnVal2 = "0";
+    	}
 		var returnVal = {
 			word : keyword,	
-	       	count : obj[1],
-	        before_count : obj[0]
+	       	count : returnVal1,
+	        before_count : returnVal2
         }
 		hotStatisticsResult.data.result.push(returnVal);
 		if(final == "Y"){
