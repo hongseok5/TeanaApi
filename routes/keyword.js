@@ -357,8 +357,6 @@ router.post("/hot/count", function(req, res){
 
     now = now.slice(0,10) + "0000";
     hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
-
-    // var body = common.getBody("20110114090910", "20191030093959", 0);   // 하드코딩
     var body = common.getBody(req.body.start_dt, req.body.end_dt, 0); // 하드코딩
     body.aggs.rt_hot_keyword = {
         date_histogram : {
@@ -378,6 +376,7 @@ router.post("/hot/count", function(req, res){
                     aggs_name : {
                         terms : {
                             field : "keyword_count.word.keyword"
+                            // size : 100
                         }
                     }
                 }
@@ -392,8 +391,11 @@ router.post("/hot/count", function(req, res){
         body
     }).then(function(resp){
 
-        if ( resp.aggregations.rt_hot_keyword.buckets.length > 2 ){
+        if ( resp.aggregations.rt_hot_keyword.buckets.length >= 2 ){
             time_result = resp.aggregations.rt_hot_keyword.buckets.slice(0,2);  // 실제로는 전시간, 현재시간으로 2개만 발생
+        } else {
+            let result = common.getResult("40","No Result","statistics_hot_keyword")
+            resp.send(result);
         }
         
         current_words = time_result[0].neut_keyword.aggs_name.buckets;  // 현재 시간
@@ -418,10 +420,13 @@ router.post("/hot/count", function(req, res){
                 }
             }
         }
-
-        res.send(current_words);
+        let result = common.getResult("10", "OK", "statistics_hot_keyword")
+        result.data.result = current_words;
+        result.data.count = current_words.length;
+        res.send(result);
     }, function(err){
-        console.log(err);
+        let result = common.getResult("99", "ERROR", "statistics_hot_keyword");
+        res.send(result);
     })
 });
 
