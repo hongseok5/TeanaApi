@@ -368,6 +368,7 @@ router.post("/hot/count", function(req, res){
 	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
 	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
 	var body = common.getBodyNoSize(hour_ago, now_ago);
+	//var body = common.getBodyNoSize("20190507000000", "20191207000000");   // 하드코딩 데이터 확인 쿼리
 	
     body.aggs.rt_hot_keyword = {
         date_histogram : {
@@ -418,7 +419,8 @@ router.post("/hot/count", function(req, res){
         current_words = current_words.sort( function(a, b){
             return a.updown > b.updown ? -1 : a.updown < b.updown ? 1 : 0;
         });
-        result.data.count = current_words.lenght;
+        result.data.count = current_words.length;
+        
         var fornum = 0;
         if(sumsize < current_words.length){
         	fornum = sumsize;
