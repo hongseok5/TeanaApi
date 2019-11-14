@@ -18,7 +18,9 @@ router.post("/top", function(req, res){
     console.log("Router for IF_DMA_00101");
     let size = req.body.size || 10;
     let from = req.body.from || 1;
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
+    let sumsize = parseInt(from)*parseInt(size);
+    let resultsize = parseInt(sumsize)-parseInt(size);
+    var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var should = [];
     var index = common.getIndex(req.body.channel);
     
@@ -52,10 +54,8 @@ router.post("/top", function(req, res){
         aggs : {
             top_keyword : {
                 terms : {
-                    field : "keyword_count.word.keyword", // field name
-                    size : size
-
-
+                    field : "keyword_count.word.keyword",
+                    size : 1000
                 }
             }
         }
@@ -69,14 +69,23 @@ router.post("/top", function(req, res){
     }).then(function(resp){
         var result = common.getResult( "10", "OK", "top_keyword");
         result.data.count = resp.aggregations.aggs_top_keyword.top_keyword.buckets.length;
-        result.data.result = resp.aggregations.aggs_top_keyword.top_keyword.buckets;
-        result.data.result = result.data.result.sort( function(a, b){
-            return a.doc_count > b.doc_count ? -1 : a.doc_count < b.doc_count ? 1 : 0;
-        });
-        for(i in result.data.result){
-            result.data.result[i].no = parseInt(i) + 1;
+        result.data.result = [];
+        test = Object.entries(resp.aggregations.aggs_top_keyword.top_keyword.buckets);
+        var fornum = 0;
+        if(sumsize < test.length){
+        	fornum = sumsize;
+        }else{
+        	fornum = test.length;
         }
-        res.send(resp);
+        for(var i=parseInt(resultsize); i<parseInt(fornum); i++){
+        	var obj = {
+    			key : test[i][1].key,	
+    			doc_count : test[i][1].doc_count,
+    			no : parseInt(i) + 1
+        	}
+        	result.data.result.push(obj);
+        }
+        res.send(result);
     }, function(err){
         var result = common.getResult( "99", "ERROR", "top_keyword");
         res.send(result);
@@ -347,16 +356,19 @@ function topKeyword2(keyword, req, res, final){
 router.post("/hot/count", function(req, res){
     console.log("Router for IF_DMA_00103");
     
-    var now = dateFormat(new Date(), "yyyymmddHHMMss");
-    var hour_ago = new Date().getHours() - 2 ;
     var interval = req.body.interval || "1H";
     let size = req.body.size || 10;
     let from = req.body.from || 1;
-    now = now.slice(0,10) + "0000";
-    hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
-
-    // var body = common.getBody("20110114090910", "20191030093959", 0);   // 하드코딩
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from); // 하드코딩
+    let sumsize = parseInt(from)*parseInt(size);
+    let resultsize = parseInt(sumsize)-parseInt(size);
+    var now = dateFormat(new Date(), "yyyymmddHHMMss");
+	var hour_ago = new Date().getHours() - 1 ;
+	var now_ago = new Date().getHours() + 1 ;
+	now = now.slice(0,10) + "0000";
+	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
+	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
+	var body = common.getBodyNoSize(hour_ago, now_ago);
+	
     body.aggs.rt_hot_keyword = {
         date_histogram : {
             field : "startTime",
@@ -389,7 +401,7 @@ router.post("/hot/count", function(req, res){
         index,
         body
     }).then(function(resp){
-
+    	var result = common.getResult( "10", "OK", "hot_count");
         if ( resp.aggregations.rt_hot_keyword.buckets.length >= 2 ){
             time_result = resp.aggregations.rt_hot_keyword.buckets.slice(0,2);  // 실제로는 전시간, 현재시간으로 2개만 발생
         }
@@ -406,8 +418,14 @@ router.post("/hot/count", function(req, res){
         current_words = current_words.sort( function(a, b){
             return a.updown > b.updown ? -1 : a.updown < b.updown ? 1 : 0;
         });
-
-        current_words = current_words.slice(0,10);
+        result.data.count = current_words.lenght;
+        var fornum = 0;
+        if(sumsize < current_words.length){
+        	fornum = sumsize;
+        }else{
+        	fornum = current_words.lenght;
+        }
+        current_words = current_words.slice(resultsize,fornum);
         for(i in current_words){
             for(j in before_words){
                 if(current_words[i].key == before_words[j].key){
@@ -415,8 +433,8 @@ router.post("/hot/count", function(req, res){
                 }
             }
         }
-
-        res.send(current_words);
+        result.data.result = current_words;
+        res.send(result);
     }, function(err){
         console.log(err);
     })
@@ -474,9 +492,9 @@ router.post("/hot/statistics", function(req, res){
             result.data.result = [];
             test = Object.entries(resp.aggregations.keyword_count.aggs_name.buckets);
             var finStr = "";
-        	for(i in test){
-        		var keyNum = test.length;
-            	keyNum--;
+            var keyNum = test.length;
+        	keyNum--;
+    		for(i in test){
         		if(i == keyNum){
         			finStr = "Y";
         		}
