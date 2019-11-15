@@ -92,145 +92,16 @@ router.post("/top", function(req, res){
     });
 });
 
-router.post("/top/statistics", function(req, res){
-    console.log("Router for IF_DMA_00102");
-    var now = dateFormat(new Date(), "yyyymmddHHMMss");
-	var hour_ago = new Date().getHours() - 1 ;
-	var now_ago = new Date().getHours() + 1 ;
-	now = now.slice(0,10) + "0000";
-	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
-	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
-	var body = common.getBodyNoSize(hour_ago, now_ago);
-	var keyword = [];
-    var index = common.getIndex(req.body.channel);
-    if(req.body.keyword == undefined || req.body.keyword == "" || req.body.keyword == null){
-    	body.aggs = {
-    		keyword_count :{	
-    			nested : {
-    				path : "keyword_count"	 
-    			},
-    			aggs : {
-    				aggs_name : {
-    					terms : {
-    						field : "keyword_count.word.keyword",
-    						size : "5"
-    					}
-    				}
-    			}
-    		}
-    	}
-    	client.search({
-            index,
-            body
-        }).then(function(resp){
-            test = Object.entries(resp.aggregations.keyword_count.aggs_name.buckets);
-            for(i in test){
-            	keyword.push(test[i][1].key);
-            }
-            topKeyword(keyword, req, res);
-        }, function(err){
-            console.log(err);
-        });
-    }else{
-    	keyword = req.body.keyword;
-    	topKeyword(keyword, req, res);
-    }
-    
-    
-});
-
-function topKeyword(keyword, req, res){
-	var now = dateFormat(new Date(), "yyyymmddHHMMss");
-	var hour_ago = new Date().getHours() - 1 ;
-	var now_ago = new Date().getHours() + 1 ;
-	now = now.slice(0,10) + "0000";
-	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
-	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
-	var body = common.getBodyNoSize(hour_ago, now_ago);
-	var index = common.getIndex(req.body.channel);
-	if(req.body.category1 !== undefined)
-        body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if(req.body.category2 !== undefined)
-        body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
-    body.query.bool.must = [
-        { 
-        	bool : {
-        		should : [{
-        			nested : {
-        				path : "keyword_count",
-        					query : {
-        						bool : {
-        							must : {
-        								terms : {
-        									"keyword_count.word.keyword" : keyword 
-        								}
-        							}
-        						}
-        					}
-        			}
-        		}]
-        	}
-        }
-    ];
-    body.aggs = {
-    	division :{	
-    		date_histogram : {
-    			field : "startTime",
-    			interval : '1H',
-    			min_doc_count : "1"
-    		}
-    	}
-    }
-    client.search({
-        index,
-        body
-    }).then(function(resp){
-        var result = common.getResult( "10", "OK", "top_keyword");
-        result.data.count = 0;
-        result.data.result = [];
-        test = Object.entries(resp.aggregations.division.buckets);
-        var keylen = keyword.length;
-        var keySet = new Array();
-        for(var z=0; z<keylen; z++){
-        	keySet[z] = keyword.pop();
-        }
-        for(i in test){
-        	test2 = Object.entries(test[i][1].keyword_count.aggs_name.buckets);
-        	for(j in test2){
-        		for(var x=0; x<keySet.length; x++){
-        			if(test2[j][1].key == keySet[x]){
-        				var obj = {
-        					key : test[i][1].key_as_string,	
-        		        	word : test2[j][1].key,
-        		            count : test2[j][1].doc_count
-        	        	}
-        	        	result.data.result.push(obj);
-        			}
-        		}
-        	}
-	    }
-        res.send(result);
-    }, function(err){
-        console.log(err);
-    });
-}
-
 var topStatisticsResult;
 
-router.post("/top/statistics2", function(req, res){
+router.post("/top/statistics", function(req, res){
     console.log("Router for IF_DMA_00102");
     var keyword = [];
-    var interval = req.body.interval || "1H";
+    var interval = req.body.interval || "1D";
     var index = common.getIndex(req.body.channel);
-    var now = dateFormat(new Date(), "yyyymmddHHMMss");
-	var hour_ago = new Date().getHours() - 1 ;
-	var now_ago = new Date().getHours() + 1 ;
-	now = now.slice(0,10) + "0000";
-	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
-	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
-	
+    
     if(req.body.keyword == undefined || req.body.keyword == "" || req.body.keyword == null){
-    	var body = common.getBodyNoSize(hour_ago, now_ago);
+    	var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     	body.aggs = {
     		keyword_count :{	
     			nested : {
@@ -251,7 +122,7 @@ router.post("/top/statistics2", function(req, res){
             body
         }).then(function(resp){
         	test = Object.entries(resp.aggregations.keyword_count.aggs_name.buckets);
-        	topStatisticsResult = common.getResult( "10", "OK", "top_keyword");
+        	topStatisticsResult = common.getResult( "10", "OK", "top_statistics_keyword");
         	topStatisticsResult.data.count = 0;
         	topStatisticsResult.data.result = [];
         	var finStr = "";
@@ -261,14 +132,14 @@ router.post("/top/statistics2", function(req, res){
             	if(i == keyNum){
         			finStr = "Y";
         		}
-            	topKeyword2(test[i][1].key, req, res, finStr);
+            	topKeyword(test[i][1].key, req, res, finStr);
             }
             
         }, function(err){
             console.log(err);
         });
     }else{
-    	topStatisticsResult = common.getResult( "10", "OK", "top_keyword");
+    	topStatisticsResult = common.getResult( "10", "OK", "top_statistics_keyword");
     	topStatisticsResult.data.count = 0;
     	topStatisticsResult.data.result = [];
     	var finStr = "";
@@ -278,25 +149,16 @@ router.post("/top/statistics2", function(req, res){
         	if(i == keyNum){
     			finStr = "Y";
     		}
-    		topKeyword2(req.body.keyword[i], req, res, finStr);
+    		topKeyword(req.body.keyword[i], req, res, finStr);
     	}
-    	
     }
-    
     
 });
 
-function topKeyword2(keyword, req, res, final){
-	var interval = req.body.interval || "1H";
+function topKeyword(keyword, req, res, final){
+	var interval = req.body.interval || "1D";
     var index = common.getIndex(req.body.channel);
-    
-    var now = dateFormat(new Date(), "yyyymmddHHMMss");
-	var hour_ago = new Date().getHours() - 1 ;
-	var now_ago = new Date().getHours() + 1 ;
-	now = now.slice(0,10) + "0000";
-	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
-	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
-	var body = common.getBodyNoSize(hour_ago, now_ago);
+    var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
 	
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
@@ -336,20 +198,23 @@ function topKeyword2(keyword, req, res, final){
         body
     }).then(function(resp){
     	test = Object.entries(resp.aggregations.division.buckets);
-        for(i in test){
+    	var obj2 = new Array();
+    	for(i in test){
         	var obj = {
         		key : test[i][1].key_as_string,	
         		word : keyword,
         		count : test[i][1].doc_count
         	}
         	topStatisticsResult.data.count = topStatisticsResult.data.count+test[i][1].doc_count;
-        	topStatisticsResult.data.result.push(obj);
+        	obj2[i] = obj
 	    }
+        topStatisticsResult.data.result.push(obj2);
         if(final == "Y"){
 			res.send(topStatisticsResult);
 		}
     }, function(err){
-        console.log(err);
+    	topStatisticsResult = common.getResult( "99", "ERROR", "top_statistics_keyword");
+    	res.send(topStatisticsResult);
     });
 }
 
@@ -469,7 +334,8 @@ router.post("/hot/statistics", function(req, res){
     	now = now.slice(0,10) + "0000";
     	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
     	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
-    	var body = common.getBodyNoSize(hour_ago, now_ago);
+    	var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
+    	var index = common.getIndex(req.body.channel);
     	body.aggs = {
     		keyword_count :{	
     			nested : {
@@ -503,7 +369,8 @@ router.post("/hot/statistics", function(req, res){
         		hotStatistics(test[i][1].key, req, res, finStr);
         	}
         }, function(err){
-           	console.log(err);
+        	hotStatisticsResult = common.getResult("99", "ERROR", "hot_statistics");
+        	res.send(hotStatisticsResult);
         });
     }
 });
@@ -515,7 +382,7 @@ function hotStatistics(keyword, req, res, final){
 	now = now.slice(0,10) + "0000";
 	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
 	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
-	var body = common.getBodyNoSize(hour_ago, now_ago);
+	var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
 	var index = common.getIndex(req.body.channel);
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
@@ -593,12 +460,15 @@ function hotStatistics(keyword, req, res, final){
 	       	count : returnVal1,
 	        before_count : returnVal2
         }
-		hotStatisticsResult.data.result.push(returnVal);
+		var obj = new Array();
+		obj[0]=returnVal; 
+		hotStatisticsResult.data.result.push(obj);
 		if(final == "Y"){
 			res.send(hotStatisticsResult);
 		}
     }, function(err){
-    	console.log(err);
+    	hotStatisticsResult = common.getResult("99", "ERROR", "hot_statistics");
+    	res.send(hotStatisticsResult);
     });
 }
 
