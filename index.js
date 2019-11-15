@@ -1,13 +1,8 @@
 var express = require('express');
-var fs = require('fs');
 var approot = require('app-root-path');
 var config = require(approot + '/config/config');
 var http = require('http');
 var res_err = require(approot + '/lib/res_err');
-var cron = require('node-cron');
-var mergejson = require('mergejson');
-var WebSocketS = require("ws").Server;
-var wss = new WebSocketS({ port : 3000 });
 const winston = require('winston');
 //const if0004 = require('./if_dma_00004.js');
 //const if0003 = require('./if_dma_00003.js');
@@ -41,51 +36,10 @@ var today = "20191113";
 //if0003();
 //if0004();
 
-wss.on("connection", function(ws){
-  logger.info("WSS" + Date() );
-  //  keyword로 색인 , 파일 write 경로 다르게. IF_DMA_00001
-  ws.on("message", function(message) {
-    
-    data = JSON.parse(message);
-    var filePath = config.save_path;
-    var fileName = filePath + data.startTime + "-" + data.extension + "-" + data.transType;
-    var result = {};
-    delete data.code;
-    if( data.ifId !== undefined ){
-
-      result.ifId = data.ifId;
-      result.startTime = data.startTime;
-      result.extension = data.extension;
-      result.agentId = data.agentId;
-      //result.transType = data.transType;
-      
-      fs.writeFile(fileName, message, 'utf-8', function(err) {
-        if(err) {
-            result.code = "99";
-            result.message = "파일 수신 실패";
-            ws.send(JSON.stringify(result));
-            //console.log('파일 쓰기 실패');
-        }else{
-            result.code = "10";
-            result.message = "파일 정상 수신";
-            ws.send(JSON.stringify(result));
-            //console.log('파일 쓰기 완료');
-          }
-      });
-    } else {
-      result.code = "99";
-      result.message = "필수값 누락";
-      ws.send(JSON.stringify(result));
-      //console.log("필수값 누락");
-    }
-  });
-});
-
 var CORS = require('cors')(corsOptions);
 var app = express();
 app.use(CORS);
 app.use(express.json());
-
 app.use("/channel", require("./routes/channel"));
 app.use("/keyword", require("./routes/keyword"));
 app.use("/class", require("./routes/class"));
@@ -153,86 +107,8 @@ function onListening() {
   var addr = server.address();
 }
 
-var file_merge_async = function (file_nr, file_nt){
-  var file_r;
-  var file_t;
-  var promiseFile = function (file_name, type) {
-    return new Promise(function (resolve, reject) {
-          fs.readFile(file_name, 'utf-8' ,(err,data)=>{
-              if(err) throw err;
-              if(data != undefined){
-                type == "R" ? file_r = data : file_t = data;
-                resolve();
-              } else {
-                reject();
-              }
-          });
-    }).catch();
-  };
 
-  Promise.all([promiseFile(file_nr, "R"), promiseFile(file_nt, "T")])
-           .then(function(){
-            mergeTalk(JSON.parse(file_r), JSON.parse(file_t))
-            console.log("R : " + file_r );
-            console.log("T : " + file_t );
-          }).catch("merge file failed!");
-}
 
-function mergeTalk( dataR, dataT  ){
-  // T : SSG , R :CST
-  dataT.timeNtalkT = dataT.timeNtalk;
-  dataR.timeNtalkR = dataR.timeNtalk;
-  let merged_talk = []; // 병합한 대화를 담을 배열
-
-  dataT.timeNtalkT = dataT.timeNtalkT.split("\n");
-  for(i in dataT.timeNtalkT){
-    dialog = dataT.timeNtalkT[i].replace(/(^\s*)|(\s*$)/g, '');
-    if( dialog !== '')
-      dialog = dialog.slice(0, 14) + " T" + dialog.slice(14);
-      merged_talk.push(dialog);
-  }
-
-  dataR.timeNtalkR = dataR.timeNtalkR.split("\n");  // 스트링을 배열로 변환
-  for(i in dataR.timeNtalkR){
-    dialog = dataR.timeNtalkR[i].replace(/(^\s*)|(\s*$)/g, ''); // 앞뒤 공백 제거
-    if( dialog !== ''){  // 대화내용이 있으면
-      dialog = dialog.slice(0, 14) + " R" + dialog.slice(14);
-      merged_talk.push(dialog);
-    } 
-  }
-  
-  merged_talk.sort();
-  merged_talk = merged_talk.join(';');
-  merged_talk = merged_talk.replace(/\t/g,':');
-  dataR.timeNtalkR = dataR.timeNtalkR.join(';');
-  dataR.timeNtalkR = dataR.timeNtalkR.replace(/\t/g, ':');
-  dataT.timeNtalkT = dataT.timeNtalkT.join(';');
-  dataT.timeNtalkT = dataT.timeNtalkT.replace(/\t/g, ':');
-  let merged_data = mergejson(dataR,dataT);
-  merged_data.timeNtalk = merged_talk;
-
-  let merged_data_m = {};
-  merged_data_m.source = merged_data; // for logstash
-
-  fs.writeFile(config.write_path + today + "/" + merged_data.startTime + "-" + merged_data.extension + ".JSON", JSON.stringify(merged_data_m), 'utf8', function(err) {
-    if(err) 
-        console.log('Failed to write file!');
-    else
-        console.log('Successed to write file!');
-        fs.rename(config.save_path + merged_data.startTime + "-" + merged_data.extension + "-R", 
-                  config.backup_path + today + '/' + merged_data.startTime + "-" + merged_data.extension + "-R", 
-                  function(err){
-                    if (err) throw err;
-                    //console.log("Move Suceess!");    
-                  });
-        fs.rename(config.save_path + merged_data.startTime + "-" + merged_data.extension + "-T", 
-                  config.backup_path + today + '/' + merged_data.startTime + "-" + merged_data.extension + "-T", 
-                  function(err){
-                    if (err) throw err;
-                    //console.log("Move Suceess!");    
-                  });
-  });
-}
 
 /************************************************************
  * 에러 처리...
@@ -241,25 +117,5 @@ process.on('uncaughtException', function (err) {
   console.error('uncaughtException 발생 : ' + err);
 });
 
-cron.schedule('* * * * *', () => {
 
-  const file_path = config.save_path;
-  var file_list = fs.readdirSync(file_path);
-  var file_list_r = file_list.filter(el => /\-R$/.test(el));
-  for( i in file_list_r ){
-    file_nr = file_list_r[i];
-    let file_nt = file_nr.substr(0, 19) + "-T";
-    file_merge_async(file_path + file_nr, file_path + file_nt); 
-    }
-});
-
-cron.schedule('0 0 * * *', () => {
- 
-  day = new Date().getDate();
-  month = new Date().getMonth() + 1;
-  year = new Date().getFullYear();
-  // make directory 
-  fs.mkdirSync(config.write_path + year.toString() + month.toString() + day.toString());
-  today = year.toString() + month.toString() + day.toString();
- });
  
