@@ -2,6 +2,9 @@ const rp = require('request-promise');
 const schedule = require('node-schedule');
 const winston = require('winston');
 const dateFormat = require('dateformat');
+var fs = require('fs');
+var approot = require('app-root-path');
+var config = require(approot + '/config/config');
 const logger = winston.createLogger({
     level: 'info',
     format: winston.format.json(),
@@ -46,11 +49,20 @@ var sj01 = schedule.scheduleJob('30 30 * * * *', function(){
     options2.body = JSON.stringify(param);
     rp(options2)
     .then(function ( data ){
-        data = JSON.parse(data);
-        logger.info(data);
+    	data = JSON.parse(data);
+    	if(data.status.code == "10"){
+    		fs.mkdirSync(config.channel_save_path+data.data.channel);
+        	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
+        	var filecontext = data.data.result.data_list;
+            fs.writeFile(filename, filecontext, "utf8", function(err) {
+            	logger.info("error file : " + err);
+            });
+        }else{
+        	logger.info(data);
+        }
         console.log(data);
     }).catch(function (err){
-        console.error("error sj01 : " + err);
+    	logger.info("error sj01 : " + err);
     });
 });    
 var sj02 = schedule.scheduleJob('20 30 * * * *', function(){
@@ -60,11 +72,20 @@ var sj02 = schedule.scheduleJob('20 30 * * * *', function(){
     options2.body = JSON.stringify(param);
     rp(options2)
     .then(function ( data ){
-        data = JSON.parse(data);
-        logger.info(data);
+    	data = JSON.parse(data);
+    	if(data.status.code == "10"){
+    		fs.mkdirSync(config.channel_save_path+data.data.channel);
+        	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
+        	var filecontext = data.data.result.data_list;
+            fs.writeFile(filename, filecontext, "utf8", function(err) {
+            	logger.info("error file : " + err);
+            });
+        }else{
+        	logger.info(data);
+        }
         console.log(data);
     }).catch(function (err){
-        console.error("error sj02 : " + err);
+    	logger.info("error sj02 : " + err);
     });
 });    
 var sj03 = schedule.scheduleJob('10 30 * * * *', function(){
@@ -74,12 +95,20 @@ var sj03 = schedule.scheduleJob('10 30 * * * *', function(){
     options2.body = JSON.stringify(param);
     rp(options2)
     .then(function ( data ){
-
-        data = JSON.parse(data);
-        logger.info(data);
+    	data = JSON.parse(data);
+    	if(data.status.code == "10"){
+    		fs.mkdirSync(config.channel_save_path+data.data.channel);
+        	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
+        	var filecontext = data.data.result.data_list;
+            fs.writeFile(filename, filecontext, "utf8", function(err) {
+            	logger.info("error file : " + err);
+            });
+        }else{
+        	logger.info(data);
+        }
         console.log(data);
     }).catch(function (err){
-        console.error("error sj03 : " + err);
+    	logger.info("error sj03 : " + err);
     });
 });    
 var sj04 = schedule.scheduleJob('0 30 * * * *', function(){
@@ -90,10 +119,19 @@ var sj04 = schedule.scheduleJob('0 30 * * * *', function(){
     rp(options2)
     .then(function ( data ){
         data = JSON.parse(data);
-        logger.info(data);
+        if(data.status.code == "10"){
+        	fs.mkdirSync(config.channel_save_path+data.data.channel);
+        	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
+        	var filecontext = data.data.result.data_list;
+            fs.writeFile(filename, filecontext, "utf8", function(err) {
+            	logger.info("error file : " + err);
+            });
+        }else{
+        	logger.info(data);
+        }
         console.log(data);
     }).catch(function (err){
-        console.error("error sj04 : " + err);
+    	logger.info("error sj04 : " + err);
     });
 });    
 function getData(){
@@ -107,12 +145,13 @@ function getData(){
         sj02.invoke();
         sj03.invoke();
         sj04.invoke();
+        
     })
     .catch(function (err) {
         console.error("error 1 : " + err);
     });
 }
 
-// getData();
+getData();
 
 module.exports = getData;

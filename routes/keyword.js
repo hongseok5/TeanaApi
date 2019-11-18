@@ -4,6 +4,7 @@ const dateFormat = require('dateformat');
 var client = require('../index');
 var common = require('./common');
 
+
 client.ping({
     requestTimeout : 100
 }, function(err){
@@ -159,7 +160,7 @@ function topKeyword(keyword, req, res, final){
 	var interval = req.body.interval || "1D";
     var index = common.getIndex(req.body.channel);
     var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
-	
+    
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
     if(req.body.category2 !== undefined)
@@ -198,17 +199,23 @@ function topKeyword(keyword, req, res, final){
         body
     }).then(function(resp){
     	test = Object.entries(resp.aggregations.division.buckets);
-    	var obj2 = new Array();
+    	var dayList = common.getDays(req.body.start_dt, req.body.end_dt, interval);
+    	
     	for(i in test){
-        	var obj = {
-        		key : test[i][1].key_as_string,	
-        		word : keyword,
-        		count : test[i][1].doc_count
-        	}
+    		for(j in dayList){
+    			if(dayList[j].key == test[i][1].key_as_string){
+    				var obj = {
+    		        	key : test[i][1].key_as_string,	
+    		        	word : keyword,
+    		        	count : test[i][1].doc_count
+    		        }
+    				dayList[j] = obj;	
+    			}
+    		}
         	topStatisticsResult.data.count = topStatisticsResult.data.count+test[i][1].doc_count;
-        	obj2[i] = obj
+        	
 	    }
-        topStatisticsResult.data.result.push(obj2);
+        topStatisticsResult.data.result.push(dayList);
         if(final == "Y"){
 			res.send(topStatisticsResult);
 		}
