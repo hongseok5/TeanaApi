@@ -1,8 +1,10 @@
 {
 	"local" : {
-		"save_path" : "D:\\TeAnaApi\\file\\",
-		"write_path" : "D:\\TeAnaApi\\file_write\\",
-		"backup_path" : "D:\\TeAnaApi\\file_bak\\",
+		"save_path" : "C:\\work\\TeAnaApi\\file\\",
+		"channel_save_path" : "C:\\work\\TeAnaApi\\file\\channel",
+		"process_save_path" : "C:\\work\\TeAnaApi\\file\\process",
+		"write_path" : "C:\\work\\TeAnaApi\\file_write\\",
+		"backup_path" : "C:\\work\\TeAnaApi\\file_bak\\",
 		"app_host" : "localhost",
 		"app_port" : 3001,
 		"app_timeout" : 3000

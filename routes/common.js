@@ -104,6 +104,9 @@ var common = {
     getDays : function (start_dt, end_dt, interval){
     	var startDt = moment(start_dt.slice(0,8));
     	var endDt = moment(end_dt.slice(0,8));
+    	var startTime = moment(start_dt.slice(0,8));
+    	var endTime = moment(end_dt.slice(0,8));
+    	var time = endTime.diff(startTime, 'hours');
     	var days = endDt.diff(startDt, 'days');
     	var month = endDt.diff(startDt, 'months', true);
     	var returnval = new Array();
@@ -111,40 +114,36 @@ var common = {
     	if(interval == "1H"){
     		days++;
     		var z = 0;
-    		for(var i=0; i<days; i++){
+    		for(var i=0; i<time; i++){
     			if(i == 0){
     				var setDay = start_dt.slice(0,8);
-        			for(var j=0; j<24; j++){
-        				z = i + j;
-        				if(j < 10){
-        					var obj = {
-        	    		       	key : setDay + "0"+j+"0000"
-        	    		    }
-        					returnval[z] = obj;	
-        				}else{
-        					var obj = {
-            	    		    key : setDay + j +"0000"
-            	    		}
-            				returnval[z] = obj;	
-        				}
-        			}
+       				z = z+1;
+       				if(j < 10){
+       					var obj = {
+       	    		       	key : setDay + "0"+j+"0000"
+       	    		    }
+       					returnval[z] = obj;	
+       				}else{
+       					var obj = {
+           	    		    key : setDay + j +"0000"
+           	    		}
+       					returnval[z] = obj;	
+       				}
     			}else{
     				var setDay = startDt.add('days',1).format('YYYYMMDD');
-        			for(var j=0; j<24; j++){
-        				z = i + j;
-        				if(j < 10){
-        					var obj = {
-           	    		       	key : setDay + "0"+j+"0000"
-           	    		    }
-           					returnval[z] = obj;	
-        				}else{
-        					var obj = {
-                	    	    key : setDay + j +"0000"
-                	    	}
-                			returnval[z] = obj;	
-        				}
+       				z = z+1;
+       				if(j < 10){
+       					var obj = {
+        	    		   	key : setDay + "0"+j+"0000"
+          	    		}
+        				returnval[z] = obj;	
+        			}else{
+        				var obj = {
+                	   	    key : setDay + j +"0000"
+                	   	}
+        				returnval[z] = obj;	
         			}
-    			}
+        		}
         	}
     	}else if(interval == "1D"){
     		days++;

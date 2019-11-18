@@ -21,7 +21,7 @@ router.post("/top", function(req, res){
     let from = req.body.from || 1;
     let sumsize = parseInt(from)*parseInt(size);
     let resultsize = parseInt(sumsize)-parseInt(size);
-    var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
+    var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     var should = [];
     var index = common.getIndex(req.body.channel);
     
@@ -100,9 +100,8 @@ router.post("/top/statistics", function(req, res){
     var keyword = [];
     var interval = req.body.interval || "1D";
     var index = common.getIndex(req.body.channel);
-    
     if(req.body.keyword == undefined || req.body.keyword == "" || req.body.keyword == null){
-    	var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
+    	var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     	body.aggs = {
     		keyword_count :{	
     			nested : {
@@ -123,6 +122,7 @@ router.post("/top/statistics", function(req, res){
             body
         }).then(function(resp){
         	test = Object.entries(resp.aggregations.keyword_count.aggs_name.buckets);
+        	console.log("bchm = "+test.length);
         	topStatisticsResult = common.getResult( "10", "OK", "top_statistics_keyword");
         	topStatisticsResult.data.count = 0;
         	topStatisticsResult.data.result = [];
@@ -137,7 +137,7 @@ router.post("/top/statistics", function(req, res){
             }
             
         }, function(err){
-            console.log(err);
+        	topStatisticsResult = common.getResult( "99", "ERROR", "top_statistics_keyword");
         });
     }else{
     	topStatisticsResult = common.getResult( "10", "OK", "top_statistics_keyword");
@@ -159,7 +159,7 @@ router.post("/top/statistics", function(req, res){
 function topKeyword(keyword, req, res, final){
 	var interval = req.body.interval || "1D";
     var index = common.getIndex(req.body.channel);
-    var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
+    var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
@@ -199,7 +199,7 @@ function topKeyword(keyword, req, res, final){
         body
     }).then(function(resp){
     	test = Object.entries(resp.aggregations.division.buckets);
-    	var dayList = common.getDays(req.body.start_dt, req.body.end_dt, interval);
+    	var dayList = common.getDays(req.body.start_dt.toString(), req.body.end_dt.toString(), interval);
     	var obj2 = new Array();
     	for(i in test){
     		for(j in dayList){
