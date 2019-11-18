@@ -200,7 +200,7 @@ function topKeyword(keyword, req, res, final){
     }).then(function(resp){
     	test = Object.entries(resp.aggregations.division.buckets);
     	var dayList = common.getDays(req.body.start_dt, req.body.end_dt, interval);
-    	
+    	var obj2 = new Array();
     	for(i in test){
     		for(j in dayList){
     			if(dayList[j].key == test[i][1].key_as_string){
@@ -209,13 +209,20 @@ function topKeyword(keyword, req, res, final){
     		        	word : keyword,
     		        	count : test[i][1].doc_count
     		        }
-    				dayList[j] = obj;	
+    				obj2[j] = obj;	
+    			}else{
+    				var obj = {
+        		       	key : dayList[j].key,	
+        		       	word : keyword,
+        		       	count : 0
+        		    }
+        			obj2[j] = obj;	
     			}
     		}
         	topStatisticsResult.data.count = topStatisticsResult.data.count+test[i][1].doc_count;
         	
 	    }
-        topStatisticsResult.data.result.push(dayList);
+        topStatisticsResult.data.result.push(obj2);
         if(final == "Y"){
 			res.send(topStatisticsResult);
 		}
