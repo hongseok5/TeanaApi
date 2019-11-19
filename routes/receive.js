@@ -2,10 +2,12 @@ var express = require("express");
 var router = express.Router();
 var client = require('../index');
 var common = require('./common');
+var config = require('../config/config');
+var fs = require('fs');
 
 router.post('/call', (req, res) => {
     //logger.info("HTTP POST /receive/call" + req.ip + Date());
-    if( req.body.ifId !== undefined && req.body.vdn !== undefined && req.body.vdnGrp !== undefined && req.body.vdnGrpNm !== undefined ){
+	if( req.body.ifId !== undefined && req.body.vdn !== undefined && req.body.vdnGrp !== undefined && req.body.vdnGrpNm !== undefined ){
 
       var result = {
         ifId : req.body.ifId
@@ -45,6 +47,12 @@ router.post('/call', (req, res) => {
         }
       };
       
+      !fs.existsSync(config.process_save_path) && fs.mkdirSync(config.process_save_path);
+  	  var filename = config.process_save_path+req.body.ifId+".JSON";
+  	  var filecontext = JSON.stringify(req.body);
+  	  fs.writeFile(filename, filecontext, "utf8", function(err) {
+      	logger.info("error file : " + err);
+      });
       client.index(document).then(function(resp) {
         var result = {
           ifId : req.ifId,
@@ -61,15 +69,6 @@ router.post('/call', (req, res) => {
         res.send(result);
       });
       
-      //console.log(response);
-      //res.send(response);
-      /*
-      client.index([ document , function(){
-        result.code = "10";
-        result.message = "OK";
-        res.send(result);
-      }]);
-      */
     } else {
       result = common.getResult("40", "No ifId", "receive_call");
       res.send(result);

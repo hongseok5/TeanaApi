@@ -1,8 +1,8 @@
 {
 	"local" : {
 		"save_path" : "C:\\work\\TeAnaApi\\file\\",
-		"channel_save_path" : "C:\\work\\TeAnaApi\\file\\channel",
-		"process_save_path" : "C:\\work\\TeAnaApi\\file\\process",
+		"channel_save_path" : "C:\\work\\TeAnaApi\\file\\channel\\",
+		"process_save_path" : "C:\\work\\TeAnaApi\\file\\process\\",
 		"write_path" : "C:\\work\\TeAnaApi\\file_write\\",
 		"backup_path" : "C:\\work\\TeAnaApi\\file_bak\\",
 		"app_host" : "localhost",
