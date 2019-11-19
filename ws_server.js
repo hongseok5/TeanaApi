@@ -6,7 +6,7 @@ const cron = require('node-cron');
 const mergejson = require('mergejson');
 const fs = require('fs');
 const rp = require('request-promise');
-let today = "20191118";
+let today = "20191119";
 // 키워드추출 API
 let kwe_option = {
   uri : 'http://10.253.42.185:12800/txt_to_kwd',
@@ -141,11 +141,11 @@ function mergeTalk( dataR, dataT  ){
     }
     for(i in values[1].sentimental.positive.keywords){
       let obj = { count : 1, word : values[1].sentimental.positive.keywords[i].keyword};
-      merged_data.negative_word.push(obj);
+      merged_data.positive_word.push(obj);
     }
     for(i in values[1].sentimental.neutral.keywords){
       let obj = { count : 0, word : values[1].sentimental.neutral.keywords[i].keyword};
-      merged_data.negative_word.push(obj);
+      merged_data.neutral_word.push(obj);
     }
     fs.writeFile(config.write_path + today + "/" + merged_data.startTime + "-" + merged_data.extension + ".JSON", JSON.stringify(merged_data), 'utf8', function(err) {
       if(err) 
