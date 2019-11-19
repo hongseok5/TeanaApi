@@ -286,40 +286,50 @@ router.post("/hot/count", function(req, res){
         body
     }).then(function(resp){
     	var result = common.getResult( "10", "OK", "hot_count");
-        if ( resp.aggregations.rt_hot_keyword.buckets.length >= 2 ){
-            time_result = resp.aggregations.rt_hot_keyword.buckets.slice(0,2);  // 실제로는 전시간, 현재시간으로 2개만 발생
-        }
-        current_words = time_result[0].keyword_count.aggs_name.buckets;  // 현재 시간
-        before_words = time_result[1].keyword_count.aggs_name.buckets;  //  전 시간
-        for( i in current_words){
-            for( j in before_words){
-                if( current_words[i].key == before_words[j].key ){
-                    current_words[i].updown = Math.ceil( 100 / ( current_words[i].doc_count - before_words[j].doc_count ) );
-                }                
+    	if(resp.aggregations.rt_hot_keyword.buckets.length > 0){
+    		if ( resp.aggregations.rt_hot_keyword.buckets.length >= 2 ){
+                time_result = resp.aggregations.rt_hot_keyword.buckets.slice(0,2);  // 실제로는 전시간, 현재시간으로 2개만 발생
+                current_words = time_result[0].keyword_count.aggs_name.buckets;  // 현재 시간
+                before_words = time_result[1].keyword_count.aggs_name.buckets;  //  전 시간
+            }else{
+            	time_result = resp.aggregations.rt_hot_keyword.buckets;  // 실제로는 전시간, 현재시간으로 2개만 발생
+            	current_words = time_result[0].keyword_count.aggs_name.buckets;  // 현재 시간
             }
-        }
-
-        current_words = current_words.sort( function(a, b){
-            return a.updown > b.updown ? -1 : a.updown < b.updown ? 1 : 0;
-        });
-        result.data.count = current_words.length;
-        
-        var fornum = 0;
-        if(sumsize < current_words.length){
-        	fornum = sumsize;
-        }else{
-        	fornum = current_words.lenght;
-        }
-        current_words = current_words.slice(resultsize,fornum);
-        for(i in current_words){
-            for(j in before_words){
-                if(current_words[i].key == before_words[j].key){
-                    current_words[i].before_count = before_words[j].doc_count;
+    		
+            for( i in current_words){
+                for( j in before_words){
+                    if( current_words[i].key == before_words[j].key ){
+                        current_words[i].updown = Math.ceil( 100 / ( current_words[i].doc_count - before_words[j].doc_count ) );
+                    }                
                 }
             }
-        }
-        result.data.result = current_words;
-        res.send(result);
+
+            current_words = current_words.sort( function(a, b){
+                return a.updown > b.updown ? -1 : a.updown < b.updown ? 1 : 0;
+            });
+            result.data.count = current_words.length;
+            
+            var fornum = 0;
+            if(sumsize < current_words.length){
+            	fornum = sumsize;
+            }else{
+            	fornum = current_words.lenght;
+            }
+            current_words = current_words.slice(resultsize,fornum);
+            for(i in current_words){
+                for(j in before_words){
+                    if(current_words[i].key == before_words[j].key){
+                        current_words[i].before_count = before_words[j].doc_count;
+                    }
+                }
+            }
+            result.data.result = current_words;
+            res.send(result);
+    	}else{
+    		var result = common.getResult( "20", "NODATA", "hot_count");
+    		res.send(result);
+    	}
+        
     }, function(err){
         console.log(err);
     })
