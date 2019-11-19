@@ -7,7 +7,8 @@ const mergejson = require('mergejson');
 const fs = require('fs');
 const rp = require('request-promise');
 let today = "20191118";
-let option = {
+// 키워드추출 API
+let kwe_option = {
   uri : 'http://10.253.42.185:12800/txt_to_kwd',
   method : "POST",
   body : {
@@ -17,6 +18,17 @@ let option = {
   },
   json : true
 }
+// 긍부정어 추출 API
+let pnn_option = {
+  uri : 'http://10.253.42.185:12800/voc/sentimental/_match',
+  method : "POST",
+  body : {
+      id : "sent8",
+      text : null
+  },
+  json : true
+}
+
 console.log("process.pid:"+process.pid);
 // 웹소켓으로 STT 데이터 받아서 키워드 추출까지 하고 파일로 쓰기
 
@@ -115,9 +127,26 @@ function mergeTalk( dataR, dataT  ){
   let merged_data = mergejson(dataR,dataT);
   merged_data.timeNtalk = merged_talk;
 
-  option.body.text = merged_talk;
-  rp(option).then(function(data){
-    merged_data.keyword_count = data.output;
+  kwe_option.body.text = merged_talk;
+  pnn_option.body.text = merged_talk;
+  Promise.all([rp(kwe_option), rp(pnn_option)]).then(function(values){
+    console.log("Promised all");
+    merged_data.keyword_count = values[0].output;
+    merged_data.negative_word = [];
+    merged_data.positive_word = [];
+    merged_data.neutral_word = [];
+    for(i in values[1].sentimental.negative.keywords){
+      let obj = { count : -1, word : values[1].sentimental.negative.keywords[i].keyword};
+      merged_data.negative_word.push(obj);
+    }
+    for(i in values[1].sentimental.positive.keywords){
+      let obj = { count : 1, word : values[1].sentimental.positive.keywords[i].keyword};
+      merged_data.negative_word.push(obj);
+    }
+    for(i in values[1].sentimental.neutral.keywords){
+      let obj = { count : 0, word : values[1].sentimental.neutral.keywords[i].keyword};
+      merged_data.negative_word.push(obj);
+    }
     fs.writeFile(config.write_path + today + "/" + merged_data.startTime + "-" + merged_data.extension + ".JSON", JSON.stringify(merged_data), 'utf8', function(err) {
       if(err) 
           console.log('Failed to write file!');
@@ -136,11 +165,14 @@ function mergeTalk( dataR, dataT  ){
     
                     });
     });
+    //console.log(values[0]);
+    //console.log(values[1]);
   }, function(err){
-    if (err) throw err;
+    if(err) throw err;
   });
-
 };
+
+
 
 cron.schedule('* * * * *', () => {
   console.log("file merge at " + new Date());
