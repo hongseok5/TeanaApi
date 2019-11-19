@@ -250,8 +250,8 @@ router.post("/hot/count", function(req, res){
 	now = now.slice(0,10) + "0000";
 	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
 	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
-	var body = common.getBodyNoSize(hour_ago, now_ago);
-	//var body = common.getBodyNoSize("20190507000000", "20191207000000");   // 하드코딩 데이터 확인 쿼리
+	//var body = common.getBodyNoSize(hour_ago, now_ago);
+	var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());   // 하드코딩 데이터 확인 쿼리
 	
     body.aggs.rt_hot_keyword = {
         date_histogram : {

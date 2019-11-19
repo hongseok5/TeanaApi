@@ -14,6 +14,7 @@
 		"write_path" : "/app/TeAna/TeAnaApi/file_write/",
 		"channel_save_path" : "/app/TeAna/TeAnaApi/file/channel/",
 		"process_save_path" : "/app/TeAna/TeAnaApi/file/process/",
+		"backup_path" : "/app/TeAna/TeAnaApi/file_bak/",
 		"app_host" : "localhost",
 		"app_port" : 3001,
 		"app_timeout" : 3000
@@ -23,6 +24,7 @@
 		"write_path" : "/app/TeAna/TeAnaApi/file_write/",
 		"channel_save_path" : "/app/TeAna/TeAnaApi/file/channel/",
 		"process_save_path" : "/app/TeAna/TeAnaApi/file/process/",
+		"backup_path" : "/app/TeAna/TeAnaApi/file_bak/",
 		"app_host" : "localhost",
 		"app_port" : 3001,
 		"app_timeout" : 3000
