@@ -1,4 +1,3 @@
-'use strict';
 const WebSocketS = require("ws").Server;
 const wss = new WebSocketS({ port : 3000 });
 const approot = require('app-root-path');
@@ -6,16 +5,27 @@ const config = require(approot + '/config/config');
 const cron = require('node-cron');
 const mergejson = require('mergejson');
 const fs = require('fs');
-
-let today = "20191113";
+const rp = require('request-promise');
+let today = "20191118";
+let option = {
+  uri : 'http://10.253.42.185:12800/txt_to_kwd',
+  method : "POST",
+  body : {
+      mode : "kma",
+      t_vec : "mobile_test",
+      text : null
+  },
+  json : true
+}
 console.log("process.pid:"+process.pid);
+// 웹소켓으로 STT 데이터 받아서 키워드 추출까지 하고 파일로 쓰기
 
 wss.on("connection", function(ws){
-  logger.info("WSS" + Date() );
-  //  keyword로 색인 , 파일 write 경로 다르게. IF_DMA_00001
+  // logger.info("WSS" + Date() );
+  // keyword로 색인 , 파일 write 경로 다르게. IF_DMA_00001
   ws.on("message", function(message) {
     
-    data = JSON.parse(message);
+    let data = JSON.parse(message);
     let filePath = config.save_path;
     let fileName = filePath + data.startTime + "-" + data.extension + "-" + data.transType;
     let result = {};
@@ -26,26 +36,24 @@ wss.on("connection", function(ws){
       result.startTime = data.startTime;
       result.extension = data.extension;
       result.agentId = data.agentId;
-      //result.transType = data.transType;
       
       fs.writeFile(fileName, message, 'utf-8', function(err) {
         if(err) {
             result.code = "99";
             result.message = "파일 수신 실패";
             ws.send(JSON.stringify(result));
-            //console.log('파일 쓰기 실패');
+
         }else{
             result.code = "10";
             result.message = "파일 정상 수신";
             ws.send(JSON.stringify(result));
-            //console.log('파일 쓰기 완료');
+
           }
       });
     } else {
       result.code = "99";
       result.message = "필수값 누락";
       ws.send(JSON.stringify(result));
-      //console.log("필수값 누락");
     }
   });
 });
@@ -71,8 +79,6 @@ let file_merge_async = function (file_nr, file_nt){
   Promise.all([promiseFile(file_nr, "R"), promiseFile(file_nt, "T")])
            .then(function(){
             mergeTalk(JSON.parse(file_r), JSON.parse(file_t))
-            console.log("R : " + file_r );
-            console.log("T : " + file_t );
           }).catch("merge file failed!");
 };
 
@@ -109,31 +115,35 @@ function mergeTalk( dataR, dataT  ){
   let merged_data = mergejson(dataR,dataT);
   merged_data.timeNtalk = merged_talk;
 
-  let merged_data_m = {};
-  merged_data_m.source = merged_data; // for logstash
-
-  fs.writeFile(config.write_path + today + "/" + merged_data.startTime + "-" + merged_data.extension + ".JSON", JSON.stringify(merged_data_m), 'utf8', function(err) {
-    if(err) 
-        console.log('Failed to write file!');
-    else
-        console.log('Successed to write file!');
-        fs.rename(config.save_path + merged_data.startTime + "-" + merged_data.extension + "-R", 
-                  config.backup_path + today + '/' + merged_data.startTime + "-" + merged_data.extension + "-R", 
-                  function(err){
-                    if (err) throw err;
-                    //console.log("Move Suceess!");    
-                  });
-        fs.rename(config.save_path + merged_data.startTime + "-" + merged_data.extension + "-T", 
-                  config.backup_path + today + '/' + merged_data.startTime + "-" + merged_data.extension + "-T", 
-                  function(err){
-                    if (err) throw err;
-                    //console.log("Move Suceess!");    
-                  });
+  option.body.text = merged_talk;
+  rp(option).then(function(data){
+    merged_data.keyword_count = data.output;
+    fs.writeFile(config.write_path + today + "/" + merged_data.startTime + "-" + merged_data.extension + ".JSON", JSON.stringify(merged_data), 'utf8', function(err) {
+      if(err) 
+          console.log('Failed to write file!');
+      else
+          console.log('Successed to write file!');
+          fs.rename(config.save_path + merged_data.startTime + "-" + merged_data.extension + "-R", 
+                    config.backup_path + today + '/' + merged_data.startTime + "-" + merged_data.extension + "-R", 
+                    function(err){
+                      if (err) throw err;
+   
+                    });
+          fs.rename(config.save_path + merged_data.startTime + "-" + merged_data.extension + "-T", 
+                    config.backup_path + today + '/' + merged_data.startTime + "-" + merged_data.extension + "-T", 
+                    function(err){
+                      if (err) throw err;
+    
+                    });
+    });
+  }, function(err){
+    if (err) throw err;
   });
+
 };
 
 cron.schedule('* * * * *', () => {
-
+  console.log("file merge at " + new Date());
   const file_path = config.save_path;
   let file_list = fs.readdirSync(file_path);
   let file_list_r = file_list.filter(el => /\-R$/.test(el));
@@ -144,20 +154,6 @@ cron.schedule('* * * * *', () => {
       let file_nt = file_nr.substr(0, 19) + "-T";
       file_merge_async(file_path + file_nr, file_path + file_nt);
     }
-    /*
-    for( j in file_list_t){
-      if(file_list_r[i].substr(0, 19) == file_list_t[j].substr(0, 19)){
-        console.log(file_list_r[i]);
-        file_merge_async(file_path + file_list_r[i], file_path + file_list_t[j]);
-      }
-    }  
-    fs.exists(file_path + file_nr.substr(0, 19) + "-T", function(ex){
-      if(ex){
-        let file_nt = file_nr.substr(0, 19) + "-T";
-        file_merge_async(file_path + file_nr, file_path + file_nt);
-      }
-    });
-    */
   }
 });
 
