@@ -122,22 +122,26 @@ router.post("/top/statistics", function(req, res){
             body
         }).then(function(resp){
         	test = Object.entries(resp.aggregations.keyword_count.aggs_name.buckets);
-        	console.log("bchm = "+test.length);
-        	topStatisticsResult = common.getResult( "10", "OK", "top_statistics_keyword");
-        	topStatisticsResult.data.count = 0;
-        	topStatisticsResult.data.result = [];
-        	var finStr = "";
-            for(i in test){
-            	var keyNum = test.length;
-            	keyNum--;
-            	if(i == keyNum){
-        			finStr = "Y";
-        		}
-            	topKeyword(test[i][1].key, req, res, finStr);
-            }
-            
+        	if(test.length > 1){
+        		topStatisticsResult = common.getResult( "10", "OK", "top_statistics_keyword");
+            	topStatisticsResult.data.count = 0;
+            	topStatisticsResult.data.result = [];
+            	var finStr = "";
+                for(i in test){
+                	var keyNum = test.length;
+                	keyNum--;
+                	if(i == keyNum){
+            			finStr = "Y";
+            		}
+                	topKeyword(test[i][1].key, req, res, finStr);
+                }
+        	}else{
+        		topStatisticsResult = common.getResult( "20", "NODATA", "top_statistics_keyword");
+        		res.send(topStatisticsResult);
+        	}
         }, function(err){
         	topStatisticsResult = common.getResult( "99", "ERROR", "top_statistics_keyword");
+        	res.send(topStatisticsResult);
         });
     }else{
     	topStatisticsResult = common.getResult( "10", "OK", "top_statistics_keyword");
@@ -373,15 +377,20 @@ router.post("/hot/statistics", function(req, res){
             result.data.count = 0;
             result.data.result = [];
             test = Object.entries(resp.aggregations.keyword_count.aggs_name.buckets);
-            var finStr = "";
-            var keyNum = test.length;
-        	keyNum--;
-    		for(i in test){
-        		if(i == keyNum){
-        			finStr = "Y";
-        		}
-        		hotStatistics(test[i][1].key, req, res, finStr);
-        	}
+            if(test.length > 0){
+            	var finStr = "";
+                var keyNum = test.length;
+            	keyNum--;
+        		for(i in test){
+            		if(i == keyNum){
+            			finStr = "Y";
+            		}
+            		hotStatistics(test[i][1].key, req, res, finStr);
+            	}
+            }else{
+            	topStatisticsResult = common.getResult( "20", "NODATA", "hot_statistics");
+        		res.send(topStatisticsResult);
+            }
         }, function(err){
         	hotStatisticsResult = common.getResult("99", "ERROR", "hot_statistics");
         	res.send(hotStatisticsResult);
