@@ -4,6 +4,7 @@ var client = require('../index');
 var common = require('./common');
 var config = require('../config/config');
 var fs = require('fs');
+const winston = require('winston');
 const logger = winston.createLogger({
     level: 'info',
     format: winston.format.json(),
