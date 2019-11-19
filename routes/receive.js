@@ -4,7 +4,15 @@ var client = require('../index');
 var common = require('./common');
 var config = require('../config/config');
 var fs = require('fs');
-
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.json(),
+    defaultMeta: { service: 'receive' },
+    transports: [
+      new winston.transports.File({ filename: './logs/error.log', level: 'error' }),
+      new winston.transports.File({ filename: './logs/receive.log' })
+    ]
+  });
 router.post('/call', (req, res) => {
     //logger.info("HTTP POST /receive/call" + req.ip + Date());
 	if( req.body.ifId !== undefined && req.body.vdn !== undefined && req.body.vdnGrp !== undefined && req.body.vdnGrpNm !== undefined ){
