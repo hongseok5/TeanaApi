@@ -10,16 +10,21 @@
 		"app_timeout" : 3000
 	},
 	"dev" : {
-		"save_path" : "/app/TeAna/TeAnaApi2/",
-		"write_path" : "/app/TeAna/TeAnaApi2/file_write",
+		"save_path" : "/app/TeAna/TeAnaApi/file/",
+		"write_path" : "/app/TeAna/TeAnaApi/file_write/",
+		"channel_save_path" : "/app/TeAna/TeAnaApi/file/channel/",
+		"process_save_path" : "/app/TeAna/TeAnaApi/file/process/",
 		"app_host" : "localhost",
 		"app_port" : 3001,
 		"app_timeout" : 3000
 	},
 	"prod" : {
-		"save_path" : "",
+		"save_path" : "/app/TeAna/TeAnaApi/file/",
+		"write_path" : "/app/TeAna/TeAnaApi/file_write/",
+		"channel_save_path" : "/app/TeAna/TeAnaApi/file/channel/",
+		"process_save_path" : "/app/TeAna/TeAnaApi/file/process/",
 		"app_host" : "localhost",
 		"app_port" : 3001,
-		"app_timeout" : 3000	
+		"app_timeout" : 3000
 	}
 }
