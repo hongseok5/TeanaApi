@@ -126,15 +126,17 @@ function mergeTalk( dataR, dataT  ){
   dataT.timeNtalkT = dataT.timeNtalkT.replace(/\t/g, ':');
   let merged_data = mergejson(dataR,dataT);
   merged_data.timeNtalk = merged_talk;
+  // 키워드 및 긍,부정어 추출시 고객의 대화로만 추출
+  kwe_option.body.text = dataR.timeNtalkR;
+  pnn_option.body.text = dataR.timeNtalkR;
 
-  kwe_option.body.text = merged_talk;
-  pnn_option.body.text = merged_talk;
   Promise.all([rp(kwe_option), rp(pnn_option)]).then(function(values){
     console.log("Promised all");
     merged_data.keyword_count = values[0].output;
     merged_data.negative_word = [];
     merged_data.positive_word = [];
     merged_data.neutral_word = [];
+
     for(i in values[1].sentimental.negative.keywords){
       let obj = { count : -1, word : values[1].sentimental.negative.keywords[i].keyword};
       merged_data.negative_word.push(obj);
