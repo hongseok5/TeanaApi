@@ -20,7 +20,7 @@ router.post("/list", function(req, res){
     if(req.body.gender !== undefined)
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(req.body.companyCode !== undefined)
-        body.query.bool.filter.push({ term : { companyCode : req.body.companyCode }});
+        body.query.bool.filter.push({ term : { company : req.body.companyCode }});
     if(req.body.Mcate !== undefined)
         body.query.bool.filter.push({ term : { Mcate : req.body.Mcate }});
     if(req.body.inCate !== undefined)
