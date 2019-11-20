@@ -317,14 +317,14 @@ router.post("/hot/count", function(req, res){
                 current_words = current_words.slice(resultsize,fornum);
                 */
                 let result = common.getResult("10", "OK", "hot_count");
-                result.data.count = resp.aggregations.rt_hot_keyword.buckets.length;
+                result.data.count = resp.aggregations.rt_hot_keyword.buckets[0].keyword_count.aggs_name.buckets.length;
                 result.data.result = current_words;
                 res.send(result);
 
             } else if( resp.aggregations.rt_hot_keyword.buckets.length == 1){
                 
                 let result = common.getResult( "10", "OK", "hot_count");
-                result.data.count = 1;
+                result.data.count = resp.aggregations.rt_hot_keyword.buckets[0].keyword_count.aggs_name.buckets.length;
                 result.data.result = resp.aggregations.rt_hot_keyword.buckets[0].keyword_count.aggs_name.buckets;
                 for(i in result.data.result){
                     result.data.result[i].updown = 100;
