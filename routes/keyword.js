@@ -239,19 +239,21 @@ function topKeyword(keyword, req, res, final){
 router.post("/hot/count", function(req, res){
  
     console.log("Router for IF_DMA_00103");
-    //var interval = req.body.interval || "1H";
-    let interval = "1H";
+    let interval = req.body.interval || "1H";
+    //let interval = "1H";
     let size = req.body.size || 0;
     let from = req.body.from || 1;
     let sumsize = parseInt(from)*parseInt(size);
     let resultsize = parseInt(sumsize)-parseInt(size);
+    let end_dt = req.body.end_dt || "20191230000000";
+    let start_dt = req.body.start_dt || "20190501000000";
     var now = dateFormat(new Date(), "yyyymmddHHMMss");
 	var hour_ago = new Date().getHours() - 1 ;
 	var hour_after = new Date().getHours() + 1 ;
 	now = now.slice(0,10) + "0000";
 	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
 	hour_after = now.slice(0,8) + ( hour_after < 10 ? "0" + hour_after : hour_after ) + "0000";
-	var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());   // 하드코딩 데이터 확인 쿼리
+	var body = common.getBodyNoSize(start_dt, end_dt);   // 실제로는 hour_ago, hour_after로 넣고 테스트 시에는 하드코딩값 or 임의값 전달
 
     body.size = 0;
     body.aggs.rt_hot_keyword = {
@@ -261,7 +263,7 @@ router.post("/hot/count", function(req, res){
             order : {
                 _key : "desc"
             },
-            min_doc_count : 1   // TEST
+            min_doc_count : 1   // TEST 
         },
         aggs : {
         	keyword_count : {
