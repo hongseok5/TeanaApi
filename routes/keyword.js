@@ -654,9 +654,9 @@ router.post("/issue/statistics", function(req, res){
         body
     }).then(function(resp){
     	var result = common.getResult( "10", "OK", "keyword_issue_statistics");
-    	result.data.count = resp.hits.total;
-        result.data.result = [];
+    	result.data.result = [];
         var totalMax = parseInt(resp.aggregations.negative.doc_count)+parseInt(resp.aggregations.neutral.doc_count)+parseInt(resp.aggregations.positive.doc_count); 
+        result.data.count = totalMax;
         var obj = {
         	division : "negative",
             count : resp.aggregations.negative.doc_count,
