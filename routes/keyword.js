@@ -31,8 +31,8 @@ router.post("/top", function(req, res){
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }})
     if(req.body.gender !== undefined)
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
-    if(req.body.company !== undefined)
-        body.query.bool.filter.push({ term : { company : req.body.company }});
+    if(req.body.companyCode !== undefined)
+        body.query.bool.filter.push({ term : { company : req.body.companyCode }});
     if(req.body.Mcate !== undefined)
         body.query.bool.filter.push({ term : { Mcate : req.body.Mcate }});
     if(req.body.inCate !== undefined)
@@ -43,7 +43,7 @@ router.post("/top", function(req, res){
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
     if(req.body.vdnGrp !== undefined)
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
-    for( p in req.body.productCode ){
+    for( p in req.body.product.productCode ){
         var term_obj = { term : { productCode : req.body.productCode[p]}};
         should.push(term_obj);
     } 
