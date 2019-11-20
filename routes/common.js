@@ -150,7 +150,7 @@ var common = {
     		for(var i=0; i<days; i++){
     			if(i == 0){
     				var obj = {
-       	    		   	key : start_dt.slice(0,8)+"01000000"
+       	    		   	key : start_dt.slice(0,8)+"000000"
        	    		}
        				returnval[i] = obj;	
     			}else{

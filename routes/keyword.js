@@ -514,11 +514,11 @@ router.get("/relation", function(req, res){
 router.post("/issue", function(req, res){
 
     console.log("Router for IF_DMA_00106");
-    let size = req.body.size || 0;
-    let from = req.body.from || 1;
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
+    
+    var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     var index = common.getIndex(req.body.channel);
-    var interval = req.body.interval || "day";
+    var interval = req.body.interval || "1D";
+    var dayList = common.getDays(req.body.start_dt.toString(), req.body.end_dt.toString(), interval);
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
     if(req.body.category2 !== undefined)
@@ -553,18 +553,23 @@ router.post("/issue", function(req, res){
         result.data.interval = req.body.interval;
         result.data.result = [];
         for(i in resp.aggregations.keyword_hist.buckets){
-            var obj = {};
-            if ( req.body.interval == "day" ){
-                obj.key = resp.aggregations.keyword_hist.buckets[i].key_as_string.substr(0, 8);
-            } else if ( req.body.interval == "month" ) {
-                obj.key = resp.aggregations.keyword_hist.buckets[i].key_as_string.substr(0, 6);
-            } else {
-                obj.key = resp.aggregations.keyword_hist.buckets[i].key_as_string.substr(0, 10);
-            }
+        	for(j in dayList){
+    			if(dayList[j].key == resp.aggregations.keyword_hist.buckets[i].key_as_string){
+    				var obj = {};
+    	            obj.key = dayList[j].key;
+    	            obj.count = resp.aggregations.keyword_hist.buckets[i].doc_count;
+    	            obj.word = req.body.keyword;
+    	            result.data.result.push(obj);
+    			}else{
+    				var obj = {
+        		       	key : dayList[j].key,	
+        		       	word : req.body.keyword,
+        		       	count : 0
+        		    }
+    				result.data.result.push(obj);	
+    			}
+    		}
             
-            obj.count = resp.aggregations.keyword_hist.buckets[i].doc_count;
-            obj.word = req.body.keyword;
-            result.data.result.push(obj);
         }
 
         res.send(result);
@@ -578,7 +583,8 @@ router.post("/issue/statistics", function(req, res){
     // 데이터 준비 필요
     console.log("Router for IF_DMA_00107");
     var size = req.body.size || 10;
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
+    var from = req.body.from || 1;
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
     var index = common.getIndex(req.body.channel);
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});

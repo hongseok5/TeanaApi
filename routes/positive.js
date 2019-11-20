@@ -8,8 +8,9 @@ router.post("/statistics", function(req, res){
     // 긍,부정어 추이
     // let interval = req.body.interval || undefined;  
     let size = req.body.size || 0;
+    let from = req.body.from || 1;
     var interval = req.body.interval || "1D";
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
     
 
     if( req.body.category1 !== undefined)
@@ -115,7 +116,8 @@ router.post("/count", function(req, res){
     // neg, pos, neu 3개 필드만 sum 해서 비유을 구하는지?
     let should = [];
     var index = common.getIndex(req.body.channel);
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, 0);
+    let from = req.body.from || 1;
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, 0, from);
     
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});

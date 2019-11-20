@@ -7,8 +7,9 @@ router.post("/count", function(req, res){
     console.log("Router for IF_DMA_00201");
 
     let size = req.body.size || 0;  // 통계쿼리는 버킷만
+    let from = req.body.from || 1;
     let should = [];
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
 
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
@@ -71,8 +72,9 @@ router.post("/count", function(req, res){
 router.post("/statistics", function(req, res){
     console.log("Router for IF_DMA_00202");
     let size = req.body.size || 10;
+    let from = req.body.from || 1;
     let should = [];
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
     let interval = req.body.interval || "week";
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});

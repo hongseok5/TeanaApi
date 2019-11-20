@@ -7,7 +7,8 @@ router.post("/count", function(req, res){
 
     console.log("Router for IF_DMA_00301");
     let size = req.body.size || 10;
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
+    let from = req.body.from || 1;
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
     var index = common.getIndex(req.body.channel);
     var interval = req.body.interval || "1D";
     if( req.body.category1 !== undefined)
@@ -62,7 +63,8 @@ router.post("/count", function(req, res){
 router.post("/statistics", function(req, res){
     console.log("Router for IF_DMA_00302");
     let size = req.body.size || 10;
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
+    let from = req.body.from || 1;
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
     var index = common.getIndex(req.body.channel);
     var interval = req.body.interval || "1D";
     if( req.body.category1 !== undefined)
