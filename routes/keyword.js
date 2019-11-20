@@ -515,7 +515,8 @@ router.post("/issue", function(req, res){
 
     console.log("Router for IF_DMA_00106");
     let size = req.body.size || 0;
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size);
+    let from = req.body.from || 1;
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
     var index = common.getIndex(req.body.channel);
     var interval = req.body.interval || "day";
     if(req.body.category1 !== undefined)
