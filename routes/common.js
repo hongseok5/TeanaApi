@@ -13,7 +13,11 @@ var common = {
             case "03":
                 return "homepage1";
             case "04":
-                return "ars1";
+				return "ars1";
+			case "05":
+				return "chat";
+			case "06":
+				return "alliance";
             default:
                 return "mobile1,pc1,homepage1,ars1";
         }
