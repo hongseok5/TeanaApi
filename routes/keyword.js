@@ -590,35 +590,24 @@ router.post("/issue", function(req, res){
 router.post("/issue/statistics", function(req, res){
     // 데이터 준비 필요
     console.log("Router for IF_DMA_00107");
-    var size = req.body.size || 10;
-    var from = req.body.from || 1;
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
+    var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     var index = common.getIndex(req.body.channel);
     if(req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
     if(req.body.category2 !== undefined)
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }})
     if(req.body.keyword !== undefined){
-    	body.query.bool.must = [
-            { 
-            	bool : {
-            		should : [{
-            			nested : {
-            				path : "keyword_count",
-            					query : {
-            						bool : {
-            							must : {
-            								terms : {
-            									"keyword_count.word.keyword" : keyword 
-            								}
-            							}
-            						}
-            					}
-            			}
-            		}]
-            	}
-            }
-        ];
+    	 var nest_obj = {
+    	            nested : {
+    	                path : "keyword_count",
+    	                query : {
+    	                    term : {
+    	                        "keyword_count.word" : req.body.keyword
+    	                    }
+    	                }
+    	            }
+    	        }
+    	        body.query.bool.filter.push(nest_obj);
     }
 
     body.aggs = {
