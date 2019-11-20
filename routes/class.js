@@ -20,7 +20,7 @@ router.post("/count", function(req, res){
     if(req.body.gender !== undefined)
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(req.body.companyCode !== undefined)
-        body.query.bool.filter.push({ term : { companyCode : req.body.companyCode }});
+        body.query.bool.filter.push({ term : { company : req.body.companyCode }});
     if(req.body.Mcate !== undefined)
         body.query.bool.filter.push({ term : { Mcate : req.body.Mcate }});
     if(req.body.inCate !== undefined)
@@ -31,7 +31,7 @@ router.post("/count", function(req, res){
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
     if(req.body.vdnGrp !== undefined)
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
-    for( p in req.body.productCode ){
+    for( p in req.body.product.productCode ){
         var term_obj = { term : { productCode : req.body.productCode[p]}};
         should.push(term_obj);
     } 
@@ -86,7 +86,7 @@ router.post("/statistics", function(req, res){
     if(req.body.gender !== undefined)
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(req.body.companyCode !== undefined)
-        body.query.bool.filter.push({ term : { companyCode : req.body.companyCode }});
+        body.query.bool.filter.push({ term : { company : req.body.companyCode }});
     if(req.body.Mcate !== undefined)
         body.query.bool.filter.push({ term : { Mcate : req.body.Mcate }});
     if(req.body.inCate !== undefined)
@@ -97,7 +97,7 @@ router.post("/statistics", function(req, res){
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
     if(req.body.vdnGrp !== undefined)
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
-    for( p in req.body.productCode ){
+    for( p in req.body.product.productCode ){
         var term_obj = { term : { productCode : req.body.productCode[p]}};
         should.push(term_obj);
     } 
