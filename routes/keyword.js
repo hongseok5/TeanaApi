@@ -656,22 +656,23 @@ router.post("/issue/statistics", function(req, res){
     	var result = common.getResult( "10", "OK", "keyword_issue_statistics");
     	result.data.count = resp.hits.total;
         result.data.result = [];
+        var totalMax = parseInt(resp.aggregations.negative.doc_count)+parseInt(resp.aggregations.neutral.doc_count)+parseInt(resp.aggregations.positive.doc_count); 
         var obj = {
         	division : "negative",
             count : resp.aggregations.negative.doc_count,
-            rate : Math.round((resp.aggregations.negative.doc_count/resp.hits.total)*100)
+            rate : Math.round((resp.aggregations.negative.doc_count/parseInt(totalMax))*100)
         }
        	result.data.result.push(obj);
         var obj1 = {
            	division : "neutral",
             count : resp.aggregations.neutral.doc_count,
-            rate : Math.round((resp.aggregations.neutral.doc_count/resp.hits.total)*100)
+            rate : Math.round((resp.aggregations.neutral.doc_count/parseInt(totalMax))*100)
         }
         result.data.result.push(obj1);
         var obj2 = {
            	division : "positive",
             count : resp.aggregations.positive.doc_count,
-            rate : Math.round((resp.aggregations.positive.doc_count/resp.hits.total)*100)
+            rate : Math.round((resp.aggregations.positive.doc_count/parseInt(totalMax))*100)
         }
         result.data.result.push(obj2);
         res.send(result);
