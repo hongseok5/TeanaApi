@@ -35,10 +35,12 @@ router.post("/list", function(req, res){
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(req.body.age !== undefined)
         body.query.bool.filter.push({ range : { age : { gte : age-9, lte : age }}});
-    for( p in req.body.product.productCode ){
-        var term_obj = { term : { productCode : req.body.productCode[p]}};
-        should.push(term_obj);
-    } 
+    if(req.body.product !== undefined) {
+		for( p in req.body.product.productCode ){
+			var term_obj = { term : { productCode : req.body.productCode[p]}};
+			should.push(term_obj);
+		} 
+	}
 
     body.query.bool.must = [
         { bool : { should } }
