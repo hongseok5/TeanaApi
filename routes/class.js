@@ -68,8 +68,8 @@ router.post("/count", function(req, res){
         for(j in resp.aggregations.cate1_terms.buckets){
         	var total = Math.ceil(parseInt(resp.aggregations.cate1_terms.buckets[j].doc_count)/parseInt(z)*100);
         	var obj = {
-        	   	category1Nm : resp.aggregations.cate1_terms.buckets[i].key,
-        	   	count : resp.aggregations.cate1_terms.buckets[i].doc_count,
+        	   	category1Nm : resp.aggregations.cate1_terms.buckets[j].key,
+        	   	count : resp.aggregations.cate1_terms.buckets[j].doc_count,
         	   	rate : total,
         	   	avgTime : Math.round(resp.aggregations.cate1_terms.buckets[j].avd_value.value)
         	}
@@ -142,8 +142,8 @@ var index = common.getIndex(req.body.channel);
         for(j in resp.aggregations.aggs_class.buckets){
         	var total = Math.ceil(parseInt(resp.aggregations.aggs_class.buckets[j].doc_count)/parseInt(z)*100);
         	var obj = {
-    		   	category1Nm : resp.aggregations.aggs_class.buckets[i].key,
-    		   	count : resp.aggregations.aggs_class.buckets[i].doc_count,
+    		   	category1Nm : resp.aggregations.aggs_class.buckets[j].key,
+    		   	count : resp.aggregations.aggs_class.buckets[j].doc_count,
     		   	rate : total,
     		   	avgTime : Math.round(resp.aggregations.aggs_class.buckets[j].avd_value.value)
     		}
