@@ -72,28 +72,18 @@ router.post("/count", function(req, res){
 
 router.post("/statistics", function(req, res){
     console.log("Router for IF_DMA_00302");
-    let size = req.body.size || 10;
-    let from = req.body.from || 1;
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
+
+    var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var index = common.getIndex(req.body.channel);
     var interval = req.body.interval || "1D";
     if( req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
     if( req.body.category2 !== undefined)
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
-    body.aggs.day = {
-      	date_histogram : {
-      		field : "startTime",
-      		interval : interval,
-            min_doc_count : 1
-        },
-        aggs : {
-        	index : {
-        		terms : {
-        			field : "_index"
-        		}
-        	}
-        }
+    body.aggs.channel = {
+		terms : {
+			field : "_index"
+		}
     };
     
     var index = common.getIndex(req.body.channel);
@@ -106,26 +96,27 @@ router.post("/statistics", function(req, res){
     	var total = 0;
     	result.data.count = 0;
         result.data.result = [];
-        test = Object.entries(resp.aggregations.day.buckets);
-        for(i in test){
-        	total = total + test[i][1].doc_count;
-        	test2 = Object.entries(test[i][1].index.buckets);
-        	var z = 1;
-        	for(j in test2){
-        		var obj = {
-        			no : z,
-                    channel : test2[j][1].key,
-                    count : test2[j][1].doc_count,
-                    rate : Math.round((test2[j][1].doc_count/resp.hits.total)*100)
-                }
-        		z++;
-                result.data.result.push(obj);
-        	}
+        result.data.count = resp.aggregations.channel.buckets.length;
+        var z = 0;
+        for(i in resp.aggregations.channel.buckets){
+        	z = parseInt(z)+parseInt(resp.aggregations.channel.buckets[i].doc_count);
+        	
         }
-        result.data.count = resp.hits.total;
+		
+		for(j in resp.aggregations.channel.buckets){
+        	var total = Math.ceil(parseInt(resp.aggregations.channel.buckets[j].doc_count)/parseInt(z)*100);
+        	var obj = {
+    		   	channel : resp.aggregations.channel.buckets[j].key,
+    		   	count : resp.aggregations.channel.buckets[j].doc_count,
+    		   	rate : total,
+    		}
+        	result.data.result.push(obj);
+        }
+		
         res.send(result);
     }, function(err){
-        console.log(err);
+        var result = common.getResult("99", "ERROR", "statistics_by_class");
+        res.send(result);
     });
 });
 
