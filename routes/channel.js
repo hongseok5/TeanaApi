@@ -66,7 +66,8 @@ router.post("/count", function(req, res){
         result.data.count = resp.hits.total;
         res.send(result);
     }, function(err){
-        console.log(err);
+        var result = common.getResult("99", "ERROR", "channel_count");
+        res.send(result);
     });
 });
 
@@ -76,9 +77,9 @@ router.post("/statistics", function(req, res){
     var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var index = common.getIndex(req.body.channel);
     var interval = req.body.interval || "1D";
-    if( req.body.category1 !== undefined)
+    if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if( req.body.category2 !== undefined)
+    if(common.getEmpty(req.body.category2))
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
     body.aggs.channel = {
 		terms : {
