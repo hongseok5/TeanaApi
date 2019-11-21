@@ -13,29 +13,29 @@ router.post("/list", function(req, res){
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from, fields);
     var index = common.getIndex(req.body.channel);
     var should = [];
-    if(req.body.category1 !== undefined)
+    if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if(req.body.category2 !== undefined)
+    if(common.getEmpty(req.body.category2))
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
-    if(req.body.gender !== undefined)
+    if(common.getEmpty(req.body.gender))
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
-    if(req.body.companyCode !== undefined)
+    if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
-    if(req.body.Mcate !== undefined)
+    if(common.getEmpty(req.body.Mcate))
         body.query.bool.filter.push({ term : { Mcate : req.body.Mcate }});
-    if(req.body.inCate !== undefined)
+    if(common.getEmpty(req.body.inCate))
         body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
-    if(req.body.MD !== undefined)
+    if(common.getEmpty(req.body.MD))
         body.query.bool.filter.push({ term : { mdNm : req.body.MD }});
-    if(req.body.vdn !== undefined)
+    if(common.getEmpty(req.body.vdn))
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
-    if(req.body.vdnGrp !== undefined)
+    if(common.getEmpty(req.body.vdnGrp))
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
-    if(req.body.gender !== undefined)
+    if(common.getEmpty(req.body.gender))
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
-    if(req.body.age !== undefined)
+    if(common.getEmpty(req.body.age))
         body.query.bool.filter.push({ range : { age : { gte : age-9, lte : age }}});
-    if(req.body.product !== undefined) {
+    if(common.getEmpty(req.body.product)) {
 		for( p in req.body.product.productCode ){
 			var term_obj = { term : { productCode : req.body.productCode[p]}};
 			should.push(term_obj);
