@@ -11,13 +11,13 @@ router.post("/statistics", function(req, res){
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
     var index = common.getIndex(req.body.channel);
 
-    if(req.body.category1 !== undefined)
+    if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if(req.body.category2 !== undefined)
+    if(common.getEmpty(req.body.category2))
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
-    if(req.body.gender !== undefined)
+    if(common.getEmpty(req.body.gender))
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
-    if(req.body.age !== undefined)
+    if(common.getEmpty(req.body.age))
         body.query.bool.filter.push({ range : { age : { gte : age - 9, lte : age }}});
     body.aggs.aggs_age = {
         histogram : {
