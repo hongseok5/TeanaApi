@@ -7,19 +7,19 @@ var common = {
             case "00":
                 return "call_dev";
             case "01":
-                return "mobile1";
+                return "mobile";
             case "02":
-                return "pc1";
+                return "pc";
             case "03":
-                return "homepage1";
+                return "homepage";
             case "04":
-				return "ars1";
+				return "ars";
 			case "05":
 				return "chat";
 			case "06":
 				return "alliance";
             default:
-                return "mobile1,pc1,homepage1,ars1";
+                return "mobile,pc,homepage,ars";
         }
     },
     getBody : function( start_dt, end_dt, size, from, source ){
