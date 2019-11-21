@@ -137,10 +137,14 @@ router.post("/count", function(req, res){
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
     if(req.body.vdnGrp !== undefined)
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
-    for( p in req.body.product.productCode ){
-        var term_obj = { term : { productCode : req.body.productCode[p]}};
-        should.push(term_obj);
-    } 
+	
+    if(req.body.product !== undefined) {
+		for( p in req.body.product.productCode ){
+			var term_obj = { term : { productCode : req.body.productCode[p]}};
+			should.push(term_obj);
+		} 
+	}
+	
     body.query.bool.must = [
         { bool : {should}}
     ];
@@ -203,10 +207,13 @@ router.post("/count", function(req, res){
     if(req.body.vdnGrp !== undefined)
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
     
-    for( p in req.body.product.productCode ){
-        var term_obj = { term : { productCode : req.body.productCode[p]}};
-        should.push(term_obj);  // should 쿼리 적용
-    } 
+	if(req.body.product !== undefined) {
+		for( p in req.body.product.productCode ){
+			var term_obj = { term : { productCode : req.body.productCode[p]}};
+			should.push(term_obj);  // should 쿼리 적용
+		}
+	}
+
     body.query.bool.should = [] // exist
     client.search({
         index,
