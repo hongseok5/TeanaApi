@@ -22,6 +22,13 @@ var common = {
                 return "mobile,pc,homepage,ars";
         }
     },
+	getEmpty : function (value) {
+		var rtn = false;
+		if (typeof value != 'undefined' && value) {
+			rtn = true;
+		}
+		return rtn;
+	},
     getBody : function( start_dt, end_dt, size, from, source ){
     	var fromcheck = (parseInt(from)-1)*parseInt(size);
     	if(from !== undefined){
