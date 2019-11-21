@@ -7,11 +7,9 @@ router.post("/statistics", function(req, res){
     console.log("Router for IF_DMA_00402");
     // 긍,부정어 추이
     // let interval = req.body.interval || undefined;  
-    let size = req.body.size || 0;
-    let from = req.body.from || 1;
     var interval = req.body.interval || "1D";
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
-    
+    var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
+    var dayList = common.getDays(req.body.start_dt.toString(), req.body.end_dt.toString(), interval);
 
     if( req.body.category1 !== undefined)
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
@@ -75,26 +73,52 @@ router.post("/statistics", function(req, res){
         result.data.result = [];
         test = Object.entries(resp.aggregations.division.buckets);
         for(i in test){
-        	var obj = {
-                key : test[i][1].key_as_string,
-                division : "negative",
-                count : test[i][1].negative.doc_count
-            }
-            result.data.result.push(obj);
+        	for(k in dayList){
+        		if(dayList[k].key == test[i][1].key_as_string){
+        			var obj = {
+        	            key : dayList[k].key,
+        	            division : "negative",
+        	            count : test[i][1].negative.doc_count
+        	        }
+        	        result.data.result.push(obj);
+        	        	
+        	        var obj2 = {
+        	            key : dayList[k].key,
+        	            division : "neutral",
+        	            count : test[i][1].neutral.doc_count
+        	        }
+        	        result.data.result.push(obj2);
+        	        	
+        	        var obj3 = {
+        	            key : dayList[k].key,
+        	            division : "positive",
+        	            count : test[i][1].positive.doc_count
+        	        }
+        	        result.data.result.push(obj3);
+        		}else{
+        			var obj = {
+            	        key : dayList[k].key,
+            	        division : "negative",
+            	        count : 0
+            	    }
+            	    result.data.result.push(obj);
+            	        	
+            	    var obj2 = {
+            	        key : dayList[k].key,
+            	        division : "neutral",
+            	        count : 0
+            	    }
+            	    result.data.result.push(obj2);
+            	        	
+            	    var obj3 = {
+            	        key : dayList[k].key,
+            	        division : "positive",
+            	        count : 0
+            	    }
+            	    result.data.result.push(obj3);
+        		}
+        	}
         	
-        	var obj2 = {
-                key : test[i][1].key_as_string,
-                division : "neutral",
-                count : test[i][1].neutral.doc_count
-            }
-            result.data.result.push(obj2);
-        	
-        	var obj3 = {
-                key : test[i][1].key_as_string,
-                division : "positive",
-                count : test[i][1].positive.doc_count
-            }
-            result.data.result.push(obj3);
         }
 
         // 인터페이스에서 삭제
