@@ -72,6 +72,9 @@ router.post("/statistics", function(req, res){
         result.data.count = 0;
         result.data.result = [];
         test = Object.entries(resp.aggregations.division.buckets);
+        var objarr1 = new Array();
+        var objarr2 = new Array();
+        var objarr3 = new Array();
         for(i in test){
         	for(k in dayList){
         		if(dayList[k].key == test[i][1].key_as_string){
@@ -80,47 +83,50 @@ router.post("/statistics", function(req, res){
         	            division : "negative",
         	            count : test[i][1].negative.doc_count
         	        }
-        	        result.data.result.push(obj);
+        			objarr1[k]=obj;
         	        	
         	        var obj2 = {
         	            key : dayList[k].key,
         	            division : "neutral",
         	            count : test[i][1].neutral.doc_count
         	        }
-        	        result.data.result.push(obj2);
+        	        objarr2[k]=obj2;
         	        	
         	        var obj3 = {
         	            key : dayList[k].key,
         	            division : "positive",
         	            count : test[i][1].positive.doc_count
         	        }
-        	        result.data.result.push(obj3);
+        	        objarr3[k]=obj3;
         		}else{
         			var obj = {
             	        key : dayList[k].key,
             	        division : "negative",
             	        count : 0
             	    }
-            	    result.data.result.push(obj);
+        			objarr1[k]=obj;
             	        	
             	    var obj2 = {
             	        key : dayList[k].key,
             	        division : "neutral",
             	        count : 0
             	    }
-            	    result.data.result.push(obj2);
+            	    objarr2[k]=obj2;
             	        	
             	    var obj3 = {
             	        key : dayList[k].key,
             	        division : "positive",
             	        count : 0
             	    }
-            	    result.data.result.push(obj3);
+            	    objarr3[k]=obj3;
         		}
         	}
-        	
         }
-
+        
+        result.data.result.push(objarr1);
+        result.data.result.push(objarr2);
+        result.data.result.push(objarr3);
+        
         // 인터페이스에서 삭제
         for( i in result.data.result ){
             if(result.data.result[i].count > 0){
