@@ -25,26 +25,26 @@ router.post("/top", function(req, res){
     var should = [];
     var index = common.getIndex(req.body.channel);
     
-    if(req.body.category1 !== undefined)
+    if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if(req.body.category2 !== undefined)
+    if(common.getEmpty(req.body.category2))
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }})
-    if(req.body.gender !== undefined)
+    if(common.getEmpty(req.body.gender))
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
-    if(req.body.companyCode !== undefined)
+    if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
-    if(req.body.Mcate !== undefined)
+    if(common.getEmpty(req.body.Mcate))
         body.query.bool.filter.push({ term : { Mcate : req.body.Mcate }});
-    if(req.body.inCate !== undefined)
+    if(common.getEmpty(req.body.inCate))
         body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
-    if(req.body.MD !== undefined)
+    if(common.getEmpty(req.body.MD))
         body.query.bool.filter.push({ term : { mdNm : req.body.MD }});
-    if(req.body.vdn !== undefined)
+    if(common.getEmpty(req.body.vdn))
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
-    if(req.body.vdnGrp !== undefined)
+    if(common.getEmpty(req.body.vdnGrp))
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
 	
-	if(req.body.product !== undefined) {
+	if(common.getEmpty(req.body.product)) {
 		for( p in req.body.product.productCode ){
 			var term_obj = { term : { productCode : req.body.productCode[p]}};
 			should.push(term_obj);
@@ -356,10 +356,8 @@ router.post("/hot/statistics", function(req, res){
     console.log("Router for IF_DMA_00104");
     hotStatisticsResult = common.getResult("10", "OK", "hot_statistics");
     hotStatisticsResult.data.result = [];
-	
-	console.log("DDD:" + req.body.keyword);
-	
-    if(req.body.keyword !== undefined && req.body.keyword !== null){
+		
+    if(common.getEmpty(req.body.keyword)){
     	hotStatisticsResult.data.count = req.body.keyword.length;
     	var finStr ="";
     	var keyNum = req.body.keyword.length;
