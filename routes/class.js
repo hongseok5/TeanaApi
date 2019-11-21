@@ -31,11 +31,13 @@ router.post("/count", function(req, res){
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
     if(req.body.vdnGrp !== undefined)
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
-    for( p in req.body.product.productCode ){
-        var term_obj = { term : { productCode : req.body.productCode[p]}};
-        should.push(term_obj);
-    } 
-
+    if(req.body.product !== undefined){
+    	for( p in req.body.product.productCode ){
+            var term_obj = { term : { productCode : req.body.productCode[p]}};
+            should.push(term_obj);
+        } 
+    }
+    
     body.query.bool.must = [
         { bool : { should } }
     ]
@@ -44,6 +46,9 @@ router.post("/count", function(req, res){
         terms : {
             field : "category1Nm",
             size : 10
+        },
+        aggs : {
+            avd_value : { avg : { field : "duration" } }
         }
     }
     var index = common.getIndex(req.body.channel);
@@ -53,16 +58,22 @@ router.post("/count", function(req, res){
         body
     }).then(function(resp){
     	var result = common.getResult("10", "OK", "statistics_by_class");
-        result.data.result = resp.aggregations.cate1_terms.buckets;
-        result.data.count = result.data.result.length;
+    	result.data.result = [];
+        result.data.count = resp.aggregations.cate1_terms.buckets.length;
         var z = 0;
-        for(i in result.data.result){
-        	z = parseInt(z)+parseInt(result.data.result[i].doc_count);
+        for(i in resp.aggregations.cate1_terms.buckets){
+        	z = parseInt(z)+parseInt(resp.aggregations.cate1_terms.buckets[i].doc_count);
         }
         
-        for(j in result.data.result){
-        	var total = Math.ceil(parseInt(result.data.result[j].doc_count)/parseInt(z)*100);
-        	result.data.result[j].rate = total;
+        for(j in resp.aggregations.cate1_terms.buckets){
+        	var total = Math.ceil(parseInt(resp.aggregations.cate1_terms.buckets[j].doc_count)/parseInt(z)*100);
+        	var obj = {
+        	   	category1Nm : resp.aggregations.cate1_terms.buckets[i].key,
+        	   	count : resp.aggregations.cate1_terms.buckets[i].doc_count,
+        	   	rate : total,
+        	   	avgTime : Math.round(resp.aggregations.cate1_terms.buckets[j].avd_value.value)
+        	}
+            result.data.result.push(obj);
         }
         res.send(result);
     }, function(err){
@@ -97,14 +108,19 @@ router.post("/statistics", function(req, res){
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
     if(req.body.vdnGrp !== undefined)
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
-    for( p in req.body.product.productCode ){
-        var term_obj = { term : { productCode : req.body.productCode[p]}};
-        should.push(term_obj);
-    } 
+    if(req.body.product !== undefined){
+    	for( p in req.body.product.productCode ){
+            var term_obj = { term : { productCode : req.body.productCode[p]}};
+            should.push(term_obj);
+        } 
+    }
 
     body.aggs.aggs_class = {
         terms : {
            field : "category1Nm"
+        },
+        aggs : {
+            avd_value : { avg : { field : "duration" } }
         }
     }        
 
@@ -115,16 +131,23 @@ var index = common.getIndex(req.body.channel);
     }).then(function(resp){
 
         var result = common.getResult("10", "OK", "statistics_by_class");
-        result.data.result = resp.aggregations.aggs_class.buckets;
-        result.data.count = result.data.result.length;
+        result.data.result = [];
+        result.data.count = resp.aggregations.aggs_class.buckets.length;
         var z = 0;
-        for(i in result.data.result){
-        	z = parseInt(z)+parseInt(result.data.result[i].doc_count);
+        for(i in resp.aggregations.aggs_class.buckets){
+        	z = parseInt(z)+parseInt(resp.aggregations.aggs_class.buckets[i].doc_count);
+        	
         }
         
-        for(j in result.data.result){
-        	var total = Math.ceil(parseInt(result.data.result[j].doc_count)/parseInt(z)*100);
-        	result.data.result[j].rate = total;
+        for(j in resp.aggregations.aggs_class.buckets){
+        	var total = Math.ceil(parseInt(resp.aggregations.aggs_class.buckets[j].doc_count)/parseInt(z)*100);
+        	var obj = {
+    		   	category1Nm : resp.aggregations.aggs_class.buckets[i].key,
+    		   	count : resp.aggregations.aggs_class.buckets[i].doc_count,
+    		   	rate : total,
+    		   	avgTime : Math.round(resp.aggregations.aggs_class.buckets[j].avd_value.value)
+    		}
+        	result.data.result.push(obj);
         }
         res.send(result);
 
