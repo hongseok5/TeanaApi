@@ -541,7 +541,7 @@ router.post("/issue", function(req, res){
                 path : "keyword_count",
                 query : {
                     term : {
-                        "keyword_count.word" : req.body.keyword
+                        "keyword_count.word" : req.body.keyword.toString()
                     }
                 }
             }
