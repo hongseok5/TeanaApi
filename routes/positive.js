@@ -251,29 +251,36 @@ router.post("/count", function(req, res){
     }).then(function(resp){
         
         var result = common.getResult("10", "OK", "count_by_positive")
-        var total = resp.aggregations.neutral.doc_count + resp.aggregations.negative.doc_count + resp.aggregations.positive.doc_count;
-        result.data.count = 0;
-        result.data.result = [];
-        test = Object.entries(resp.aggregations);
-        for(i in test){
-            var obj = {
-                key : test[i][0],
-                count : test[i][1].doc_count,
-                rate : Math.round( test[i][1].doc_count / total * 100 )
-            }
-            result.data.result.push(obj);
+        result.data.result = {} ;
+    	result.data.result.negative = [];
+    	result.data.result.neutral = [];
+    	result.data.result.positive = [];
+        var totalMax = parseInt(resp.aggregations.negative.doc_count)+parseInt(resp.aggregations.neutral.doc_count)+parseInt(resp.aggregations.positive.doc_count); 
+        result.data.count = totalMax;
+        var obj = {
+        	division : "negative",
+            count : resp.aggregations.negative.doc_count,
+            rate : Math.round((resp.aggregations.negative.doc_count/parseInt(totalMax))*100)
         }
-
-        // 인터페이스에서 삭제
-        for( i in result.data.result ){
-            if(result.data.result[i].count > 0){
-                result.data.count++;
-            }
+       	result.data.result.negative.push(obj);
+        var obj1 = {
+           	division : "neutral",
+            count : resp.aggregations.neutral.doc_count,
+            rate : Math.round((resp.aggregations.neutral.doc_count/parseInt(totalMax))*100)
         }
+        result.data.result.neutral.push(obj1);
+        var obj2 = {
+           	division : "positive",
+            count : resp.aggregations.positive.doc_count,
+            rate : Math.round((resp.aggregations.positive.doc_count/parseInt(totalMax))*100)
+        }
+        result.data.result.positive.push(obj2);
+        res.send(result);
 
         res.send(result);
     }, function(err){
-        console.log(err);
+        var result = common.getResult("99", "ERROR", "issue_keyword");
+        res.send(result);
     });
 });
 
