@@ -43,10 +43,14 @@ router.post("/top", function(req, res){
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
     if(req.body.vdnGrp !== undefined)
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
-    for( p in req.body.product.productCode ){
-        var term_obj = { term : { productCode : req.body.productCode[p]}};
-        should.push(term_obj);
-    } 
+	
+	if(req.body.product !== undefined) {
+		for( p in req.body.product.productCode ){
+			var term_obj = { term : { productCode : req.body.productCode[p]}};
+			should.push(term_obj);
+		} 
+	}
+	
     body.query.bool.should = should;
     body.aggs.aggs_top_keyword = {
         nested : {
