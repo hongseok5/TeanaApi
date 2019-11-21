@@ -11,9 +11,9 @@ router.post("/statistics", function(req, res){
     var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     var dayList = common.getDays(req.body.start_dt.toString(), req.body.end_dt.toString(), interval);
 
-    if( req.body.category1 !== undefined)
+    if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if( req.body.category2 !== undefined)
+    if(common.getEmpty(req.body.category2))
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
         body.aggs.division = {
         	date_histogram : {
@@ -136,7 +136,8 @@ router.post("/statistics", function(req, res){
 
         res.send(result);
     }, function(err){
-        console.log(err);
+        var result = common.getResult("99", "ERROR", "statistics_by_positive");
+        res.send(result);
     });
 });
 
@@ -149,26 +150,26 @@ router.post("/count", function(req, res){
     let from = req.body.from || 1;
     var body = common.getBody(req.body.start_dt, req.body.end_dt, 0, from);
     
-    if(req.body.category1 !== undefined)
+    if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if(req.body.category2 !== undefined)
+    if(common.getEmpty(req.body.category2))
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }})
-    if(req.body.gender !== undefined)
+    if(common.getEmpty(req.body.gender))
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
-    if(req.body.companyCode !== undefined)
+    if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
-    if(req.body.Mcate !== undefined)
+    if(common.getEmpty(req.body.Mcate))
         body.query.bool.filter.push({ term : { Mcate : req.body.Mcate }});
-    if(req.body.inCate !== undefined)
+    if(common.getEmpty(req.body.inCate))
         body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
-    if(req.body.MD !== undefined)
+    if(common.getEmpty(req.body.MD))
         body.query.bool.filter.push({ term : { mdNm : req.body.MD }});
-    if(req.body.vdn !== undefined)
+    if(common.getEmpty(req.body.vdn))
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
-    if(req.body.vdnGrp !== undefined)
+    if(common.getEmpty(req.body.vdnGrp))
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
 	
-    if(req.body.product !== undefined) {
+    if(common.getEmpty(req.body.product)) {
 		for( p in req.body.product.productCode ){
 			var term_obj = { term : { productCode : req.body.productCode[p]}};
 			should.push(term_obj);
@@ -218,26 +219,26 @@ router.post("/count", function(req, res){
 
     var index = common.getIndex(req.body.channel);
 
-    if(req.body.category1 !== undefined)
+    if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if(req.body.category2 !== undefined)
+    if(common.getEmpty(req.body.category2))
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
-    if(req.body.gender !== undefined)
+    if(common.getEmpty(req.body.gender))
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
-    if(req.body.companyCode !== undefined)
+    if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
-    if(req.body.Mcate !== undefined)
+    if(common.getEmpty(req.body.Mcate))
         body.query.bool.filter.push({ term : { Mcate : req.body.Mcate }});
-    if(req.body.inCate !== undefined)
+    if(common.getEmpty(req.body.inCate))
         body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
-    if(req.body.MD !== undefined)
+    if(common.getEmpty(req.body.MD))
         body.query.bool.filter.push({ term : { mdNm : req.body.MD }});
-    if(req.body.vdn !== undefined)
+    if(common.getEmpty(req.body.vdn))
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
-    if(req.body.vdnGrp !== undefined)
+    if(common.getEmpty(req.body.vdnGrp))
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
     
-	if(req.body.product !== undefined) {
+	if(common.getEmpty(req.body.product)) {
 		for( p in req.body.product.productCode ){
 			var term_obj = { term : { productCode : req.body.productCode[p]}};
 			should.push(term_obj);  // should 쿼리 적용
@@ -279,7 +280,7 @@ router.post("/count", function(req, res){
 
         res.send(result);
     }, function(err){
-        var result = common.getResult("99", "ERROR", "issue_keyword");
+        var result = common.getResult("99", "ERROR", "count_by_positive");
         res.send(result);
     });
 });
