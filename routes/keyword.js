@@ -356,7 +356,10 @@ router.post("/hot/statistics", function(req, res){
     console.log("Router for IF_DMA_00104");
     hotStatisticsResult = common.getResult("10", "OK", "hot_statistics");
     hotStatisticsResult.data.result = [];
-    if(req.body.keyword !== undefined){
+	
+	console.log("DDD:" + req.body.keyword);
+	
+    if(req.body.keyword !== undefined && req.body.keyword !== null){
     	hotStatisticsResult.data.count = req.body.keyword.length;
     	var finStr ="";
     	var keyNum = req.body.keyword.length;
