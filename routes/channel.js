@@ -40,29 +40,32 @@ router.post("/count", function(req, res){
     	result.data.count = 0;
         result.data.result = [];
         test = Object.entries(resp.aggregations.day.buckets);
-        for(i in test){
-        	total = total + test[i][1].doc_count;
-        	test2 = Object.entries(test[i][1].index.buckets);
-        	for(j in test2){
-        		for(k in dayList){
-        			if(dayList[k].key == test[i][1].key_as_string){
-        				var obj = {
-        					key : dayList[k].key,
-        	                channel : test2[j][1].key,
-        	                count : test2[j][1].doc_count
-        		        }
-        				result.data.result.push(obj);
-        			}else{
-        				var obj = {
-            		       	key : dayList[k].key,	
-            		       	channel : test2[j][1].key,
-            		       	count : 0
-            		    }
-        				result.data.result.push(obj);
-        			}
-        		}
-        	}
+        var indexb = index.split(",");
+        for(z in indexb){
+        	for(k in dayList){
+        		var obj = {
+            			key : dayList[k].key,
+            	        channel : indexb[z],
+            	        count : 0
+            		}
+            		result.data.result.push(obj);
+            }
         }
+        
+        for(p in result.data.result){
+        	for(i in test){
+            	total = total + test[i][1].doc_count;
+            	test2 = Object.entries(test[i][1].index.buckets);
+            	for(j in test2){
+            		if(result.data.result[p].key == test[i][1].key_as_string && result.data.result[p].channel == test2[j][1].key){
+            			result.data.result[p].count = test2[j][1].doc_count;
+            		}else{
+            			result.data.result[p].count = 0;
+            		}
+          		}
+          	}
+        }
+        
         result.data.count = resp.hits.total;
         res.send(result);
     }, function(err){
