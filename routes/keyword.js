@@ -3,6 +3,16 @@ var router = express.Router();
 const dateFormat = require('dateformat');
 var client = require('../index');
 var common = require('./common');
+const rp = require('request-promise');
+var rel_word_option = {
+    uri : 'http://10.253.42.185:12800/kwd_to_kwd',
+    method : "POST",
+    body : {
+        keyword : [],
+        t_vec : "mobile_test8",
+        size : 10
+    }
+}
 
 
 client.ping({
@@ -518,10 +528,34 @@ function hotStatistics(keyword, req, res, final){
     });
 }
 
-router.get("/relation", function(req, res){
+router.post("/relation", function(req, res){
     console.log("Router for IF_DMA_00105");
-    // 연관키워드는 연구소에서 모듈 제공!?
-    res.send("Router for IF_DMA_00105");
+    if( typeof req.body.keyword == "string"){
+        rel_word_option.body.keyword.push(req.body.keyword);
+    } else {
+        for(i in req.body.keyword ){
+            rel_word_option.body.keyword.push(req.body.keyword[i]);
+        }
+    }
+    if(req.body.size !== undefined)
+        rel_word_option.body.size = req.body.size;
+    rp(rel_word_option).then(function(data){
+        let result = common.getResult("10", "OK", "relation_keyword");
+        data.output = data.output.sort( function(a, b){
+            return a.similarity > b.similarity ? -1 : a.similarity < b.similarity ? 1 : 0;
+        });
+        for ( i in data.output ){
+            data.output[i].no = i;
+        }
+        result.data.result = data.output;
+        result.data.count = data.output.length;
+
+        res.send(result);
+    }).catch(function(err){
+        let result = common.getResult("99", "ERROR", "relation_keyword");
+        res.send(result);
+    });
+
 });
 
 router.post("/issue", function(req, res){
