@@ -4,15 +4,7 @@ const dateFormat = require('dateformat');
 var client = require('../index');
 var common = require('./common');
 const rp = require('request-promise');
-var rel_word_option = {
-    uri : 'http://10.253.42.185:12800/kwd_to_kwd',
-    method : "POST",
-    body : {
-        keyword : [],
-        t_vec : "mobile_test8",
-        size : 10
-    }
-}
+
 
 
 client.ping({
@@ -530,6 +522,18 @@ function hotStatistics(keyword, req, res, final){
 
 router.post("/relation", function(req, res){
     console.log("Router for IF_DMA_00105");
+    var rel_word_option = {
+        uri : 'http://10.253.42.185:12800/kwd_to_kwd',
+        method : "POST",
+        body : {
+            keyword : [],
+            t_vec : "mobile_test8",
+            size : 10
+        },
+        json : true
+    }
+    rel_word_option.body.keyword.push(req.body.keyword.replace( /(\s*)/g ,""));
+    /*
     if( typeof req.body.keyword == "string"){
         rel_word_option.body.keyword.push(req.body.keyword);
     } else {
@@ -537,15 +541,17 @@ router.post("/relation", function(req, res){
             rel_word_option.body.keyword.push(req.body.keyword[i]);
         }
     }
-    if(req.body.size !== undefined)
+    */
+    if(common.getEmpty(req.body.size))
         rel_word_option.body.size = req.body.size;
+    console.log(rel_word_option);
     rp(rel_word_option).then(function(data){
         let result = common.getResult("10", "OK", "relation_keyword");
         data.output = data.output.sort( function(a, b){
             return a.similarity > b.similarity ? -1 : a.similarity < b.similarity ? 1 : 0;
         });
         for ( i in data.output ){
-            data.output[i].no = i;
+            data.output[i].no = parseInt(i) + 1;
         }
         result.data.result = data.output;
         result.data.count = data.output.length;
