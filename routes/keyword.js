@@ -532,6 +532,7 @@ router.post("/relation", function(req, res){
         },
         json : true
     }
+	
     rel_word_option.body.keyword.push(req.body.keyword.replace( /(\s*)/g ,""));
     /*
     if( typeof req.body.keyword == "string"){
@@ -572,11 +573,11 @@ router.post("/issue", function(req, res){
     var index = common.getIndex(req.body.channel);
     var interval = req.body.interval || "1D";
     var dayList = common.getDays(req.body.start_dt.toString(), req.body.end_dt.toString(), interval);
-    if(req.body.category1 !== undefined)
+    if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if(req.body.category2 !== undefined)
+    if(common.getEmpty(req.body.category2))
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }})
-    if(req.body.keyword !== undefined){
+    if(common.getEmpty(req.body.keyword)){
         var nest_obj = {
             nested : {
                 path : "keyword_count",
@@ -637,11 +638,11 @@ router.post("/issue/statistics", function(req, res){
     console.log("Router for IF_DMA_00107");
     var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     var index = common.getIndex(req.body.channel);
-    if(req.body.category1 !== undefined)
+    if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if(req.body.category2 !== undefined)
+    if(common.getEmpty(req.body.category2))
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }})
-    if(req.body.keyword !== undefined){
+    if(common.getEmpty(req.body.keyword)){
     	 var nest_obj = {
     	            nested : {
     	                path : "keyword_count",
