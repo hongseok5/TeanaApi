@@ -54,7 +54,8 @@ router.post("/search", function(req, res){
         }
         res.send(result);
     }, function(err){
-        console.log(err);
+        var result = common.getResult( "99", "ERROR", "channel_statistics");
+        res.send(result);
     });
 });
 
