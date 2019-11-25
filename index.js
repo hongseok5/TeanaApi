@@ -12,15 +12,14 @@ var client = new elasticsearch.Client({
   log: 'trace',
   apiVersion: '6.8' // insert 수행시 필요한 설정
 });
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.json(),
-  defaultMeta: { service: 'user-service' },
-  transports: [
-    new winston.transports.File({ filename: './logs/index_error.log', level: 'error' }),
-    new winston.transports.File({ filename: './logs/index.log' })
-  ]
-});
+
+/************************************************************
+ * 로그 설정.
+ ************************************************************/
+const winstonConfig = require(approot + '/lib/logger');
+var logger = winstonConfig.defaultLogger;
+
+
 require('log-timestamp');
 
 module.exports = client;
@@ -71,7 +70,7 @@ app.use(function(err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  console.log("status:" + err.status + " message:" + err.message);
+  logger.error("status:" + err.status + " message:" + err.message);
   // render the error page
   res.status(err.status || 500);
   res.send(res_err(req, err.status, err.message));
@@ -92,7 +91,7 @@ server.listen(port);
 server.setTimeout(timeout);
 server.on('listening', onListening);
 
-console.log("process.pid:"+process.pid);
+logger.debug("Sever start, process.pid:"+process.pid);
 
 function normalizePort(val) {
   var port = parseInt(val, 10);
@@ -114,7 +113,7 @@ function onListening() {
  * 에러 처리...
  ************************************************************/
 process.on('uncaughtException', function (err) {
-  console.error('uncaughtException 발생 : ' + err);
+  logger.error('uncaughtException 발생 : ' + err);
 });
 
 
