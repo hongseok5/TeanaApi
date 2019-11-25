@@ -42,14 +42,16 @@ router.post("/count", function(req, res){
         test = Object.entries(resp.aggregations.day.buckets);
         var indexb = index.split(",");
         for(z in indexb){
+        	var obj2 = new Array();
         	for(k in dayList){
         		var obj = {
             			key : dayList[k].key,
             	        channel : indexb[z],
             	        count : 0
             		}
-            		result.data.result.push(obj);
+        			obj2[k] = obj;
             }
+    		result.data.result.push(obj2);
         }
         
         for(p in result.data.result){
@@ -57,10 +59,13 @@ router.post("/count", function(req, res){
             	total = total + test[i][1].doc_count;
             	test2 = Object.entries(test[i][1].index.buckets);
             	for(j in test2){
-            		if(result.data.result[p].key == test[i][1].key_as_string && result.data.result[p].channel == test2[j][1].key){
-            			result.data.result[p].count = test2[j][1].doc_count;
-            		}else{
-            			result.data.result[p].count = 0;
+            		var channelcheck = result.data.result[p];
+            		for(l in channelcheck){
+            			if(channelcheck[l].key == test[i][1].key_as_string && channelcheck[l].channel == test2[j][1].key){
+            				channelcheck[l].count = test2[j][1].doc_count;
+                		}else{
+                			channelcheck[l].count = 0;
+                		}
             		}
           		}
           	}
