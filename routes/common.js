@@ -5,7 +5,7 @@ var common = {
     getIndex : function(code){
         switch(code){
             case "00":
-                return "call_dev";
+                return "call";
             case "01":
                 return "mobile";
             case "02":
@@ -19,7 +19,7 @@ var common = {
 			case "06":
 				return "alliance";
             default:
-                return "mobile,pc,homepage,ars";
+                return "call,mobile,pc,homepage,ars";
         }
     },
 	getEmpty : function (value) {
@@ -92,7 +92,8 @@ var common = {
                     ]
                 }
             },
-            aggs : {}
+            aggs : {},
+			size : 0
         };
 
         return obj_body2;
