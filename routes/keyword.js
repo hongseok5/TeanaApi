@@ -61,7 +61,7 @@ router.post("/top", function(req, res){
         aggs : {
             top_keyword : {
                 terms : {
-                    field : "keyword_count.word.keyword",
+                    field : "keyword_count.keyword",
                     size : 1000
                 }
             }
@@ -116,7 +116,7 @@ router.post("/top/statistics", function(req, res){
     			aggs : {
     				aggs_name : {
     					terms : {
-    						field : "keyword_count.word.keyword",
+    						field : "keyword_count.keyword",
     						size : "5"
     					}
     				}
@@ -185,7 +185,7 @@ function topKeyword(keyword, req, res, final){
         						bool : {
         							must : {
         								term : {
-        									"keyword_count.word.keyword" : keyword 
+        									"keyword_count.keyword" : keyword 
         								}
         							}
         						}
@@ -279,7 +279,7 @@ router.post("/hot/count", function(req, res){
                 aggs : {
                     aggs_name : {
                         terms : {
-                            field : "keyword_count.word.keyword",
+                            field : "keyword_count.keyword",
                             size : 1000
                         }
                     }
@@ -387,7 +387,7 @@ router.post("/hot/statistics", function(req, res){
     			aggs : {
     				aggs_name : {
     					terms : {
-    						field : "keyword_count.word.keyword",
+    						field : "keyword_count.keyword",
     						size : "5"
     					}
     				}
@@ -447,7 +447,7 @@ function hotStatistics(keyword, req, res, final){
            						bool : {
            							must : {
            								term : {
-           									"keyword_count.word.keyword" : keyword 
+           									"keyword_count.keyword" : keyword 
            								}
            							}
            						}
@@ -583,7 +583,7 @@ router.post("/issue", function(req, res){
                 path : "keyword_count",
                 query : {
                     term : {
-                        "keyword_count.word" : req.body.keyword.toString()
+                        "keyword_count.keyword" : req.body.keyword.toString()
                     }
                 }
             }
@@ -648,7 +648,7 @@ router.post("/issue/statistics", function(req, res){
     	                path : "keyword_count",
     	                query : {
     	                    term : {
-    	                        "keyword_count.word" : req.body.keyword
+    	                        "keyword_count.keyword" : req.body.keyword
     	                    }
     	                }
     	            }
