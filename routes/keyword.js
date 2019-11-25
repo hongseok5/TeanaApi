@@ -553,10 +553,10 @@ router.post("/relation", function(req, res){
         });
         for ( i in data.output ){
             data.output[i].no = parseInt(i) + 1;
+            data.output[i].similarity = data.output[i].similarity.toString();
         }
         result.data.result = data.output;
         result.data.count = data.output.length;
-
         res.send(result);
     }).catch(function(err){
         let result = common.getResult("99", "ERROR", "relation_keyword");
