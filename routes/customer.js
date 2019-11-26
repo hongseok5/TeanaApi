@@ -2,9 +2,19 @@ var express = require("express");
 var router = express.Router();
 var client = require('../index');
 var common = require('./common');
+var approot = require('app-root-path');
+var config = require(approot + '/config/config');
+var winston = require('winston');
+const winstonConfig = require(approot + '/lib/logger');
+
+/************************************************************
+ * 로그 설정.
+ ************************************************************/
+winston.loggers.add("customer", winstonConfig.createLoggerConfig("customer"));
+var logger = winston.loggers.get("customer");
 
 router.post("/statistics", function(req, res){
-    console.log("Router for IF_DMA_00601");
+    logger.info("Router for IF_DMA_00601");
     let age = parseInt( req.body.age ); // 전체일 경우 어떤 값으로 오는지 확인?
     let size = req.body.size || 10;
     let from = req.body.from || 1;
@@ -53,6 +63,7 @@ router.post("/statistics", function(req, res){
         }
         res.send(result);
     }, function(err){
+		logger.error("statistics_by_customer ", err);
         var result = common.getResult("99", "ERROR", "statistics_by_customer");
         res.send(result);
     });
