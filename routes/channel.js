@@ -2,10 +2,20 @@ var express = require("express");
 var router = express.Router();
 var client = require('../index');
 var common = require('./common');
+var approot = require('app-root-path');
+var config = require(approot + '/config/config');
+var winston = require('winston');
+const winstonConfig = require(approot + '/lib/logger');
+
+/************************************************************
+ * 로그 설정.
+ ************************************************************/
+winston.loggers.add("channel", winstonConfig.createLoggerConfig("channel"));
+var logger = winston.loggers.get("channel");
 
 router.post("/count", function(req, res){
 
-    console.log("Router for IF_DMA_00301");
+    logger.info("Router for IF_DMA_00301");
     var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     var index = common.getIndex(req.body.channel);
     var interval = req.body.interval || "1D";
@@ -74,13 +84,14 @@ router.post("/count", function(req, res){
         result.data.count = resp.hits.total;
         res.send(result);
     }, function(err){
+		logger.error("channel_count ", err);
         var result = common.getResult("99", "ERROR", "channel_count");
         res.send(result);
     });
 });
 
 router.post("/statistics", function(req, res){
-    console.log("Router for IF_DMA_00302");
+    logger.info("Router for IF_DMA_00302");
 
     var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var index = common.getIndex(req.body.channel);
@@ -124,6 +135,7 @@ router.post("/statistics", function(req, res){
 		
         res.send(result);
     }, function(err){
+		logger.error("statistics_by_class ", err);
         var result = common.getResult("99", "ERROR", "statistics_by_class");
         res.send(result);
     });
