@@ -2,9 +2,19 @@ var express = require("express");
 var router = express.Router();
 var client = require('../index');
 var common = require('./common');
+var approot = require('app-root-path');
+var config = require(approot + '/config/config');
+var winston = require('winston');
+const winstonConfig = require(approot + '/lib/logger');
+
+/************************************************************
+ * 로그 설정.
+ ************************************************************/
+winston.loggers.add("voc", winstonConfig.createLoggerConfig("voc"));
+var logger = winston.loggers.get("voc");
 
 router.post("/search", function(req, res){
-    console.log("Router for IF_DMA_70001");
+    logger.info("Router for IF_DMA_70001");
 
     let size = req.body.size || 10;
     let from = req.body.from || 1;
@@ -54,6 +64,7 @@ router.post("/search", function(req, res){
         }
         res.send(result);
     }, function(err){
+		logger.error("channel_statistics ", err);
         var result = common.getResult( "99", "ERROR", "channel_statistics");
         res.send(result);
     });
