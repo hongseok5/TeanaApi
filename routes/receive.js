@@ -2,20 +2,20 @@ var express = require("express");
 var router = express.Router();
 var client = require('../index');
 var common = require('./common');
-var config = require('../config/config');
+var approot = require('app-root-path');
+var config = require(approot + '/config/config');
+var winston = require('winston');
+const winstonConfig = require(approot + '/lib/logger');
+
+/************************************************************
+ * 로그 설정.
+ ************************************************************/
+winston.loggers.add("receive", winstonConfig.createLoggerConfig("receive"));
+var logger = winston.loggers.get("receive");
 var fs = require('fs');
-const winston = require('winston');
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.json(),
-    defaultMeta: { service: 'receive' },
-    transports: [
-      new winston.transports.File({ filename: './logs/error.log', level: 'error' }),
-      new winston.transports.File({ filename: './logs/receive.log' })
-    ]
-  });
+
 router.post('/call', (req, res) => {
-    //logger.info("HTTP POST /receive/call" + req.ip + Date());
+    logger.info("HTTP POST /receive/call");
 	if( req.body.ifId !== undefined && req.body.vdn !== undefined && req.body.vdnGrp !== undefined && req.body.vdnGrpNm !== undefined ){
 
       var result = {
@@ -60,7 +60,7 @@ router.post('/call', (req, res) => {
   	  var filename = config.process_save_path+req.body.ifId+".JSON";
   	  var filecontext = JSON.stringify(req.body);
   	  fs.writeFile(filename, filecontext, "utf8", function(err) {
-      	logger.info("error file : " + err);
+      	logger.error("error file : " , err);
       });
       client.index(document).then(function(resp) {
         var result = {
@@ -79,6 +79,7 @@ router.post('/call', (req, res) => {
       });
       
     } else {
+	  logger.info("ifId, vdn, vdnGrp, vdnGrpNm  undefined ");
       result = common.getResult("40", "No ifId", "receive_call");
       res.send(result);
     }
