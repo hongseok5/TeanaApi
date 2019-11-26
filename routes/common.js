@@ -190,7 +190,55 @@ var common = {
     	}	
     	
     	return returnval;
-    }
+	},
+	getCategory : function( code ){
+		switch(code){
+			case 1:
+				return "AS관련";
+			case 2:
+				return "결제/환불관련";
+			case 3:
+				return "고객관련";
+			case 4:
+				return "고객아웃바운드";
+			case 5:
+				return "교환관련";
+			case 6:
+				return "당사제안";
+			case 7:
+				return "매체상담(방송/EC/ARS)";
+			case 8:
+				return "반품관련";
+			case 9:
+				return "배송/수거관련";
+			case 10:
+				return "상품문의";
+			case 11:
+				return "상품불만";
+			case 12:
+				return "소비자보호";
+			case 13:
+				return "주문/영수증문의";
+			case 14:
+				return "주문이탈";
+			case 15:
+				return "취소관련";
+			case 16:
+				return "컨택센터관련";
+			case 17:
+				return "프로모션";
+			case 18:
+				return "협력사관련";
+			case 19:
+				return "협력사 QnA";
+			case 20:
+				return "홈페이지";
+			case 21:
+				return "기타문의";
+			default:
+				return null;
+		}
+	}
 };
 
 

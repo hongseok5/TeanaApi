@@ -536,7 +536,7 @@ function hotStatistics(keyword, req, res, final){
 router.post("/relation", function(req, res){
     logger.info("Router for IF_DMA_00105");
     var rel_word_option = {
-        uri : 'http://10.253.42.185:12800/kwd_to_kwd',
+        uri : 'http://localhost:12800/kwd_to_kwd',
         method : "POST",
         body : {
             keyword : [],

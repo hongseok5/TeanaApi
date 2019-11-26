@@ -1,34 +1,45 @@
 const approot = require('app-root-path');
 const config = require(approot + '/config/config');
+const common = require(approot + '/routes/common');
 const cron = require('node-cron');
 const mergejson = require('mergejson');
 const fs = require('fs');
 const rp = require('request-promise');
-let today = "20191125";
+let today = "20191126";
 // 키워드추출 API
 let kwe_option = {
-  uri : 'http://10.253.42.185:12800/txt_to_kwd',
+  uri : 'http://localhost:12800/txt_to_kwd',
   method : "POST",
   body : {
       mode : "kma",
-      t_vec : "mobile_test",
-      text : null
+      t_vec : "wv_mobile_1",
+      text : null,
+      in_text : true,
+      combine_xs : true
   },
   json : true
 }
 // 긍부정어 추출 API
 let pnn_option = {
-  uri : 'http://10.253.42.185:12800/voc/sentimental/_match',
+  uri : 'http://localhost:12800/voc/sentimental/_match',
   method : "POST",
   body : {
-      id : "sent8",
+      id : "sent_2",
       text : null
   },
   json : true
 } 
 
 let cat_option = {
-
+  uri : 'http://localhost:12800/txt_to_doc',
+  method : "POST",
+  body : {
+      t_col : "cl_mobile_1",
+      text : null,
+      mode : 'kma',
+      combine_xs : true
+  },
+  json : true
 }
 
 console.log("process.pid:"+process.pid);
@@ -87,32 +98,60 @@ function mergeTalk( dataR, dataT  ){
   dataT.timeNtalkT = dataT.timeNtalkT.join(';');
   dataT.timeNtalkT = dataT.timeNtalkT.replace(/\t/g, ':');
   let merged_data = mergejson(dataR,dataT);
-  merged_data.timeNtalk = merged_talk;
+  merged_data.timeNtalk = merged_talk.replace( /20\d{12}/g , "");
   // 키워드 및 긍,부정어 추출시 고객의 대화로만 추출
    
   kwe_option.body.text = dataR.timeNtalkR;
   pnn_option.body.text = dataR.timeNtalkR;
-  
-  Promise.all([rp(kwe_option), rp(pnn_option)]).then(function(values){
+  cat_option.body.text = merged_data.timeNtalk;  
+  Promise.all([rp(kwe_option), rp(cat_option),rp(pnn_option)]).then(function(values){
     
     merged_data.keyword_count = values[0].output;
+    //merged_data.analysisCate = values[1].output[0].id.substr(0,2);
     merged_data.negative_word = [];
     merged_data.positive_word = [];
     merged_data.neutral_word = [];
-    /*
-    for(i in values[1].sentimental.negative.keywords){
-      let obj = { count : -1, word : values[1].sentimental.negative.keywords[i].keyword};
+    merged_data.analysisCate = null;
+    merged_data.analysisCateNm = null;
+     
+    let cate_obj = {};
+    for( i in values[1].output ){
+      let obj = {};
+      obj.category = parseInt(values[1].output[i].id.substr(0, 2));
+      obj.score = values[1].output[i].similarity;
+      if( obj.category in cate_obj){
+        cate_obj[eval(obj.category)] += obj.score;
+      } else {
+        cate_obj[eval(obj.category)] = obj.score;
+      }
+     
+    }
+    tmp_arr = Object.keys(cate_obj);
+    let max = 0;
+    let max_key = null;
+    for( i in tmp_arr){
+      if( cate_obj[tmp_arr[i]] > max ){
+        max = cate_obj[tmp_arr[i]]; 
+        max_key = tmp_arr[i]
+      }
+    }
+    merged_data.analysisCate = max_key;
+    merged_data.analysisCateNm = common.getCategory(parseInt(max_key));
+
+        
+    for(i in values[2].sentimental.negative.keywords){
+      let obj = { count : -1, word : values[2].sentimental.negative.keywords[i].keyword};
       merged_data.negative_word.push(obj);
     }
-    for(i in values[1].sentimental.positive.keywords){
-      let obj = { count : 1, word : values[1].sentimental.positive.keywords[i].keyword};
+    for(i in values[2].sentimental.positive.keywords){
+      let obj = { count : 1, word : values[2].sentimental.positive.keywords[i].keyword};
       merged_data.positive_word.push(obj);
     }
-    for(i in values[1].sentimental.neutral.keywords){
-      let obj = { count : 0, word : values[1].sentimental.neutral.keywords[i].keyword};
+    for(i in values[2].sentimental.neutral.keywords){
+      let obj = { count : 0, word : values[2].sentimental.neutral.keywords[i].keyword};
       merged_data.neutral_word.push(obj);
     }
-    */   
+     
     //console.log("test2 : " + merged_data.startTime + merged_data.agentId);
     fs.writeFile(config.write_path + today + "/" + merged_data.startTime + "-" + merged_data.agentId + ".JSON", JSON.stringify(merged_data), 'utf8', function(err) {
       if(err) 
