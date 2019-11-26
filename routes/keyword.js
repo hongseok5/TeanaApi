@@ -4,21 +4,29 @@ const dateFormat = require('dateformat');
 var client = require('../index');
 var common = require('./common');
 const rp = require('request-promise');
+var approot = require('app-root-path');
+var config = require(approot + '/config/config');
+var winston = require('winston');
+const winstonConfig = require(approot + '/lib/logger');
 
-
+/************************************************************
+ * 로그 설정.
+ ************************************************************/
+winston.loggers.add("keyword", winstonConfig.createLoggerConfig("keyword"));
+var logger = winston.loggers.get("keyword");
 
 client.ping({
     requestTimeout : 100
 }, function(err){
     if (err){
-        console.trace('down!');
+        logger.error('elasticsearch connection down!');
     } else {
-        console.log('well');
+		logger.info('elasticsearch connection well');
     }
 });
 
 router.post("/top", function(req, res){
-    console.log("Router for IF_DMA_00101");
+    logger.info("Router for IF_DMA_00101");
     let size = req.body.size || 10;
     let from = req.body.from || 1;
     let sumsize = parseInt(from)*parseInt(size);
@@ -94,6 +102,7 @@ router.post("/top", function(req, res){
         }
         res.send(result);
     }, function(err){
+		logger.error("Router for IF_DMA_00101", err);
         var result = common.getResult( "99", "ERROR", "top_keyword");
         res.send(result);
     });
@@ -102,7 +111,7 @@ router.post("/top", function(req, res){
 var topStatisticsResult;
 
 router.post("/top/statistics", function(req, res){
-    console.log("Router for IF_DMA_00102");
+    logger.info("Router for IF_DMA_00102");
     var keyword = [];
     var interval = req.body.interval || "1D";
     var index = common.getIndex(req.body.channel);
@@ -237,6 +246,7 @@ function topKeyword(keyword, req, res, final){
 			res.send(topStatisticsResult);
 		}
     }, function(err){
+		logger.error("top_statistics_keyword", err);
     	topStatisticsResult = common.getResult( "99", "ERROR", "top_statistics_keyword");
     	res.send(topStatisticsResult);
     });
@@ -244,7 +254,7 @@ function topKeyword(keyword, req, res, final){
 
 router.post("/hot/count", function(req, res){
  
-    console.log("Router for IF_DMA_00103");
+    logger.info("Router for IF_DMA_00103");
     let interval = req.body.interval || "1H";
     //let interval = "1H";
     let size = req.body.size || 0;
@@ -344,6 +354,7 @@ router.post("/hot/count", function(req, res){
             }
         
     }, function(err){
+		logger.error("hot_count", err);
         let result = common.getResult("99", "ERROR", "hot_count");
         res.send(result);
     })
@@ -355,7 +366,7 @@ router.post("/hot/count", function(req, res){
 var hotStatisticsResult;
 
 router.post("/hot/statistics", function(req, res){
-    console.log("Router for IF_DMA_00104");
+    logger.info("Router for IF_DMA_00104");
     hotStatisticsResult = common.getResult("10", "OK", "hot_statistics");
     hotStatisticsResult.data.result = [];
 		
@@ -417,6 +428,7 @@ router.post("/hot/statistics", function(req, res){
         		res.send(topStatisticsResult);
             }
         }, function(err){
+			logger.error("hot_statistics", err);
         	hotStatisticsResult = common.getResult("99", "ERROR", "hot_statistics");
         	res.send(hotStatisticsResult);
         });
@@ -515,13 +527,14 @@ function hotStatistics(keyword, req, res, final){
 			res.send(hotStatisticsResult);
 		}
     }, function(err){
+		logger.error("hot_statistics", err);
     	hotStatisticsResult = common.getResult("99", "ERROR", "hot_statistics");
     	res.send(hotStatisticsResult);
     });
 }
 
 router.post("/relation", function(req, res){
-    console.log("Router for IF_DMA_00105");
+    logger.info("Router for IF_DMA_00105");
     var rel_word_option = {
         uri : 'http://10.253.42.185:12800/kwd_to_kwd',
         method : "POST",
@@ -559,6 +572,7 @@ router.post("/relation", function(req, res){
         result.data.count = data.output.length;
         res.send(result);
     }).catch(function(err){
+		logger.error("relation_keyword", err);
         let result = common.getResult("99", "ERROR", "relation_keyword");
         res.send(result);
     });
@@ -567,7 +581,7 @@ router.post("/relation", function(req, res){
 
 router.post("/issue", function(req, res){
 
-    console.log("Router for IF_DMA_00106");
+    logger.info("Router for IF_DMA_00106");
     
     var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     var index = common.getIndex(req.body.channel);
@@ -628,6 +642,7 @@ router.post("/issue", function(req, res){
 
         res.send(result);
     }, function(err){
+		logger.error("issue_keyword", err);
         var result = common.getResult("99", "ERROR", "issue_keyword");
         res.send(result);
     });
@@ -635,7 +650,7 @@ router.post("/issue", function(req, res){
 
 router.post("/issue/statistics", function(req, res){
     // 데이터 준비 필요
-    console.log("Router for IF_DMA_00107");
+    logger.info("Router for IF_DMA_00107");
     var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     var index = common.getIndex(req.body.channel);
     if(common.getEmpty(req.body.category1))
@@ -726,6 +741,7 @@ router.post("/issue/statistics", function(req, res){
         result.data.result.positive.push(obj2);
         res.send(result);
     }, function(err){
+		logger.error("issue_keyword", err);
         var result = common.getResult("99", "ERROR", "issue_keyword");
         res.send(result);
     });
