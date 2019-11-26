@@ -29,20 +29,20 @@ router.post("/statistics", function(req, res){
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.age))
         body.query.bool.filter.push({ range : { age : { gte : age - 9, lte : age }}});
-    body.aggs.aggs_age = {
-        histogram : {
-            field : "age",
-            interval : 10
+
+    body.aggs.aggs_gender = {
+		terms : {
+            field : "gender"
         },
         aggs : {
-            aggs_gender : {
-                terms : {
-                    field : "gender"
-                }
+            aggs_age : {
+                histogram : {
+					field : "age",
+					interval : 10
+				}
             }
         }
-    }
-    
+    }    
 
     client.search({
         index,
@@ -51,15 +51,21 @@ router.post("/statistics", function(req, res){
         var result = common.getResult("10", "OK", "statistics_by_customer");
         result.data.count = resp.hits.total;
         result.data.result = [];
-        console.log(resp.aggregations);
-        for(i in resp.aggregations.aggs_age.buckets){
-            for( j in resp.aggregations.aggs_age.buckets[i].aggs_gender.buckets){
+		var objArr = new Array();
+		var objArr2 = new Array();
+		
+        logger.debug(resp.aggregations);
+        for(i in resp.aggregations.aggs_gender.buckets){
+            for( j in resp.aggregations.aggs_gender.buckets[i].aggs_age.buckets){
                 var obj = {};
-                obj.division = resp.aggregations.aggs_age.buckets[i].key;
-                obj.gender = resp.aggregations.aggs_age.buckets[i].aggs_gender.buckets[j].key;
-                obj.count = resp.aggregations.aggs_age.buckets[i].aggs_gender.buckets[j].doc_count;
-                result.data.result.push(obj);
+                obj.gender = resp.aggregations.aggs_gender.buckets[i].key;
+                obj.division = resp.aggregations.aggs_gender.buckets[i].aggs_age.buckets[j].key;
+                obj.count = resp.aggregations.aggs_gender.buckets[i].aggs_age.buckets[j].doc_count;
+                //result.data.result.push(obj);
+				objArr[j] = obj;
             }
+			result.data.result.push(objArr);
+			objArr = new Array();
         }
         res.send(result);
     }, function(err){
