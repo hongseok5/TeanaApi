@@ -2,9 +2,19 @@ var express = require("express");
 var router = express.Router();
 var client = require('../index');
 var common = require('./common');
+var approot = require('app-root-path');
+var config = require(approot + '/config/config');
+var winston = require('winston');
+const winstonConfig = require(approot + '/lib/logger');
+
+/************************************************************
+ * 로그 설정.
+ ************************************************************/
+winston.loggers.add("class", winstonConfig.createLoggerConfig("class"));
+var logger = winston.loggers.get("class");
 
 router.post("/count", function(req, res){
-    console.log("Router for IF_DMA_00201");
+    logger.info("Router for IF_DMA_00201");
 
     let size = req.body.size || 0;  // 통계쿼리는 버킷만
     let from = req.body.from || 1;
@@ -77,6 +87,7 @@ router.post("/count", function(req, res){
         }
         res.send(result);
     }, function(err){
+		logger.error("count_by_class ", err);
         var result = common.getResult("99", "ERROR", "count_by_class");
         res.send(result);
     });
@@ -84,7 +95,8 @@ router.post("/count", function(req, res){
 });
 
 router.post("/statistics", function(req, res){
-    console.log("Router for IF_DMA_00202");
+    logger.info("Router for IF_DMA_00202");
+	
     let should = [];
     var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     let interval = req.body.interval || "week";
@@ -152,6 +164,7 @@ var index = common.getIndex(req.body.channel);
         res.send(result);
 
     }, function(err){
+		logger.error("statistics_by_class ", err);
         var result = common.getResult("99", "ERROR", "statistics_by_class");
         res.send(result);
     });
