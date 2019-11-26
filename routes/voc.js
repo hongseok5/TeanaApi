@@ -14,11 +14,11 @@ winston.loggers.add("voc", winstonConfig.createLoggerConfig("voc"));
 var logger = winston.loggers.get("voc");
 
 router.post("/search", function(req, res){
-    logger.info("Router for IF_DMA_70001");
+    logger.info("Router for IF_DMA_00701");
 
     let size = req.body.size || 10;
     let from = req.body.from || 1;
-    var source = ["company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","channel","ifId"];
+    var source = ["company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId"];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from, source);
     var index = common.getIndex(req.body.channel);
     if(common.getEmpty(req.body.category1))
@@ -57,7 +57,8 @@ router.post("/search", function(req, res){
         		mdId : test[i][1]._source.mdId,
         		mdNm : test[i][1]._source.mdNm,
         		startTime : test[i][1]._source.startTime,
-        		channel : test[i][1]._source.channel,
+				extension : test[i][1]._source.extension,
+        		channel : test[i][1]._index,
         		ifId : test[i][1]._source.ifId
             }
         	result.data.result.push(obj);
