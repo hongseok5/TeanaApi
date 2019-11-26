@@ -69,6 +69,8 @@ router.post("/count", function(req, res){
     }).then(function(resp){
     	var result = common.getResult("10", "OK", "statistics_by_class");
     	result.data.result = [];
+		var objArr = new Array();
+		var objArr2 = new Array();
         result.data.count = resp.aggregations.cate1_terms.buckets.length;
         var z = 0;
         for(i in resp.aggregations.cate1_terms.buckets){
@@ -78,13 +80,21 @@ router.post("/count", function(req, res){
         for(j in resp.aggregations.cate1_terms.buckets){
         	var total = Math.ceil(parseInt(resp.aggregations.cate1_terms.buckets[j].doc_count)/parseInt(z)*100);
         	var obj = {
+				key : "category",
         	   	category1Nm : resp.aggregations.cate1_terms.buckets[j].key,
         	   	count : resp.aggregations.cate1_terms.buckets[j].doc_count,
-        	   	rate : total,
+        	}
+			objArr[j] = obj;
+			var obj2 = {
+				key : "avgTime",
+        	   	category1Nm : resp.aggregations.cate1_terms.buckets[j].key,
         	   	avgTime : Math.round(resp.aggregations.cate1_terms.buckets[j].avd_value.value)
         	}
-            result.data.result.push(obj);
+            objArr2[j] = obj2;
         }
+		result.data.result.push(objArr);
+		result.data.result.push(objArr2);
+		
         res.send(result);
     }, function(err){
 		logger.error("count_by_class ", err);
