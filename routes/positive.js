@@ -2,9 +2,19 @@ var express = require("express");
 var router = express.Router();
 var client = require('../index');
 var common = require('./common');
+var approot = require('app-root-path');
+var config = require(approot + '/config/config');
+var winston = require('winston');
+const winstonConfig = require(approot + '/lib/logger');
+
+/************************************************************
+ * 로그 설정.
+ ************************************************************/
+winston.loggers.add("positive", winstonConfig.createLoggerConfig("positive"));
+var logger = winston.loggers.get("positive");
 
 router.post("/statistics", function(req, res){
-    console.log("Router for IF_DMA_00402");
+    logger.info("Router for IF_DMA_00402");
     // 긍,부정어 추이
     // let interval = req.body.interval || undefined;  
     var interval = req.body.interval || "1D";
@@ -136,13 +146,14 @@ router.post("/statistics", function(req, res){
 
         res.send(result);
     }, function(err){
+		logger.error("statistics_by_positive ", err);
         var result = common.getResult("99", "ERROR", "statistics_by_positive");
         res.send(result);
     });
 });
 
 router.post("/count", function(req, res){
-    console.log("Router for IF_DMA_00401");
+    logger.info("Router for IF_DMA_00401");
     // 긍,부정어 현황
     // neg, pos, neu 3개 필드만 sum 해서 비유을 구하는지?
     let should = [];
@@ -278,8 +289,8 @@ router.post("/count", function(req, res){
         result.data.result.positive.push(obj2);
         res.send(result);
 
-        res.send(result);
     }, function(err){
+		logger.error("count_by_positive ", err);
         var result = common.getResult("99", "ERROR", "count_by_positive");
         res.send(result);
     });
