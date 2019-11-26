@@ -5,104 +5,296 @@ const dateFormat = require('dateformat');
 var fs = require('fs');
 var approot = require('app-root-path');
 var config = require(approot + '/config/config');
-var common = require(approot + '/routes/common');
+//var dbConn = require(approot + '/lib/MariaDBConn');
+const mariadb = require('mysql');
+const conn = {
+    host : '10.253.42.184',
+    user : 'ssgtv',
+    password : 'ssgtv0930',
+    database : 'ssgtv',
+    connectionLimit : 5
+};
+
+var pool = mariadb.createPool(conn);
+
 const logger = winston.createLogger({
     level: 'info',
     format: winston.format.json(),
-    defaultMeta: { service: 'if_dma_00003' },
+    defaultMeta: { service: 'if_uanalzyer' },
     transports: [
       new winston.transports.File({ filename: './logs/error.log', level: 'error' }),
-      new winston.transports.File({ filename: './logs/if_dma_00003.log' })
+      new winston.transports.File({ filename: './logs/if_uanalzyer.log' })
     ]
   });
-console.log("process.pid:"+process.pid);
-
-var options1 = {
-    method: 'POST',
-    uri: 'https://ssgtv--devlje.my.salesforce.com/services/oauth2/token',
-    form: {
-        // Like <input type="text" name="name">
-        grant_type:"password",
-        client_id:"3MVG9iLRabl2Tf4g2XAyYuODanLCeqa3uTma9Ax4ACprTeO5AqZXk6KHnXSDDyn52l7Pukc96mULKLAGGKiOJ",
-        client_secret:"CAA1104F28306FDAF134CA7B711B48F3879EC229AE9A403175028625316605C7",
-        username : "ifuser@shinsegae.com.partsb2",
-        password : "ifpartsb1234"
-    },
-    headers: {},
-    timeout: 5000
-};
 
 var options2 = {
     method: 'POST',
     uri: 'http://10.253.42.185:12800/voc/evaluation/_sync',
     headers: {
-        Authorization : null
+        Authorization : null,
+        "content-type" : "application/json"
     },
     timeout: 10000,
     body : {
     	
     }
 };
-//var channel_codes = ["01", "02", "03", "04"];
 
-var sj01 = schedule.scheduleJob('30 30 * * * *', function(){
-    console.log("sj01 start");
-    var now = dateFormat(new Date(), "yyyymmddHHMMss");
-    param = { "id" : "eval1",
-    		"extradata" : "name = 01, dpet = 01",
-    		"use" : "true",
-    		"expression" :    [{
-    	    		"id" : "s1",
-    	    		"extradata" : "type = aaaa",
-    	    		"use" : "true",
-    	    		"expression" :"안녕하십니까? 행복을 전하는 신세계 홈쇼핑 ${NAME]입니다.",
-    	    		"synonyms" : [{
-    	    			"use" : "true",
-    	    			"experssion" : "안녕하십니까? 행복을 전하는 신세계 홈쇼핑 ${NAME]입니다."
-    	    		},{
-    	    			"use" : "true",
-    	    			"experssion" : "안녕하십니까? 행복을 전하는 신세계 ${NAME]입니다."
-    	    		}]
-    	    	},
-    	    	{
-    	    		"id" : "s2",
-    	        	"extradata" : "type = bbbbb",
-    	        	"use" : "true",
-    	        	"expression" :"안녕하십니까? 행복을 전하는 신세계 홈쇼핑 ${NAME]입니다.",
-    	        	"synonyms" : [{
-    	        		"use" : "true",
-    	        		"experssion" : "안녕하십니까? 행복을 전하는 신세계 홈쇼핑 ${NAME]입니다."
-    	        	},{
-    	        		"use" : "true",
-    	        		"experssion" : "안녕하십니까? 행복을 전하는 신세계 ${NAME]입니다."
-    	        	}]	
-    	    	}]};
-    options2.body = JSON.stringify(param);
-    console.log("sj01 2 "+options2.body);
-    rp(options2).then(function ( data ){
-    	console.log(data);
-    	data = JSON.parse(data);
-    	console.log(data);
-    }).catch(function (err){
-    	logger.info("error sj01 : " + err);
-    });
-});    
-  
+var options1 = {
+	method: 'POST',
+	uri: 'http://10.253.42.185:12800/voc/evaluation/_match',
+	headers: {
+	    Authorization : null,
+	    "content-type" : "application/json"
+	},
+	timeout: 10000,
+	body : {
+	  	
+	}
+};
+
+
+var iu = schedule.scheduleJob('30 30 * * * *', function(){
+	var querystring = "SELECT A.* FROM "
+					+" (SELECT NCT.COUNSEL_TYPE_ID "
+					+" 	   , NCT.TITLE	 "
+					+" 	   , NCI.LEV3_COUNSEL_ITEM_ID	 "
+					+" 	   , NCI.LEV4_COUNSEL_ITEM_ID	 "
+					+" 	   , NCI.ITEM_TYPE_CD "
+					+" 	   , NCI.LEV4 "
+					+" 	   , NCI.LEVEL "
+					+" 	   , NCI.LEV3_ITEM_POINT "
+					+"       , NCI.LEV4_ITEM_POINT "
+					+"       , NCS.SENTENCE "
+					+" 	   , NCI.SORT_ORDER "
+					+" 	   , NCT.DEPT_ID "
+					+" 	   , NCS.COUNSEL_SENTENCE_ID "
+					+"   FROM (SELECT NCI4.TITLE AS LEV4 "
+					+" 	   , NCI3.COUNSEL_ITEM_ID AS LEV3_COUNSEL_ITEM_ID "
+					+" 	   , NCI4.COUNSEL_ITEM_ID AS LEV4_COUNSEL_ITEM_ID "
+					+" 	   , NCI3.ITEM_TYPE_CD "
+					+" 	   , NCI1.COUNSEL_TYPE_ID "
+					+" 	   , NCI3.ITEM_POINT AS LEV3_ITEM_POINT "
+					+"   	   , NCI4.ITEM_POINT AS LEV4_ITEM_POINT "
+					+"   	   , NCI4.LEVEL "
+					+"   	   , NCI4.SORT_ORDER "
+					+"   	   , NCI4.MATCH_EST_YN "
+					+"   FROM NX_COUNSEL_ITEM AS NCI1 "
+					+"   LEFT JOIN NX_COUNSEL_ITEM AS NCI3 ON NCI3.PRE_COUNSEL_ITEM_ID = NCI1.COUNSEL_ITEM_ID "
+					+"   LEFT JOIN NX_COUNSEL_ITEM AS NCI4 ON NCI4.PRE_COUNSEL_ITEM_ID = NCI3.COUNSEL_ITEM_ID "
+					+"  WHERE NCI4.LEVEL = 3 "
+					+" ) NCI LEFT JOIN NX_COUNSEL_TYPE NCT "
+					+"   	   ON (NCI.COUNSEL_TYPE_ID = NCT.COUNSEL_TYPE_ID AND NCT.USE_YN = 'Y') "
+					+"   	  LEFT JOIN NX_COUNSEL_SENTENCE NCS "
+					+"   	   ON (NCI.COUNSEL_TYPE_ID = NCS.COUNSEL_TYPE_ID AND NCI.LEV4_COUNSEL_ITEM_ID = NCS.COUNSEL_ITEM_ID AND NCS.USE_YN = 'Y') "
+					+" UNION ALL "
+					+" SELECT NCT.COUNSEL_TYPE_ID "
+					+" 	   , NCT.TITLE	 "
+					+" 	   , NCI.LEV3_COUNSEL_ITEM_ID	 "
+					+" 	   , NCI.LEV4_COUNSEL_ITEM_ID	 "
+					+" 	   , NCI.ITEM_TYPE_CD "
+					+" 	   , NCI.LEV4 "
+					+" 	   , NCI.LEVEL "
+					+" 	   , NCI.LEV3_ITEM_POINT "
+					+"       , NCI.LEV4_ITEM_POINT "
+					+"       , NCK.KEYWORD "
+					+" 	   , NCI.SORT_ORDER "
+					+" 	   , NCT.DEPT_ID "
+					+" 	   , NCK.COUNSEL_KEYWORD_ID "
+					+"   FROM (SELECT NCI4.TITLE AS LEV4 "
+					+" 	   , NCI3.COUNSEL_ITEM_ID AS LEV3_COUNSEL_ITEM_ID "
+					+" 	   , NCI4.COUNSEL_ITEM_ID AS LEV4_COUNSEL_ITEM_ID "
+					+" 	   , NCI3.ITEM_TYPE_CD "
+					+" 	   , NCI1.COUNSEL_TYPE_ID "
+					+" 	   , NCI3.ITEM_POINT AS LEV3_ITEM_POINT "
+					+"   	   , NCI4.ITEM_POINT AS LEV4_ITEM_POINT "
+					+"   	   , NCI4.LEVEL "
+					+"   	   , NCI4.SORT_ORDER "
+					+"   	   , NCI4.MATCH_EST_YN "
+					+"   FROM NX_COUNSEL_ITEM AS NCI1 "
+					+"   LEFT JOIN NX_COUNSEL_ITEM AS NCI3 ON NCI3.PRE_COUNSEL_ITEM_ID = NCI1.COUNSEL_ITEM_ID "
+					+"   LEFT JOIN NX_COUNSEL_ITEM AS NCI4 ON NCI4.PRE_COUNSEL_ITEM_ID = NCI3.COUNSEL_ITEM_ID "
+					+"  WHERE NCI4.LEVEL = 3 "
+					+" ) NCI LEFT JOIN NX_COUNSEL_KEYWORD NCK "
+					+"   	   ON (NCI.COUNSEL_TYPE_ID = NCK.COUNSEL_TYPE_ID AND NCI.LEV4_COUNSEL_ITEM_ID = NCK.COUNSEL_ITEM_ID AND NCK.USE_YN = 'Y')	 "
+					+"   	  LEFT JOIN NX_COUNSEL_TYPE NCT "
+					+"   	   ON (NCI.COUNSEL_TYPE_ID = NCT.COUNSEL_TYPE_ID AND NCT.USE_YN = 'Y') "
+					+"  ) A "
+					+"  WHERE A.SENTENCE IS NOT NULL	 "
+					+" ORDER BY LEV3_COUNSEL_ITEM_ID, LEV4_COUNSEL_ITEM_ID, LEVEL, SORT_ORDER ";
+	param1 = {
+			  "id": "",
+			  "extradata": "",
+			  "use": true,
+			  "expressions": []
+			};
+	pool.getConnection(function(err, connection){
+		connection.query(querystring, function(err, rows, fields) {
+			if (!err){
+				for(var i=0; i<rows.length;i++){
+			    	if(i == 0){
+			    		param1.id = rows[i].COUNSEL_TYPE_ID;
+			    		param1.extradata = "name="+rows[i].TITLE+",counselitemid="+rows[i].LEV1_COUNSEL_ITEM_ID;
+			    		param2 = {
+			    			      "id": "",
+			    			      "extradata": "",
+			    			      "use": true,
+			    			      "expression": "",
+			    			      "synonyms": []
+			    			    }
+			    		param2.id = rows[i].LEV4_COUNSEL_ITEM_ID;
+			    		param2.extradata = "LEVEL4="+rows[i].LEV4_ITEM_POINT+",counselitemid3="+rows[i].LEV3_COUNSEL_ITEM_ID+",counselitemid4="+rows[i].LEV4_COUNSEL_ITEM_ID+",LEVEL4="+rows[i].LEV4_ITEM_POINT+",ITEM_TYPE_CD="+rows[i].ITEM_TYPE_CD;
+			    		param2.expression = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
+			    	}else{
+			    		var j = i-1;
+			    		if(rows[j].LEV4_COUNSEL_ITEM_ID == rows[i].LEV4_COUNSEL_ITEM_ID){
+			    			param3 = {
+			    					"expression": rows[i].SENTENCE.replace(/OOO/gi, "${NAME}"),
+			    					"use": true
+			    		         };
+			    			param2.synonyms.push(param3);
+			    		}else{
+			    			param1.expressions.push(param2);
+			    			param2 = {
+			    				      "id": "",
+			    				      "extradata": "",
+			    				      "use": true,
+			    				      "expression": "",
+			    				      "synonyms": []
+			    				    }
+			    			param2.id = rows[i].LEV4_COUNSEL_ITEM_ID;
+			    			param2.extradata = "LEVEL4="+rows[i].LEV4_ITEM_POINT+",counselitemid3="+rows[i].LEV3_COUNSEL_ITEM_ID+",counselitemid4="+rows[i].LEV4_COUNSEL_ITEM_ID+",LEVEL4="+rows[i].LEV4_ITEM_POINT+",ITEM_TYPE_CD="+rows[i].ITEM_TYPE_CD;
+				    		param2.expression = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
+			    		}
+			    	}
+			    	
+			    }
+				options2.body = JSON.stringify(param1);
+			    rp(options2).then(function ( data ){
+			    	data = JSON.parse(data);
+			    }).catch(function (err){
+			    	logger.info("error sj01 : " + err);
+			    });
+			}
+			else
+			    console.log('Error Db Query.', err);
+		});
+	});
+}); 
+
+var io = schedule.scheduleJob('30 30 * * * *', function(){
+	fs.readdir(config.backup_path, function(err, filelist){
+		if(err) { return callerror(err); }
+		filelist.forEach(function(file) {
+			if(file.substring(file.lastIndexOf("-"),file.lenght) == '-T'){
+				fs.readFile(config.backup_path+file , 'utf-8' , function(err , filedata){
+					if(err) { return callerror(err); }
+					filedata = JSON.parse(filedata);
+					var counsetltypeid = "";
+					pool.getConnection(function(err, connection){
+						var querystring  = "SELECT NCT.COUNSEL_TYPE_ID FROM NX_COUNSEL_TYPE NCT, NX_EMP NE WHERE NCT.DEPT_ID = NE.DEPT_ID AND NE.CTI_ID = ? LIMIT 1";
+						connection.query(querystring, [ filedata.agentId ], function(err, rows, fields) {
+							if (!err){
+								for(var i=0; i<rows.length;i++){
+							    	counsetltypeid = rows[i].COUNSEL_TYPE_ID; //resultId에 해당하는 부분만 가져옴
+							    }
+								param = { "id" : counsetltypeid,
+							    		  "text" : filedata.timeNtalk
+							    		};
+							    options1.body = JSON.stringify(param);
+							    rp(options1).then(function ( data ){
+							    	var querystringuacall  = "SELECT CALL_NUM FROM UA_CALL WHERE START_TIME = ? AND EXTENSION = ?";
+							    	var uacallnum = "";
+							    	var callSQL = "CALL call_counsel_set()";
+							    	var inserEstDtltQL = "  INSERT INTO NX_COUNSEL_ITEM_HIS (CALL_NUM, START_TIME, EXTENSION, COUNSEL_TYPE_ID, EMP_ID  "
+											    		+", DEPT_ID, LEV3_COUNSEL_ITEM_ID, LEV4_COUNSEL_ITEM_ID, LEV3_ITEM_POINT, LEV4_ITEM_POINT "
+											    		+", ITEM_COUNT, ITEM_TYPE_CD, REG_ID, REG_IP, REG_DTM, MOD_ID, MOD_IP, MOD_DTM) "
+											    		+"select ?, ?, ?, ?, emp_id, dept_id, ?, ?, ?, ?, ?, ?, 'SYSTEM', '0.0.0.0', sysdate(), 'SYSTEM', '0.0.0.0', sysdate() from NX_EMP where cti_id=? ";
+
+							    	data = JSON.parse(data);
+						    			
+							    	connection.query(querystringuacall, [ filedata.startTime, filedata.extension ], function(err, rows, fields) {
+								    		if (!err){
+												for(var i=0; i<rows.length;i++){
+													uacallnum = rows[i].CALL_NUM; //resultId에 해당하는 부분만 가져옴
+											    }
+												for(i in data.matches){
+										    		var extrarr = data.matches[i].extradata.split(","); 
+										    		var counselitemid4 = extrarr[2].substring(extrarr[2].lastIndexOf("=")+1, extrarr[2].length);
+										    		var counselitemid3 = extrarr[1].substring(extrarr[1].lastIndexOf("=")+1, extrarr[1].length);
+										    		var lev4itempoint = extrarr[0].substring(extrarr[0].lastIndexOf("=")+1, extrarr[0].length);
+										    		var lev3itempoint = extrarr[3].substring(extrarr[3].lastIndexOf("=")+1, extrarr[3].length);
+										    		var itemtypecd = extrarr[4].substring(extrarr[4].lastIndexOf("=")+1, extrarr[4].length);
+										    		var checkrow = data.matches.length-1;
+										    		var inserEstDtlquery = connection.query(inserEstDtltQL, [ uacallnum, filedata.startTime, filedata.extension, data.id, counselitemid3, counselitemid4, lev3itempoint, lev4itempoint, data.matches[i].frequency, itemtypecd, filedata.agentId ], function (err, rows) {
+											    	    if(err){
+											    	        connection.release();
+											    	        throw err;
+											    	    }else{
+															console.log("error inserEstDtltQL = "+err);
+														}
+											    	    connection.commit(function(err){
+											    	        if(err){
+											    	            connection.rollback(function(err){
+											    	                throw err;
+											    	            });
+											    	        } else {
+											    	            console.log("Updated successfully!");
+											    	            if(i == checkrow){
+													    	    	var callSQLquery = connection.query(callSQL, function (err, rows) {
+															    	    if(err){
+															    	    	connection.release();
+															    	        throw err;
+															    	    }else{
+																			console.log("error callSQL = "+err);
+																		}
+															    	    connection.commit(function(err){
+															    	        if(err){
+															    	            connection.rollback(function(err){
+															    	                throw err;
+															    	            });
+															    	        } else {
+															    	            console.log("Updated successfully!");
+															    	        }
+															    	    });
+															    	});
+													    	    }
+											    	        }
+											    	    });
+											    	    
+											    	    connection.release();
+											    	});
+										    	}
+											}else{
+												console.log("error querystringuacall = "+err);
+											}
+								    	});
+								}).catch(function (err){
+							    	logger.info("error sj01 : " + err);
+							    });
+							}
+							else
+							    console.log('Error Db Query.', err);
+						});
+					});
+				});
+			}
+	    });
+	})
+}); 
+
+function callback(filename){
+	console.log("bchm callback filename = "+ filename);
+}
+
+function callerror(err){
+	console.log("bchm err = "+ err);
+}
+
 function getData(){
-    sj01.invoke();
 	
-    rp(options1)
-    .then( function(body) {
-
-        var token = JSON.parse(body);
-        options2.headers.Authorization = "OAuth " + token.access_token;
-
-        
-    })
-    
-    .catch(function (err) {
-        console.error("error 1 : " + err);
-    });
+	//iu.invoke();
+	io.invoke();
 }
 
 getData();
