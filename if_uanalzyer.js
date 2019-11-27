@@ -200,7 +200,7 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 							    	counsetltypeid = rows[i].COUNSEL_TYPE_ID; //resultId에 해당하는 부분만 가져옴
 							    	callsetseq = rows[i].SEQ; //resultId에 해당하는 부분만 가져옴
 							    }
-								if(counsetltypeid != null){
+								if(counsetltypeid != null || counsetltypeid != ""){
 									param = { "id" : counsetltypeid,
 								    		  "text" : filedata.timeNtalk.replace(/[0-9]/g, "")
 								    		};
@@ -213,8 +213,33 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 												    		+", ITEM_COUNT, ITEM_TYPE_CD, REG_ID, REG_IP, REG_DTM, MOD_ID, MOD_IP, MOD_DTM) "
 												    		+"select ?, ?, ?, ?, emp_id, dept_id, ?, ?, ?, ?, ?, ?, 'SYSTEM', '0.0.0.0', sysdate(), 'SYSTEM', '0.0.0.0', sysdate() from NX_EMP where cti_id=? ";
 
+								    	console.log('db data'+data);
 								    	data = JSON.parse(data);
-								    	
+								    	console.log('db data.matches'+data.matches.length);
+								    	if(data.matches.length == 0){
+								    		var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.agentId ], function (err, rows) {
+							    	    		if(err){
+									    	    	console.log("bchm err = "+err);
+									    	    	connection.release();
+									    	        throw err;
+									    	    }else{
+									    	    	logger.error("if_uanalzyer_Db_Query_callSQL", err);
+												}
+									    	    connection.commit(function(err){
+									    	        if(err){
+									    	            connection.rollback(function(err){
+									    	                throw err;
+									    	            });
+									    	        } else {
+									    	            console.log("Updated successfully!");
+									    	        }
+									    	    });
+									    	    fs.unlink(config.backup_path+file, function(err){
+									    	        if( err ) throw err;
+									    	        console.log('file deleted');
+									    	    });
+									    	});
+								    	}
 								    	for(i in data.matches){
 								    		console.log('db data.matches');
 								    		var extrarr = data.matches[i].extradata.split(","); 
