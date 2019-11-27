@@ -223,7 +223,7 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 									    	    	connection.release();
 									    	        throw err;
 									    	    }else{
-									    	    	logger.error("if_uanalzyer_Db_Query_callSQL", err);
+									    	    	logger.info("if_uanalzyer_Db_Query_callSQL", err);
 												}
 									    	    connection.commit(function(err){
 									    	        if(err){
@@ -255,7 +255,7 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 									    	        connection.release();
 									    	        throw err;
 									    	    }else{
-									    	    	logger.error("if_uanalzyer_Db_Query_inserEstDtltQL", err);
+									    	    	logger.info("if_uanalzyer_Db_Query_inserEstDtltQL", err);
 												}
 									    	    connection.commit(function(err){
 									    	        if(err){
@@ -271,7 +271,7 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 													    	    	connection.release();
 													    	        throw err;
 													    	    }else{
-													    	    	logger.error("if_uanalzyer_Db_Query_callSQL", err);
+													    	    	logger.info("if_uanalzyer_Db_Query_callSQL", err);
 																}
 													    	    connection.commit(function(err){
 													    	        if(err){
