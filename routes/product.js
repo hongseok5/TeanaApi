@@ -50,6 +50,9 @@ router.post("/list", function(req, res){
 			should.push(term_obj);
 		} 
 	}
+	
+	// productCode가 있는 것만 추출
+	body.query.bool.filter.push({ exists : { "field" : "productCode" }});
 
     body.query.bool.must = [
         { bool : { should } }
