@@ -18,7 +18,7 @@ router.post("/search", function(req, res){
 
     let size = req.body.size || 10;
     let from = req.body.from || 1;
-    var source = ["company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId"];
+    var source = ["company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId", "content", "reContent"];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from, source);
     var index = common.getIndex(req.body.channel);
     if(common.getEmpty(req.body.category1))
@@ -59,7 +59,9 @@ router.post("/search", function(req, res){
         		startTime : test[i][1]._source.startTime,
 				extension : test[i][1]._source.extension,
         		channel : test[i][1]._index,
-        		ifId : test[i][1]._source.ifId
+        		ifId : test[i][1]._source.ifId,
+				content : test[i][1]._source.content,
+				reContent : test[i][1]._source.reContent
             }
         	result.data.result.push(obj);
         }
