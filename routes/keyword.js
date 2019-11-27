@@ -323,7 +323,8 @@ router.post("/hot/count", function(req, res){
                 current_words = current_words.sort( function(a, b){
                     return a.updown > b.updown ? -1 : a.updown < b.updown ? 1 : 0;
                 });
-                /*
+
+                
                 var fornum = 0;
                 if(sumsize < current_words.length){
                     fornum = sumsize;
@@ -331,8 +332,9 @@ router.post("/hot/count", function(req, res){
                     fornum = current_words.lenght;
                 }
                 current_words = current_words.slice(resultsize,fornum);
-                */
-                let result = common.getResult("10", "OK", "hot_count");
+                
+               
+			   let result = common.getResult("10", "OK", "hot_count");
                 result.data.count = resp.aggregations.rt_hot_keyword.buckets[0].keyword_count.aggs_name.buckets.length;
                 result.data.result = current_words;
                 res.send(result);
