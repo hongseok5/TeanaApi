@@ -1,10 +1,16 @@
 const rp = require('request-promise');
 const schedule = require('node-schedule');
 const winston = require('winston');
-const dateFormat = require('dateformat');
 var fs = require('fs');
 var approot = require('app-root-path');
 var config = require(approot + '/config/config');
+const winstonConfig = require(approot + '/lib/logger');
+
+/************************************************************
+ * 로그 설정.
+ ************************************************************/
+winston.loggers.add("if_uanalzyer", winstonConfig.createLoggerConfig("if_uanalzyer"));
+var logger = winston.loggers.get("if_uanalzyer");
 //var dbConn = require(approot + '/lib/MariaDBConn');
 const mariadb = require('mysql');
 const conn = {
@@ -16,16 +22,6 @@ const conn = {
 };
 
 var pool = mariadb.createPool(conn);
-
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.json(),
-    defaultMeta: { service: 'if_uanalzyer' },
-    transports: [
-      new winston.transports.File({ filename: './logs/error.log', level: 'error' }),
-      new winston.transports.File({ filename: './logs/if_uanalzyer.log' })
-    ]
-  });
 
 var options2 = {
     method: 'POST',
@@ -173,11 +169,11 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 			    rp(options2).then(function ( data ){
 			    	data = JSON.parse(data);
 			    }).catch(function (err){
-			    	logger.info("error sj01 : " + err);
+			    	logger.error("if_uanalzyer_/voc/evaluation/_sync", err);
 			    });
 			}
 			else
-			    console.log('Error Db Query.', err);
+				logger.error("if_uanalzyer_Db_Query", err);
 		});
 	});
 }); 
@@ -231,7 +227,7 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 											    	        connection.release();
 											    	        throw err;
 											    	    }else{
-															console.log("error inserEstDtltQL = "+err);
+											    	    	logger.error("if_uanalzyer_Db_Query_inserEstDtltQL", err);
 														}
 											    	    connection.commit(function(err){
 											    	        if(err){
@@ -246,7 +242,7 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 															    	    	connection.release();
 															    	        throw err;
 															    	    }else{
-																			console.log("error callSQL = "+err);
+															    	    	logger.error("if_uanalzyer_Db_Query_callSQL", err);
 																		}
 															    	    connection.commit(function(err){
 															    	        if(err){
@@ -257,6 +253,10 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 															    	            console.log("Updated successfully!");
 															    	        }
 															    	    });
+															    	    fs.unlink(config.backup_path+file, function(err){
+															    	        if( err ) throw err;
+															    	        console.log('file deleted');
+															    	    });
 															    	});
 													    	    }
 											    	        }
@@ -266,29 +266,34 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 											    	});
 										    	}
 											}else{
-												console.log("error querystringuacall = "+err);
+												logger.error("if_uanalzyer_Db_Query_querystringuacall", err);
 											}
 								    	});
 								}).catch(function (err){
-							    	logger.info("error sj01 : " + err);
+									logger.error("if_uanalzyer_/voc/evaluation/_match", err);
 							    });
 							}
 							else
-							    console.log('Error Db Query.', err);
+								logger.error("if_uanalzyer_Db_Query_2", err);
 						});
 					});
 				});
+			}else{
+				if(file.substring(file.lastIndexOf("-"),file.lenght) == '-R'){
+					fs.unlink(config.backup_path+file, function(err){
+		    	        if( err ){
+		    	        	throw err;
+		    	        }
+		    	        console.log('file deleted');
+		    	    });
+				}
 			}
 	    });
 	})
 }); 
 
-function callback(filename){
-	console.log("bchm callback filename = "+ filename);
-}
-
 function callerror(err){
-	console.log("bchm err = "+ err);
+	logger.error("if_uanalzyer_file_error", err);
 }
 
 function getData(){
