@@ -180,8 +180,10 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 
 var io = schedule.scheduleJob('30 30 * * * *', function(){
 	fs.readdir(config.backup_path, function(err, filelist){
+		console.log('file readdir');
 		if(err) { return callerror(err); }
 		filelist.forEach(function(file) {
+			console.log('file forEach');
 			if(file.substring(file.lastIndexOf("-"),file.lenght) == '-T'){
 				fs.readFile(config.backup_path+file , 'utf-8' , function(err , filedata){
 					if(err) { return callerror(err); }
@@ -189,8 +191,10 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 					var counsetltypeid = "";
 					var callsetseq = "";
 					pool.getConnection(function(err, connection){
+						console.log('file pool.getConnection');
 						var querystring  = "SELECT NCT.COUNSEL_TYPE_ID, (SELECT CURRENT_VAL FROM NX_SEQUENCE WHERE SEQUENCE_ID = 'CALL_SET_SEQ'  LIMIT 1) AS SEQ FROM NX_COUNSEL_TYPE NCT, NX_EMP NE WHERE NCT.DEPT_ID = NE.DEPT_ID AND NE.CTI_ID = ? LIMIT 1";
 						connection.query(querystring, [ filedata.agentId ], function(err, rows, fields) {
+							console.log('db querystring');
 							if (!err){
 								for(var i=0; i<rows.length;i++){
 							    	counsetltypeid = rows[i].COUNSEL_TYPE_ID; //resultId에 해당하는 부분만 가져옴
@@ -202,6 +206,7 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 								    		};
 								    options1.body = JSON.stringify(param);
 								    rp(options1).then(function ( data ){
+								    	console.log('db rp(options1)');
 								    	var callSQL = "CALL call_counsel_set(?, ?, ?, ?)";
 								    	var inserEstDtlHisSQL = "  INSERT INTO NX_COUNSEL_ITEM_HIS (CALL_SET_SEQ, START_TIME, EXTENSION, COUNSEL_TYPE_ID, EMP_ID  "
 												    		+", DEPT_ID, LEV3_COUNSEL_ITEM_ID, LEV4_COUNSEL_ITEM_ID, LEV3_ITEM_POINT, LEV4_ITEM_POINT "
@@ -211,6 +216,7 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 								    	data = JSON.parse(data);
 								    	
 								    	for(i in data.matches){
+								    		console.log('db data.matches');
 								    		var extrarr = data.matches[i].extradata.split(","); 
 								    		var counselitemid4 = extrarr[2].substring(extrarr[2].lastIndexOf("=")+1, extrarr[2].length);
 								    		var counselitemid3 = extrarr[1].substring(extrarr[1].lastIndexOf("=")+1, extrarr[1].length);
@@ -219,6 +225,7 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 								    		var itemtypecd = extrarr[4].substring(extrarr[4].lastIndexOf("=")+1, extrarr[4].length);
 								    		var checkrow = data.matches.length-1;
 								    		var inserEstDtlquery = connection.query(inserEstDtlHisSQL, [ callsetseq, filedata.startTime, filedata.extension, data.id, counselitemid3, counselitemid4, lev3itempoint, lev4itempoint, data.matches[i].frequency, itemtypecd, filedata.agentId ], function (err, rows) {
+								    			console.log('db callsetseq');
 								    			if(err){
 									    	        connection.release();
 									    	        throw err;
