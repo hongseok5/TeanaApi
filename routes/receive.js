@@ -18,6 +18,11 @@ router.post('/call', (req, res) => {
     logger.info("HTTP POST /receive/call");
 	if( req.body.ifId !== undefined && req.body.vdn !== undefined && req.body.vdnGrp !== undefined && req.body.vdnGrpNm !== undefined ){
 
+		logger.info("ifId:" + req.body.ifId);
+		logger.info("vdn:" + req.body.vdn);
+		logger.info("vdnGrp:" + req.body.vdnGrp);
+		logger.info("vdnGrpNm:" + req.body.vdnGrpNm);
+
       var result = {
         ifId : req.body.ifId
       };
@@ -59,8 +64,17 @@ router.post('/call', (req, res) => {
       !fs.existsSync(config.process_save_path) && fs.mkdirSync(config.process_save_path);
   	  var filename = config.process_save_path+req.body.ifId+".JSON";
   	  var filecontext = JSON.stringify(req.body);
+	  
+	  logger.info("filename: " +  filename);
+	  logger.info("filecontext: " +  filecontext);
+	  
+	  
   	  fs.writeFile(filename, filecontext, "utf8", function(err) {
-      	logger.error("error file : " , err);
+		  if(err) {
+			logger.error("File write error : ", err);
+		  }else{
+			logger.info("File write : " + filename);
+		  }
       });
       client.index(document).then(function(resp) {
         var result = {
