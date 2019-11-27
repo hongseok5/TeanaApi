@@ -5,7 +5,15 @@ const cron = require('node-cron');
 const mergejson = require('mergejson');
 const fs = require('fs');
 const rp = require('request-promise');
-let today = "20191126";
+let day = new Date().getDate();
+let month = new Date().getMonth() + 1;
+let year = new Date().getFullYear();
+//fs.mkdirSync(config.backup_path + year.toString() + month.toString() + day.toString());
+var today = year.toString() + month.toString() + day.toString();
+var stop_words = fs.readFileSync("./stop_word.txt", "utf-8");
+stop_words = stop_words.split(",");
+console.log(stop_words);
+
 // 키워드추출 API
 let kwe_option = {
   uri : 'http://localhost:12800/txt_to_kwd',
@@ -29,7 +37,7 @@ let pnn_option = {
   },
   json : true
 } 
-
+// 카테고리 분류
 let cat_option = {
   uri : 'http://localhost:12800/txt_to_doc',
   method : "POST",
@@ -104,13 +112,22 @@ function mergeTalk( dataR, dataT  ){
   kwe_option.body.text = dataR.timeNtalkR;
   pnn_option.body.text = dataR.timeNtalkR;
   cat_option.body.text = merged_data.timeNtalk;  
+
   Promise.all([rp(kwe_option), rp(cat_option),rp(pnn_option)]).then(function(values){
-    
+    //merged_data.keyword_count = [];
+    if(values[0].output !== undefined && values[0].output.length > 0){
+    // if(  values[0].output.length > 0){
+      for( i in values[0].output ){
+        for( j in stop_words){
+          if(values[0].output[i] !== undefined &&  values[0].output[i].keyword  === stop_words[j] ){
+          //if(  values[0].output[i].keyword  === stop_words[j] ){
+            values[0].output.splice(i, 1)
+            //console.log(stop_words[j] + " removed!");
+          }
+        }
+      }
+    } 
     merged_data.keyword_count = values[0].output;
-    //merged_data.analysisCate = values[1].output[0].id.substr(0,2);
-    merged_data.negative_word = [];
-    merged_data.positive_word = [];
-    merged_data.neutral_word = [];
     merged_data.analysisCate = null;
     merged_data.analysisCateNm = null;
      
@@ -124,7 +141,6 @@ function mergeTalk( dataR, dataT  ){
       } else {
         cate_obj[eval(obj.category)] = obj.score;
       }
-     
     }
     tmp_arr = Object.keys(cate_obj);
     let max = 0;
@@ -138,22 +154,43 @@ function mergeTalk( dataR, dataT  ){
     merged_data.analysisCate = max_key;
     merged_data.analysisCateNm = common.getCategory(parseInt(max_key));
 
-        
+    merged_data.negative_word = [];
+    merged_data.positive_word = [];
+    merged_data.neutral_word = [];
+
+    // negative 추출
+    tmp_array = [];
+
     for(i in values[2].sentimental.negative.keywords){
-      let obj = { count : -1, word : values[2].sentimental.negative.keywords[i].keyword};
+      tmp_array.push(values[2].sentimental.negative.keywords[i].keyword);
+    }
+    tmp_array = Array.from(new Set(tmp_array)); // 중복 키워드 제거 
+    for( i in tmp_array ){
+      let obj = { count : -1 , word : tmp_array[i]};
       merged_data.negative_word.push(obj);
     }
+    // positive 추출
+    tmp_array = [];
     for(i in values[2].sentimental.positive.keywords){
-      let obj = { count : 1, word : values[2].sentimental.positive.keywords[i].keyword};
+      tmp_array.push(values[2].sentimental.positive.keywords[i].keyword)
+    }
+    tmp_array = Array.from(new Set(tmp_array)); // 중복 키워드 제거
+    for(i in tmp_array){
+      let obj = { count : 1, word : tmp_array[i]};
       merged_data.positive_word.push(obj);
     }
+
+    // neutral 추출
+    tmp_array = [];
     for(i in values[2].sentimental.neutral.keywords){
-      let obj = { count : 0, word : values[2].sentimental.neutral.keywords[i].keyword};
+      tmp_array.push(values[2].sentimental.neutral.keywords[i].keyword)
+    }
+    tmp_array = Array.from(new Set(tmp_array)); // 중복 키워드 제거
+    for(i in tmp_array){
+      let obj = { count : 0, word : tmp_array[i]};
       merged_data.neutral_word.push(obj);
     }
-     
-    //console.log("test2 : " + merged_data.startTime + merged_data.agentId);
-    fs.writeFile(config.write_path + today + "/" + merged_data.startTime + "-" + merged_data.agentId + ".JSON", JSON.stringify(merged_data), 'utf8', function(err) {
+    fs.writeFile(config.write_path + merged_data.startTime + "-" + merged_data.agentId + ".JSON", JSON.stringify(merged_data), 'utf8', function(err) {
       if(err) 
           console.log('Failed to write file!');
       else
@@ -181,7 +218,7 @@ cron.schedule('*/5 * * * * *', () => {
   let file_list = fs.readdirSync(file_path);
   let file_list_r = file_list.filter(el => /\-R$/.test(el));
   let file_list_t = file_list.filter(el => /\-T$/.test(el));
-  console.log("check file_nr list : " + file_list_r);
+  //console.log("check file_nr list : " + file_list_r);
   let count = 0;
   let count_not_ex = 0;
   for( i in file_list_r ){
@@ -189,7 +226,6 @@ cron.schedule('*/5 * * * * *', () => {
     let fn_index = file_nr.lastIndexOf('-');
     if(fs.existsSync(file_path + file_nr.substr(0, fn_index) + "-T")){
       let file_nt = file_nr.substr(0, fn_index) + "-T";
-      //console.log( file_nr + file_nt );
       file_merge_async(file_path + file_nr, file_path + file_nt);
       count++;
     } else {
@@ -204,7 +240,6 @@ cron.schedule('0 0 * * *', () => {
   day = new Date().getDate();
   month = new Date().getMonth() + 1;
   year = new Date().getFullYear();
-  fs.mkdirSync(config.write_path + year.toString() + month.toString() + day.toString());
   fs.mkdirSync(config.backup_path + year.toString() + month.toString() + day.toString());
   today = year.toString() + month.toString() + day.toString();
 });
