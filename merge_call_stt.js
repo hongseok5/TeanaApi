@@ -114,22 +114,11 @@ function mergeTalk( dataR, dataT  ){
   cat_option.body.text = merged_data.timeNtalk;  
 
   Promise.all([rp(kwe_option), rp(cat_option),rp(pnn_option)]).then(function(values){
-    //merged_data.keyword_count = [];
-    if(values[0].output !== undefined && values[0].output.length > 0){
-    // if(  values[0].output.length > 0){
-      for( i in values[0].output ){
-        for( j in stop_words){
-          if(values[0].output[i] !== undefined &&  values[0].output[i].keyword  === stop_words[j] ){
-          //if(  values[0].output[i].keyword  === stop_words[j] ){
-            values[0].output.splice(i, 1)
-            //console.log(stop_words[j] + " removed!");
-          }
-        }
-      }
-    } 
-    merged_data.keyword_count = values[0].output;
-    merged_data.analysisCate = null;
-    merged_data.analysisCateNm = null;
+    tmp_karr = [];
+    for( i in values[0].output){
+	tmp_karr.push(values[0].output[i]);
+    }
+    merged_data.keyword_count = tmp_karr.filter( function(v){ return stop_words.indexOf( v.keyword ) == -1 });
      
     let cate_obj = {};
     for( i in values[1].output ){
@@ -213,7 +202,7 @@ function mergeTalk( dataR, dataT  ){
   
 };
 
-cron.schedule('*/5 * * * * *', () => {
+cron.schedule('*/10 * * * * *', () => {
   const file_path = config.save_path;
   let file_list = fs.readdirSync(file_path);
   let file_list_r = file_list.filter(el => /\-R$/.test(el));
