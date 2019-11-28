@@ -270,36 +270,30 @@ function topKeyword(keyword, req, res, final){
 }
 
 router.post("/hot/count", function(req, res){
- 
     logger.info("Router for IF_DMA_00103");
     let interval = req.body.interval || "1H";
-    //let interval = "1H";
-    let size = req.body.size || 0;
+    let size = req.body.size || 10;
     let from = req.body.from || 1;
     let sumsize = parseInt(from)*parseInt(size);
-    let resultsize = parseInt(sumsize)-parseInt(size);
-    let end_dt = req.body.end_dt || "20191230000000";
-    let start_dt = req.body.start_dt || "20190501000000";
+    let result_size = parseInt(sumsize)-parseInt(size) || 10;
     var now = dateFormat(new Date(), "yyyymmddHHMMss");
-	var hour_ago = new Date().getHours() - 1 ;
-	var hour_after = new Date().getHours() + 1 ;
-	now = now.slice(0,10) + "0000";
-	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
-	hour_after = now.slice(0,8) + ( hour_after < 10 ? "0" + hour_after : hour_after ) + "0000";
-	var body = common.getBodyNoSize(start_dt, end_dt);   // 실제로는 hour_ago, hour_after로 넣고 테스트 시에는 하드코딩값 or 임의값 전달
-
-    body.size = 0;
+    var hour_ago = new Date().getHours() - 1 ;
+    var hour_after = new Date().getHours() + 1 ;
+    now = now.slice(0,10) + "0000";
+    hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
+    hour_after = now.slice(0,8) + ( hour_after < 10 ? "0" + hour_after : hour_after ) + "0000";
+    var body = common.getBodyNoSize(hour_ago, hour_after);   // 실제로는 hour_ago, hour_after로 넣고 테스트 시에는 하드코딩값 or 임의값 전달
+    
     body.aggs.rt_hot_keyword = {
         date_histogram : {
             field : "startTime",
             interval : interval,
             order : {
                 _key : "desc"
-            },
-            min_doc_count : 1   // TEST 
+            }
         },
         aggs : {
-        	keyword_count : {
+            keyword_count : {
                 nested : {
                     path : "keyword_count"   
                 },
@@ -308,6 +302,11 @@ router.post("/hot/count", function(req, res){
                         terms : {
                             field : "keyword_count.keyword",
                             size : 1000
+                        }
+                    },
+                    aggs_avg : {
+                        avg : {
+                            field : "keyword_count.count"                           
                         }
                     }
                 }
@@ -321,59 +320,59 @@ router.post("/hot/count", function(req, res){
         index,
         body
     }).then(function(resp){
-
-    		if ( resp.aggregations.rt_hot_keyword.buckets.length >= 2 ){
-                time_result = resp.aggregations.rt_hot_keyword.buckets.slice(0,2);  // 실제로는 전시간, 현재시간으로 2개만 발생
-                current_words = time_result[0].keyword_count.aggs_name.buckets;  // 현재 시간
-                before_words = time_result[1].keyword_count.aggs_name.buckets;  //  전 시간
-                for(i in current_words){
-                    for(j in before_words){
-                        if(current_words[i].key == before_words[j].key){    // 전 시간대에 같은 키 값이 있으면 
-                            current_words[i].before_count = before_words[j].doc_count;
-                            current_words[i].updown = common.getUpdownRate(before_words[j].doc_count, current_words[i].doc_count );
-                        } else {
-                            current_words[i].before_count = null;
-                            current_words[i].updown = null;
-                        }
-                    }
-                }
-                current_words = current_words.sort( function(a, b){
-                    return a.updown > b.updown ? -1 : a.updown < b.updown ? 1 : 0;
-                });
-
-                
-                var fornum = 0;
-                if(sumsize < current_words.length){
-                    fornum = sumsize;
-                }else{
-                    fornum = current_words.lenght;
-                }
-                current_words = current_words.slice(resultsize,fornum);
-                
+    
+        if ( resp.aggregations.rt_hot_keyword.buckets.length >= 2 ){
+               time_result = resp.aggregations.rt_hot_keyword.buckets.slice(0,2);  // 실제로는 전시간, 현재시간으로 2개만 발생
+               current_words = time_result[0].keyword_count.aggs_name.buckets;  // 현재 시간
+               before_words = time_result[1].keyword_count.aggs_name.buckets;  //  전 시간
+                /*
+               current_words = current_words.sort( function(a, b){
+                   return a.doc_count > b.doc_count ? -1 : a.doc_count < b.doc_count ? 1 : 0;
+               });
+               */
+               for(i in current_words){
+                   for(j in before_words){
+                       if( current_words[i].key == before_words[j].key){    // 전 시간대에 같은 키 값이 있으면 
+                           current_words[i].before_count = before_words[j].doc_count;
+                           current_words[i].gap = current_words[i].doc_count - before_words[j].doc_count;
+                           current_words[i].updown = common.getUpdownRate(before_words[j].doc_count, current_words[i].doc_count );
+                           break;
+                       } else {
+                           current_words[i].before_count = 0;
+                           current_words[i].gap = current_words[i].doc_count;
+                           current_words[i].updown = "new";
+                       }
+                   }
+               }
                
-			   let result = common.getResult("10", "OK", "hot_count");
-                result.data.count = resp.aggregations.rt_hot_keyword.buckets[0].keyword_count.aggs_name.buckets.length;
-                result.data.result = current_words;
-                res.send(result);
-
-            } else if( resp.aggregations.rt_hot_keyword.buckets.length == 1){
-                
-                let result = common.getResult( "10", "OK", "hot_count");
-                result.data.count = resp.aggregations.rt_hot_keyword.buckets[0].keyword_count.aggs_name.buckets.length;
-                result.data.result = resp.aggregations.rt_hot_keyword.buckets[0].keyword_count.aggs_name.buckets;
-                for(i in result.data.result){
-                    result.data.result[i].updown = 100;
-                    result.data.result[i].before_count = null;
-                }
-                res.send(result);
-            } else {
-                let result = common.getResult( "20", "NO DATA", "hot_count");
-                result.data.count = 0;
-                res.send(result);
-            }
+               current_words = current_words.sort( function(a, b){
+                   return a.gap > b.gap ? -1 : a.gap < b.gap ? 1 : 0;
+               });
+               current_words = current_words.slice( 0, 100); // 페이징 안 하고 TOP 100개 한 꺼번에
+              
+            let result = common.getResult("10", "OK", "hot_count");
+               result.data.count = current_words.length;
+               result.data.result = current_words;
+               res.send(result);
+    
+           } else if( resp.aggregations.rt_hot_keyword.buckets.length == 1){
+               
+               let result = common.getResult( "10", "OK", "hot_count");
+               result.data.count = resp.aggregations.rt_hot_keyword.buckets[0].keyword_count.aggs_name.buckets.length;
+               result.data.result = resp.aggregations.rt_hot_keyword.buckets[0].keyword_count.aggs_name.buckets;
+               for(i in result.data.result){
+                   result.data.result[i].updown = 100;
+                   result.data.result[i].before_count = null;
+               }
+               res.send(result);
+           } else {
+               let result = common.getResult( "20", "NO DATA", "hot_count");
+               result.data.count = 0;
+               res.send(result);
+           }
         
     }, function(err){
-		logger.error("hot_count", err);
+        logger.error("hot_count", err);
         let result = common.getResult("99", "ERROR", "hot_count");
         res.send(result);
     })

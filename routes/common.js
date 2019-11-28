@@ -111,7 +111,12 @@ var common = {
         return result;
     },
     getUpdownRate : function( base_value, current_value){
-        return Math.ceil( (current_value - base_value) / base_value * 100 ) ;
+		if( base_value == 0){
+			return "new";
+		} else {
+			return Math.ceil( (current_value - base_value) / base_value * 100 ) + "%"
+		}
+         
     },
     getDays : function (start_dt, end_dt, interval){
     	var startDt = moment(start_dt.slice(0,8));
