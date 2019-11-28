@@ -131,20 +131,30 @@ router.post("/statistics", function(req, res){
         result.data.result = [];
         result.data.count = resp.aggregations.channel.buckets.length;
         var z = 0;
+        var call = 0;
         for(i in resp.aggregations.channel.buckets){
         	z = parseInt(z)+parseInt(resp.aggregations.channel.buckets[i].doc_count);
-        	
         }
-		
 		for(j in resp.aggregations.channel.buckets){
         	var total = Math.ceil(parseInt(resp.aggregations.channel.buckets[j].doc_count)/parseInt(z)*100);
-        	var obj = {
-    		   	channel : resp.aggregations.channel.buckets[j].key,
-    		   	count : resp.aggregations.channel.buckets[j].doc_count,
-    		   	rate : total,
-    		}
-        	result.data.result.push(obj);
+        	
+        	if(resp.aggregations.channel.buckets[j].key.substring(0,3) == "call"){
+        		call = parseInt(call) + parseInt(resp.aggregations.channel.buckets[j].doc_count);
+        	}else{
+        		var obj = {
+            	   	channel : resp.aggregations.channel.buckets[j].key,
+            	   	count : resp.aggregations.channel.buckets[j].doc_count,
+            	   	rate : total,
+            	}
+        		result.data.result.push(obj);
+        	}
         }
+		var objcall = {
+				channel : "call",
+        	   	count : call,
+        	   	rate : Math.ceil(parseInt(call)/parseInt(z)*100),	
+		}
+		result.data.result.push(objcall);
 		
         res.send(result);
     }, function(err){
