@@ -33,7 +33,7 @@ router.post("/count", function(req, res){
     if(common.getEmpty(req.body.category2))
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }})
     if(common.getEmpty(req.body.age))
-        body.query.bool.filter.push({ term : { age : req.body.age }});    
+    	body.query.bool.filter.push({ range : { age : { gte : age, lte : age + 9}}});    
     if(common.getEmpty(req.body.gender))
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.companyCode))
@@ -128,7 +128,7 @@ router.post("/statistics", function(req, res){
     if(common.getEmpty(req.body.category2))
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }})
     if(common.getEmpty(req.body.age))
-        body.query.bool.filter.push({ term : { age : req.body.age }});    
+    	body.query.bool.filter.push({ range : { age : { gte : age, lte : age + 9}}});    
     if(common.getEmpty(req.body.gender))
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.companyCode))

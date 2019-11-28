@@ -24,13 +24,13 @@ router.post("/count", function(req, res){
     	var result = common.getResult("40", "OK", "There is no required end_dt");
     	res.send(result);
     }
-    var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
+    var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var index = common.getIndex(req.body.channel);
     var interval = req.body.interval || "1D";
-    var dayList = common.getDays(req.body.start_dt.toString(), req.body.end_dt.toString(), interval);
-    if( req.body.category1 !== undefined)
+    var dayList = common.getDays(req.body.start_dt, req.body.end_dt, interval);
+    if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if( req.body.category2 !== undefined)
+    if(common.getEmpty(req.body.category2))
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
     body.aggs.day = {
       	date_histogram : {

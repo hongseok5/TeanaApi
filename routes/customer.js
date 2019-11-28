@@ -36,7 +36,7 @@ router.post("/statistics", function(req, res){
     if(common.getEmpty(req.body.gender))
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.age))
-        body.query.bool.filter.push({ range : { age : { gte : age - 9, lte : age }}});
+        body.query.bool.filter.push({ range : { age : { gte : age, lte : age + 9}}});
 
     body.aggs.aggs_gender = {
 		terms : {
