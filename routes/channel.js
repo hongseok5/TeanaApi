@@ -137,8 +137,7 @@ router.post("/statistics", function(req, res){
         }
 		for(j in resp.aggregations.channel.buckets){
         	var total = Math.ceil(parseInt(resp.aggregations.channel.buckets[j].doc_count)/parseInt(z)*100);
-        	
-        	if(resp.aggregations.channel.buckets[j].key.substring(0,3) == "call"){
+        	if(resp.aggregations.channel.buckets[j].key.substring(0,4) == "call"){
         		call = parseInt(call) + parseInt(resp.aggregations.channel.buckets[j].doc_count);
         	}else{
         		var obj = {
