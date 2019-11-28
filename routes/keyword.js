@@ -225,8 +225,7 @@ function topKeyword(keyword, req, res, final){
     	division :{	
     		date_histogram : {
     			field : "startTime",
-    			interval : interval,
-    			min_doc_count : "1"
+    			interval : interval
     		}
     	}
     }
@@ -406,7 +405,7 @@ router.post("/hot/statistics", function(req, res){
     	now = now.slice(0,10) + "0000";
     	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
     	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
-    	var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
+    	var body = common.getBodyNoSize(hour_ago, now_ago);
     	var index = common.getIndex(req.body.channel);
     	body.aggs = {
     		keyword_count :{	
@@ -460,7 +459,7 @@ function hotStatistics(keyword, req, res, final){
 	now = now.slice(0,10) + "0000";
 	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
 	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
-	var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
+	var body = common.getBodyNoSize(hour_ago, now_ago);
 	var index = common.getIndex(req.body.channel);
 	if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
@@ -525,12 +524,12 @@ function hotStatistics(keyword, req, res, final){
     	}
     	if(dateObj[1] == now){
     		if(common.getEmpty(obj[1])){
-        		returnVal1 = obj[0];
+        		returnVal1 = obj[1];
         	}
     	}
     	if(dateObj[1] == hour_ago){
     		if(common.getEmpty(obj[1])){
-        		returnVal2 = obj[0];
+        		returnVal2 = obj[1];
         	}
     	}
     	var returnVal = {
