@@ -27,7 +27,7 @@ router.post("/count", function(req, res){
     let from = req.body.from || 1;
     let should = [];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
-
+    
     if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
     if(common.getEmpty(req.body.category2))
@@ -49,12 +49,11 @@ router.post("/count", function(req, res){
     if(common.getEmpty(req.body.vdnGrp))
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
     if(common.getEmpty(req.body.product)){
-    	for( p in req.body.product.productCode ){
-            var term_obj = { term : { productCode : req.body.productCode[p]}};
+    	for( p in req.body.product ){
+            var term_obj = { term : { productCode : req.body.product[p].productCode}};
             should.push(term_obj);
         } 
     }
-    
     body.query.bool.must = [
         { bool : { should } }
     ]
@@ -145,12 +144,14 @@ router.post("/statistics", function(req, res){
     if(common.getEmpty(req.body.vdnGrp))
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
     if(common.getEmpty(req.body.product)){
-    	for( p in req.body.product.productCode ){
-            var term_obj = { term : { productCode : req.body.productCode[p]}};
+    	for( p in req.body.product ){
+            var term_obj = { term : { productCode : req.body.product[p].productCode}};
             should.push(term_obj);
         } 
     }
-
+    body.query.bool.must = [
+        { bool : { should } }
+    ];
     body.aggs.aggs_class = {
         terms : {
            field : "analysisCateNm"

@@ -61,14 +61,15 @@ router.post("/top", function(req, res){
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
     if(common.getEmpty(req.body.vdnGrp))
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
-	
-	if(common.getEmpty(req.body.product)) {
-		for( p in req.body.product.productCode ){
-			var term_obj = { term : { productCode : req.body.productCode[p]}};
-			should.push(term_obj);
-		} 
-	}
-	
+    if(common.getEmpty(req.body.product)){
+    	for( p in req.body.product ){
+            var term_obj = { term : { productCode : req.body.product[p].productCode}};
+            should.push(term_obj);
+        } 
+    }
+    body.query.bool.must = [
+        { bool : { should } }
+    ];
     body.query.bool.should = should;
     body.aggs.aggs_top_keyword = {
         nested : {

@@ -52,13 +52,13 @@ router.post("/list", function(req, res){
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.age))
         body.query.bool.filter.push({ range : { age : { gte : age-9, lte : age }}});
-    if(common.getEmpty(req.body.product)) {
-		for( p in req.body.product.productCode ){
-			var term_obj = { term : { productCode : req.body.productCode[p]}};
-			should.push(term_obj);
-		} 
-	}
-	
+    if(common.getEmpty(req.body.product)){
+    	for( p in req.body.product ){
+            var term_obj = { term : { productCode : req.body.product[p].productCode}};
+            should.push(term_obj);
+        } 
+    }
+   
 	// productCode가 있는 것만 추출
 	body.query.bool.filter.push({ exists : { "field" : "productCode" }});
 
