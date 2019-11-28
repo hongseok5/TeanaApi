@@ -27,6 +27,14 @@ client.ping({
 
 router.post("/top", function(req, res){
     logger.info("Router for IF_DMA_00101");
+    if(!common.getEmpty(req.body.start_dt)){
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    }
+    if(!common.getEmpty(req.body.end_dt)){
+    	var result = common.getResult("40", "OK", "There is no required end_dt");
+    	res.send(result);
+    }
     let size = req.body.size || 10;
     let from = req.body.from || 1;
     let sumsize = parseInt(from)*parseInt(size);
@@ -112,6 +120,14 @@ var topStatisticsResult;
 
 router.post("/top/statistics", function(req, res){
     logger.info("Router for IF_DMA_00102");
+    if(!common.getEmpty(req.body.start_dt)){
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    }
+    if(!common.getEmpty(req.body.end_dt)){
+    	var result = common.getResult("40", "OK", "There is no required end_dt");
+    	res.send(result);
+    }
     var keyword = [];
     var interval = req.body.interval || "1D";
     var index = common.getIndex(req.body.channel);
@@ -548,47 +564,58 @@ router.post("/relation", function(req, res){
         json : true
     }
 	
-    rel_word_option.body.keyword.push(req.body.keyword.replace( /(\s*)/g ,""));
-    /*
-    if( typeof req.body.keyword == "string"){
-        rel_word_option.body.keyword.push(req.body.keyword);
-    } else {
-        for(i in req.body.keyword ){
-            rel_word_option.body.keyword.push(req.body.keyword[i]);
+    if(common.getEmpty(req.body.keyword)){
+    	rel_word_option.body.keyword.push(req.body.keyword.replace( /(\s*)/g ,""));
+        /*
+        if( typeof req.body.keyword == "string"){
+            rel_word_option.body.keyword.push(req.body.keyword);
+        } else {
+            for(i in req.body.keyword ){
+                rel_word_option.body.keyword.push(req.body.keyword[i]);
+            }
         }
-    }
-    */
-    if(common.getEmpty(req.body.size))
-        rel_word_option.body.size = req.body.size;
-    console.log(rel_word_option);
-    rp(rel_word_option).then(function(data){
-        let result = common.getResult("10", "OK", "relation_keyword");
-        data.output = data.output.sort( function(a, b){
-            return a.similarity > b.similarity ? -1 : a.similarity < b.similarity ? 1 : 0;
+        */
+        if(common.getEmpty(req.body.size))
+            rel_word_option.body.size = req.body.size;
+        console.log(rel_word_option);
+        rp(rel_word_option).then(function(data){
+            let result = common.getResult("10", "OK", "relation_keyword");
+            data.output = data.output.sort( function(a, b){
+                return a.similarity > b.similarity ? -1 : a.similarity < b.similarity ? 1 : 0;
+            });
+            for ( i in data.output ){
+                data.output[i].no = parseInt(i) + 1;
+                data.output[i].similarity = data.output[i].similarity.toString();
+            }
+            result.data.result = data.output;
+            result.data.count = data.output.length;
+            res.send(result);
+        }).catch(function(err){
+    		logger.error("relation_keyword", err);
+            let result = common.getResult("99", "ERROR", "relation_keyword");
+            res.send(result);
         });
-        for ( i in data.output ){
-            data.output[i].no = parseInt(i) + 1;
-            data.output[i].similarity = data.output[i].similarity.toString();
-        }
-        result.data.result = data.output;
-        result.data.count = data.output.length;
-        res.send(result);
-    }).catch(function(err){
-		logger.error("relation_keyword", err);
-        let result = common.getResult("99", "ERROR", "relation_keyword");
-        res.send(result);
-    });
-
+    }else{
+    	let result = common.getResult("40", "OK", "There is no required keyword");
+    	res.send(result);
+    }
 });
 
 router.post("/issue", function(req, res){
 
     logger.info("Router for IF_DMA_00106");
-    
-    var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
+    if(!common.getEmpty(req.body.start_dt)){
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    }
+    if(!common.getEmpty(req.body.end_dt)){
+    	var result = common.getResult("40", "OK", "There is no required end_dt");
+    	res.send(result);
+    }
+    var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var index = common.getIndex(req.body.channel);
     var interval = req.body.interval || "1D";
-    var dayList = common.getDays(req.body.start_dt.toString(), req.body.end_dt.toString(), interval);
+    var dayList = common.getDays(req.body.start_dt, req.body.end_dt, interval);
     if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
     if(common.getEmpty(req.body.category2))
@@ -605,6 +632,9 @@ router.post("/issue", function(req, res){
             }
         }
         body.query.bool.filter.push(nest_obj);
+    }else{
+    	var result = common.getResult("40", "OK", "There is no required keyword");
+    	res.send(result);
     }
 
     body.aggs.keyword_hist = {
@@ -653,6 +683,14 @@ router.post("/issue", function(req, res){
 router.post("/issue/statistics", function(req, res){
     // 데이터 준비 필요
     logger.info("Router for IF_DMA_00107");
+    if(!common.getEmpty(req.body.start_dt)){
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    }
+    if(!common.getEmpty(req.body.end_dt)){
+    	var result = common.getResult("40", "OK", "There is no required end_dt");
+    	res.send(result);
+    }
     var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     var index = common.getIndex(req.body.channel);
     if(common.getEmpty(req.body.category1))
@@ -671,6 +709,9 @@ router.post("/issue/statistics", function(req, res){
     	            }
     	        }
     	        body.query.bool.filter.push(nest_obj);
+    }else{
+    	var result = common.getResult("40", "OK", "There is no required keyword");
+    	res.send(result);
     }
 
     body.aggs = {

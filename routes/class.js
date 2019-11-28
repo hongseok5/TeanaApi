@@ -15,7 +15,14 @@ var logger = winston.loggers.get("class");
 
 router.post("/count", function(req, res){
     logger.info("Router for IF_DMA_00201");
-
+    if(!common.getEmpty(req.body.start_dt)){
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    }
+    if(!common.getEmpty(req.body.end_dt)){
+    	var result = common.getResult("40", "OK", "There is no required end_dt");
+    	res.send(result);
+    }
     let size = req.body.size || 0;  // 통계쿼리는 버킷만
     let from = req.body.from || 1;
     let should = [];
@@ -106,7 +113,14 @@ router.post("/count", function(req, res){
 
 router.post("/statistics", function(req, res){
     logger.info("Router for IF_DMA_00202");
-	
+    if(!common.getEmpty(req.body.start_dt)){
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    }
+    if(!common.getEmpty(req.body.end_dt)){
+    	var result = common.getResult("40", "OK", "There is no required end_dt");
+    	res.send(result);
+    }
     let should = [];
     var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     let interval = req.body.interval || "week";

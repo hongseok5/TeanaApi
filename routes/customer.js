@@ -15,6 +15,14 @@ var logger = winston.loggers.get("customer");
 
 router.post("/statistics", function(req, res){
     logger.info("Router for IF_DMA_00601");
+    if(!common.getEmpty(req.body.start_dt)){
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    }
+    if(!common.getEmpty(req.body.end_dt)){
+    	var result = common.getResult("40", "OK", "There is no required end_dt");
+    	res.send(result);
+    }
     let age = parseInt( req.body.age ); // 전체일 경우 어떤 값으로 오는지 확인?
     let size = req.body.size || 10;
     let from = req.body.from || 1;

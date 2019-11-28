@@ -15,6 +15,14 @@ var logger = winston.loggers.get("positive");
 
 router.post("/statistics", function(req, res){
     logger.info("Router for IF_DMA_00402");
+    if(!common.getEmpty(req.body.start_dt)){
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    }
+    if(!common.getEmpty(req.body.end_dt)){
+    	var result = common.getResult("40", "OK", "There is no required end_dt");
+    	res.send(result);
+    }
     // 긍,부정어 추이
     // let interval = req.body.interval || undefined;  
     var interval = req.body.interval || "1D";
@@ -154,6 +162,14 @@ router.post("/statistics", function(req, res){
 
 router.post("/count", function(req, res){
     logger.info("Router for IF_DMA_00401");
+    if(!common.getEmpty(req.body.start_dt)){
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    }
+    if(!common.getEmpty(req.body.end_dt)){
+    	var result = common.getResult("40", "OK", "There is no required end_dt");
+    	res.send(result);
+    }
     // 긍,부정어 현황
     // neg, pos, neu 3개 필드만 sum 해서 비유을 구하는지?
     let should = [];

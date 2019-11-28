@@ -15,6 +15,14 @@ var logger = winston.loggers.get("product");
 
 router.post("/list", function(req, res){
     logger.info("Router for IF_DMA_00004");
+    if(!common.getEmpty(req.body.start_dt)){
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    }
+    if(!common.getEmpty(req.body.end_dt)){
+    	var result = common.getResult("40", "OK", "There is no required end_dt");
+    	res.send(result);
+    }
     let size = req.body.size || 10 ;
     let from = req.body.from || 1 ;
     let age = parseInt(req.body.age);

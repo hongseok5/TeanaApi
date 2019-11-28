@@ -15,7 +15,14 @@ var logger = winston.loggers.get("voc");
 
 router.post("/search", function(req, res){
     logger.info("Router for IF_DMA_00701");
-
+    if(!common.getEmpty(req.body.start_dt)){
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    }
+    if(!common.getEmpty(req.body.end_dt)){
+    	var result = common.getResult("40", "OK", "There is no required end_dt");
+    	res.send(result);
+    }
     let size = req.body.size || 10;
     let from = req.body.from || 1;
     var source = ["company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId", "content", "reContent"];

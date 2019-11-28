@@ -16,6 +16,14 @@ var logger = winston.loggers.get("channel");
 router.post("/count", function(req, res){
 
     logger.info("Router for IF_DMA_00301");
+    if(!common.getEmpty(req.body.start_dt)){
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    }
+    if(!common.getEmpty(req.body.end_dt)){
+    	var result = common.getResult("40", "OK", "There is no required end_dt");
+    	res.send(result);
+    }
     var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     var index = common.getIndex(req.body.channel);
     var interval = req.body.interval || "1D";
@@ -92,7 +100,14 @@ router.post("/count", function(req, res){
 
 router.post("/statistics", function(req, res){
     logger.info("Router for IF_DMA_00302");
-
+    if(!common.getEmpty(req.body.start_dt)){
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    }
+    if(!common.getEmpty(req.body.end_dt)){
+    	var result = common.getResult("40", "OK", "There is no required end_dt");
+    	res.send(result);
+    }
     var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var index = common.getIndex(req.body.channel);
     var interval = req.body.interval || "1D";
