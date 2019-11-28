@@ -80,9 +80,7 @@ router.post("/count", function(req, res){
             		var channelcheck = result.data.result[p];
             		for(l in channelcheck){
             			if(channelcheck[l].key == test[i][1].key_as_string && channelcheck[l].channel == test2[j][1].key){
-            				channelcheck[l].count = test2[j][1].doc_count;
-                		}else{
-                			channelcheck[l].count = 0;
+            				result.data.result[p][l].count = test2[j][1].doc_count;
                 		}
             		}
           		}
