@@ -39,7 +39,7 @@ router.post("/top", function(req, res){
     let from = req.body.from || 1;
     let sumsize = parseInt(from)*parseInt(size);
     let resultsize = parseInt(sumsize)-parseInt(size);
-    var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
+    var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var should = [];
     var index = common.getIndex(req.body.channel);
     
@@ -133,7 +133,7 @@ router.post("/top/statistics", function(req, res){
     var interval = req.body.interval || "1D";
     var index = common.getIndex(req.body.channel);
     if(req.body.keyword == undefined || req.body.keyword == "" || req.body.keyword == null){
-    	var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
+    	var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     	body.aggs = {
     		keyword_count :{	
     			nested : {
@@ -195,11 +195,11 @@ router.post("/top/statistics", function(req, res){
 function topKeyword(keyword, req, res, final){
 	var interval = req.body.interval || "1D";
     var index = common.getIndex(req.body.channel);
-    var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
+    var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     
-    if(req.body.category1 !== undefined)
+    if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if(req.body.category2 !== undefined)
+    if(common.getEmpty(req.body.category2))
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
     body.query.bool.must = [
         { 
@@ -235,7 +235,7 @@ function topKeyword(keyword, req, res, final){
         body
     }).then(function(resp){
     	test = Object.entries(resp.aggregations.division.buckets);
-    	var dayList = common.getDays(req.body.start_dt.toString(), req.body.end_dt.toString(), interval);
+    	var dayList = common.getDays(req.body.start_dt, req.body.end_dt, interval);
     	var obj2 = new Array();
     	for(i in test){
     		for(j in dayList){
@@ -463,9 +463,9 @@ function hotStatistics(keyword, req, res, final){
 	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
 	var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
 	var index = common.getIndex(req.body.channel);
-    if(req.body.category1 !== undefined)
+	if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if(req.body.category2 !== undefined)
+	if(common.getEmpty(req.body.category2))
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
     
     body.query.bool.must = [
@@ -515,26 +515,26 @@ function hotStatistics(keyword, req, res, final){
     	var returnVal1 = 0;
     	var returnVal2 = 0;
     	if(dateObj[0] == now){
-    		if(obj[0] !== undefined){
+    		if(common.getEmpty(obj[0])){
         		returnVal1 = obj[0];
         	}
     	}
     	if(dateObj[0] == hour_ago){
-    		if(obj[0] !== undefined){
+    		if(common.getEmpty(obj[0])){
         		returnVal2 = obj[0];
         	}
     	}
     	if(dateObj[1] == now){
-    		if(obj[1] !== undefined){
+    		if(common.getEmpty(obj[1])){
         		returnVal1 = obj[0];
         	}
     	}
     	if(dateObj[1] == hour_ago){
-    		if(obj[1] !== undefined){
+    		if(common.getEmpty(obj[1])){
         		returnVal2 = obj[0];
         	}
     	}
-		var returnVal = {
+    	var returnVal = {
 			word : keyword,	
 	       	count : returnVal1,
 	        before_count : returnVal2
@@ -627,7 +627,7 @@ router.post("/issue", function(req, res){
                 path : "keyword_count",
                 query : {
                     term : {
-                        "keyword_count.keyword" : req.body.keyword.toString()
+                        "keyword_count.keyword" : req.body.keyword
                     }
                 }
             }
@@ -692,7 +692,7 @@ router.post("/issue/statistics", function(req, res){
     	var result = common.getResult("40", "OK", "There is no required end_dt");
     	res.send(result);
     }
-    var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
+    var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var index = common.getIndex(req.body.channel);
     if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
