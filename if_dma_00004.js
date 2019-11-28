@@ -3,16 +3,15 @@ const schedule = require('node-schedule');
 const winston = require('winston');
 const dateFormat = require('dateformat');
 const fs = require('fs');
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.json(),
-    defaultMeta: { service: 'if_dma_00004' },
-    transports: [
-      new winston.transports.File({ filename: './logs/error.log', level: 'error' }),
-      new winston.transports.File({ filename: './logs/if_dma_00004.log' })
-    ]
-  });
-console.log("process.pid:"+process.pid);
+var approot = require('app-root-path');
+var config = require(approot + '/config/config');
+const winstonConfig = require(approot + '/lib/logger');
+
+/************************************************************
+ * 로그 설정.
+ ************************************************************/
+winston.loggers.add("if_dma_00004", winstonConfig.createLoggerConfig("if_dma_00004"));
+var logger = winston.loggers.get("if_dma_00004");
 
 var options1 = {
     method: 'POST',
@@ -41,34 +40,31 @@ var options2 = {
 };
 
 function getData(){
-    var path = "D:\\TeAnaApi\\file\\if_dma_00004\\"
+    var path = config.send_save_path;
     var sj = schedule.scheduleJob('*/10 * * * * *', function(){
-        var file_list = fs.readdirSync('./file/if_dma_00004');
-        var send_data = {};
+    	var send_data = {};
         send_data.params = [];
 
-        var get_file = function(file_name){
-            return new Promise(function(resolve, reject){
-                   fs.readFile(path + file_name, 'utf-8', (err,data)=>{
-                       if(err) throw err;
-                       if(data !== undefined){
-                           resolve(data);  
-                       } else {
-                           reject();
-                       }           
-                   });    
-               }).catch();    
-           };
-        for( f in file_list){
-            send_data.params.push(get_file(file_list[f]));  // check if it's file
-        }
-        Promise.all(send_data.params).then(function(value){
-            send_data.params = value;
-            send_data.sendTime = dateFormat(new Date(), "yyyymmddHHMMss");
-            fs.mkdirSync( "D:\\TeAnaApi\\file\\if_dma_00004_sent\\" + send_data.sendTime);
-            
-        }).catch("Failed!");
-
+        fs.readdir(config.send_save_path, function(err, filelist){
+        	filelist.forEach(function(file) {
+        		fs.readFile(config.send_save_path+file , 'utf-8' , function(err , filedata){
+        			send_data.params.push(filedata);
+        		});
+        		fs.unlink(config.send_save_path+file, function(err){
+	    	        if( err ) throw err;
+	    	        console.log('file deleted');
+	    	    });
+        	});
+        	
+        });
+        send_data.sendTime = dateFormat(new Date(), "yyyymmddHHMMss");
+        !fs.existsSync(config.sent_save_path+send_data.sendTime) && fs.mkdirSync(config.sent_save_path+send_data.sendTime);
+        var filename = config.sent_save_path+send_data.sendTime;
+    	var filecontext = send_data;
+        fs.writeFile(filename, filecontext, "utf8", function(err) {
+        	logger.info("error file : " + err);
+        });
+    	
         rp(options1)
         .then(function (body) {
             var token = JSON.parse(body);
@@ -77,14 +73,13 @@ function getData(){
             console.log(req_body);
             options2.body = req_body;
             rp(options2).then(function ( data ){
-                console.log("response is : " + data);
                 logger.info(data);
             }).catch(function (err){
-                console.error("error 2 : " + err);
+            	logger.error(err);
             });
         })
         .catch(function (err) {
-            console.error("error 1 : " + err);
+        	logger.error(err);
         });
     });  
     sj.invoke();
