@@ -349,8 +349,10 @@ router.post("/hot/count", function(req, res){
                    return a.gap > b.gap ? -1 : a.gap < b.gap ? 1 : 0;
                });
                current_words = current_words.slice( 0, 100); // 페이징 안 하고 TOP 100개 한 꺼번에
-              
-            let result = common.getResult("10", "OK", "hot_count");
+               for( i in current_words){
+                   current_words[i].no = parseInt(i) + 1;
+               }
+               let result = common.getResult("10", "OK", "hot_count");
                result.data.count = current_words.length;
                result.data.result = current_words;
                res.send(result);
