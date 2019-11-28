@@ -204,6 +204,9 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 									param = { "id" : counsetltypeid,
 								    		  "text" : filedata.timeNtalk.replace(/[0-9]/g, "")
 								    		};
+											
+									logger.debug("counsetltypeid : " +counsetltypeid);		
+											
 								    options1.body = JSON.stringify(param);
 								    rp(options1).then(function ( data ){
 								    	console.log('db rp(options1)');
