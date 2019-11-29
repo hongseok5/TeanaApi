@@ -116,7 +116,7 @@ function mergeTalk( dataR, dataT  ){
   Promise.all([rp(kwe_option), rp(cat_option),rp(pnn_option)]).then(function(values){
     tmp_karr = [];
     for( i in values[0].output){
-	tmp_karr.push(values[0].output[i]);
+    	tmp_karr.push(values[0].output[i]);
     }
     merged_data.keyword_count = tmp_karr.filter( function(v){ return stop_words.indexOf( v.keyword ) == -1 });
      
@@ -179,6 +179,22 @@ function mergeTalk( dataR, dataT  ){
       let obj = { count : 0, word : tmp_array[i]};
       merged_data.neutral_word.push(obj);
     }
+
+    file_sending = {};
+    file_sending.startTime = merged_data.startTime;
+    file_sending.agentId = merged_data.agentId;
+    file_sending.channel = "00";
+    file_sending.category = merged_data.analysisCate;
+    file_sending.summary = 
+    `${merged_data.startTime}에 ${merged_data.agentId} 상담원이 ${merged_data.analysisCateNm} 으로 상담을 ${merged_data.duration}초 동안 진행하였습니다.` 
+    + putKeyword(merged_data.keyword_count);
+
+    
+    fs.writeFile( config.send_save_path + merged_data.startTime + "-" + merged_data.agentId + ".JSON" , JSON.stringify(file_sending), 'utf8', function(err){
+      if(err) 
+        console.log(err);
+    });
+    
     fs.writeFile(config.write_path + merged_data.startTime + "-" + merged_data.agentId + ".JSON", JSON.stringify(merged_data), 'utf8', function(err) {
       if(err) 
           console.log('Failed to write file!');
@@ -232,3 +248,11 @@ cron.schedule('0 0 * * *', () => {
   fs.mkdirSync(config.backup_path + year.toString() + month.toString() + day.toString());
   today = year.toString() + month.toString() + day.toString();
 });
+
+function putKeyword(arr){
+  var text = ''
+  for( i in arr){
+    text = arr[i].keyword + ','
+  }
+  return text + '등이 언급되었습니다.';
+}
