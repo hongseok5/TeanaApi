@@ -114,7 +114,8 @@ var common = {
 		if( base_value == 0){
 			return "new";
 		} else {
-			return Math.ceil( (current_value - base_value) / base_value * 100 ) + "%"
+			let a = Math.ceil( (current_value - base_value) / base_value * 100 );
+			return a.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "%"
 		}
          
     },
