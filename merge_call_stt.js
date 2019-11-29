@@ -179,14 +179,14 @@ function mergeTalk( dataR, dataT  ){
       let obj = { count : 0, word : tmp_array[i]};
       merged_data.neutral_word.push(obj);
     }
-
+    merged_data.duration = getDuration( merged_data.startTime, merged_data.endTime , true);
     file_sending = {};
     file_sending.startTime = merged_data.startTime;
     file_sending.agentId = merged_data.agentId;
     file_sending.channel = "00";
     file_sending.category = merged_data.analysisCate;
     file_sending.summary = 
-    `${merged_data.startTime}에 ${merged_data.agentNm} 상담원이 ${merged_data.analysisCateNm} 으로 상담을 ${merged_data.duration}초 동안 진행하였습니다.` 
+    `${convertDateFormat(merged_data.startTime)}에 ${merged_data.agentNm} 상담원이 ${merged_data.analysisCateNm} 으로 상담을 ${convertDuration(merged_data.duration)} 동안 진행하였습니다.` 
     + putKeyword(merged_data.keyword_count);
 
     
@@ -259,4 +259,35 @@ function putKeyword(arr){
   }
   text = text + ' 등이 언급되었습니다.'
   return text.replace( ', 등', ' 등');
+}
+
+function convertDateFormat( dt ){
+  if ( dt.length === 14){
+    return `${dt.slice(0,4)}년${dt.slice(4,6)}월${dt.slice(6,8)}일 ${dt.slice(8,10)}시${dt.slice(10,12)}분${dt.slice(12,14)}초`
+  } else {
+    return dt;
+  }
+}
+
+function getDuration( start, end, es ){
+  if (start.length === 14 && end.length === 14) {
+      
+    value = common.strToDate(end) - common.strToDate(start);
+    value = value / 1000;
+    return parseInt( value );
+  } else {
+    return null;
+  }
+}
+
+
+
+function convertDuration( value ){
+  if ( value > 60 ){
+    let min = value / 60;
+    let sec = value % 60;
+    return parseInt(min) + "분 " + sec + "초 ";
+  } else {
+    return value + "초";
+  }
 }
