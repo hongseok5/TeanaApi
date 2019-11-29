@@ -458,18 +458,28 @@ router.post("/hot/statistics", function(req, res){
 
 function hotStatistics(keyword, req, res, final, keycount){
 	var now = dateFormat(new Date(), "yyyymmddHHMMss");
+	var two_ago = new Date().getHours() - 2 ;
 	var hour_ago = new Date().getHours() - 1 ;
-	var now_ago = new Date().getHours() + 1 ;
+	var now_ago = new Date().getHours();
+	two_ago = now.slice(0,8) + ( two_ago < 10 ? "0" + two_ago : two_ago )+now.slice(10,14);
+	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago )+now.slice(10,14);
+	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago )+now.slice(10,14);
+	var search_hour_age = new Date().getHours() - 1 ;
+	var search_now_age = new Date().getHours() + 1 ;
 	now = now.slice(0,10) + "0000";
-	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
-	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
-	var body = common.getBodyNoSize(hour_ago, now_ago);
+    search_hour_age = now.slice(0,8) + ( search_hour_age < 10 ? "0" + search_hour_age : search_hour_age ) + "0000";
+    search_now_age = now.slice(0,8) + ( search_now_age < 10 ? "0" + search_now_age : search_now_age ) + "0000";
+    var body = common.getBodyNoSize(search_hour_age, search_now_age);
 	var index = common.getIndex(req.body.channel);
+	
 	if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
 	if(common.getEmpty(req.body.category2))
         body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
     
+	console.log('bchm hour_ago = '+hour_ago);
+	console.log('bchm now_ago = '+now_ago);
+	
     body.query.bool.must = [
     	{ 
           	bool : {
@@ -491,14 +501,17 @@ function hotStatistics(keyword, req, res, final, keycount){
         }
     ];
     body.aggs = {
-    	day : {
-    		date_histogram : {
+    		data_range : {
+    			range : {
     			field : "startTime",
-    			interval : "1H",
-    			min_doc_count : "1"
+    			ranges : [
+    	              {from : two_ago, to : hour_ago},
+    	              {from : hour_ago, to : now_ago}
+    	            ]
     		}
     	}
     };
+    
     body.sort = [
     	{startTime : "asc"}	
     ];
@@ -509,14 +522,14 @@ function hotStatistics(keyword, req, res, final, keycount){
     }).then(function(resp){
     	var obj = new Array();
     	var dateObj = new Array();
-    	test = Object.entries(resp.aggregations.day.buckets);
+    	test = Object.entries(resp.aggregations.data_range.buckets);
     	for(i in test){
     		obj[i] = test[i][1].doc_count;
-    		dateObj[i] = test[i][1].key_as_string;
+    		dateObj[i] = test[i][1].to_as_string;
     	}
     	var returnVal1 = 0;
     	var returnVal2 = 0;
-    	if(dateObj[0] == now){
+    	if(dateObj[0] == now_ago){
     		if(common.getEmpty(obj[0])){
         		returnVal1 = obj[0];
         	}
@@ -526,7 +539,7 @@ function hotStatistics(keyword, req, res, final, keycount){
         		returnVal2 = obj[0];
         	}
     	}
-    	if(dateObj[1] == now){
+    	if(dateObj[1] == now_ago){
     		if(common.getEmpty(obj[1])){
         		returnVal1 = obj[1];
         	}
