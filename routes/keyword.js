@@ -398,28 +398,39 @@ router.post("/hot/statistics", function(req, res){
     	}
     }else{
     	var now = dateFormat(new Date(), "yyyymmddHHMMss");
+    	var two_ago = new Date().getHours() - 2 ;
     	var hour_ago = new Date().getHours() - 1 ;
-    	var now_ago = new Date().getHours() + 1 ;
-    	now = now.slice(0,10) + "0000";
-    	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + "0000";
-    	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago ) + "0000";
-    	var body = common.getBodyNoSize(hour_ago, now_ago);
+    	var now_ago = new Date().getHours();
+    	two_ago = now.slice(0,8) + ( two_ago < 10 ? "0" + two_ago : two_ago )+now.slice(10,14);
+    	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago )+now.slice(10,14);
+    	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago )+now.slice(10,14);
+    	var body = common.getBodyNoSize(two_ago, now_ago);
     	var index = common.getIndex(req.body.channel);
-    	body.aggs = {
-    		keyword_count :{	
-    			nested : {
-    				path : "keyword_count"	 
-    			},
-    			aggs : {
-    				aggs_name : {
-    					terms : {
-    						field : "keyword_count.keyword",
-    						size : "5"
-    					}
-    				}
-    			}
-    		}
-    	}
+    	body.aggs.rt_hot_keyword = {
+    	        range : {
+    	            field : "startTime",
+    	            ranges : [
+    	             { from : two_ago, to : hour_ago },
+    	             { from : hour_ago, to : now_ago }
+    	         
+    	            ]
+    	        },
+    	        aggs : {
+    	            keyword_count : {
+    	                nested : {
+    	                    path : "keyword_count"   
+    	                },
+    	                aggs : {
+    	                    aggs_name : {
+    	                        terms : {
+    	                            field : "keyword_count.keyword",
+    	                            size : 1000
+    	                        }
+    	                    }
+    	                }
+    	            }
+    	        }
+    	    }
     	client.search({
             index,
             body
@@ -427,17 +438,47 @@ router.post("/hot/statistics", function(req, res){
         	var result = common.getResult( "10", "OK", "top_keyword");
             result.data.count = 0;
             result.data.result = [];
-            test = Object.entries(resp.aggregations.keyword_count.aggs_name.buckets);
-            if(test.length > 0){
-            	var finStr = "";
-                var keyNum = test.length;
-            	keyNum--;
-        		for(i in test){
-            		if(i == keyNum){
+            if( resp.aggregations.rt_hot_keyword.buckets.length === 2 ){
+            	// 현재시간, 전시간으로 정렬
+                resp.aggregations.rt_hot_keyword.buckets = resp.aggregations.rt_hot_keyword.buckets.sort( function(a, b){
+                    return a.from > b.from ? -1 : a.from < b.from ? 1 : 0;
+                });
+                
+                // 키갑 비교 이중 포문
+                let current_words = resp.aggregations.rt_hot_keyword.buckets[0].keyword_count.aggs_name.buckets;
+                let before_words = resp.aggregations.rt_hot_keyword.buckets[1].keyword_count.aggs_name.buckets;
+                
+                for( i in current_words ){
+                    for( j in before_words ){
+                        if( current_words[i].key === before_words[j].key){
+                            current_words[i].before_count = before_words[j].doc_count;
+                            current_words[i].gap = current_words[i].doc_count - before_words[j].doc_count;
+                            current_words[i].updown = common.getUpdownRate(before_words[j].doc_count, current_words[i].doc_count );
+                            break;
+
+                        } else {
+                            current_words[i].before_count = 0;
+                            current_words[i].gap = current_words[i].doc_count;
+                            current_words[i].updown = "new";
+                        }
+                    }
+                }
+                // gap 순으로 정렬
+                current_words = current_words.sort( function(a, b){
+                    return a.gap > b.gap ? -1 : a.gap < b.gap ? 1 : 0;
+                });
+                if( current_words.length > 5 ){
+                    current_words = current_words.slice(0, 5);
+                }
+                
+                var finStr = "";
+                // 번호부여
+                for ( i in current_words){
+                    if(i == 4){
             			finStr = "Y";
             		}
-            		hotStatistics(test[i][1].key, req, res, finStr, i);
-            	}
+            		hotStatistics(current_words[i].key, req, res, finStr, i);
+                }
             }else{
             	topStatisticsResult = common.getResult( "20", "NODATA", "hot_statistics");
         		res.send(topStatisticsResult);
