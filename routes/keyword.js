@@ -383,6 +383,8 @@ router.post("/hot/count", function(req, res){
  * 키워드 별로 hotStatistics(키워드, req, res, 종료 여부) 호출 	
  * 키워드 수만큼 hotStatistics호출 후 hotStatisticsResult에 데이터 쌓아 놓음. */ 
 var hotStatisticsResult;
+var hotstatisticsobj = new Array();
+var hotstatisticsobj2 = new Array();
 
 router.post("/hot/statistics", function(req, res){
     logger.info("Router for IF_DMA_00104");
@@ -440,7 +442,7 @@ router.post("/hot/statistics", function(req, res){
             		if(i == keyNum){
             			finStr = "Y";
             		}
-            		hotStatistics(test[i][1].key, req, res, finStr);
+            		hotStatistics(test[i][1].key, req, res, finStr, i);
             	}
             }else{
             	topStatisticsResult = common.getResult( "20", "NODATA", "hot_statistics");
@@ -454,7 +456,7 @@ router.post("/hot/statistics", function(req, res){
     }
 });
 
-function hotStatistics(keyword, req, res, final){
+function hotStatistics(keyword, req, res, final, keycount){
 	var now = dateFormat(new Date(), "yyyymmddHHMMss");
 	var hour_ago = new Date().getHours() - 1 ;
 	var now_ago = new Date().getHours() + 1 ;
@@ -534,15 +536,22 @@ function hotStatistics(keyword, req, res, final){
         		returnVal2 = obj[1];
         	}
     	}
-    	var returnVal = {
+    	var returnObj = {
+    		key : "before",	
 			word : keyword,	
-	       	count : returnVal1,
-	        before_count : returnVal2
-        }
-		var obj = new Array();
-		obj[0]=returnVal; 
-		hotStatisticsResult.data.result.push(obj);
+	       	count : returnVal2,
+	    }
+    	var returnObj2 = {
+        	key : "current",	
+        	word : keyword,	
+    	   	count : returnVal1,
+    	}
+    		
+    	hotstatisticsobj[keycount] = returnObj;
+    	hotstatisticsobj2[keycount] = returnObj2;
 		if(final == "Y"){
+			hotStatisticsResult.data.result.push(hotstatisticsobj);
+			hotStatisticsResult.data.result.push(hotstatisticsobj2);
 			res.send(hotStatisticsResult);
 		}
     }, function(err){
