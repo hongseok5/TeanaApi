@@ -186,7 +186,7 @@ function mergeTalk( dataR, dataT  ){
     file_sending.channel = "00";
     file_sending.category = merged_data.analysisCate;
     file_sending.summary = 
-    `${merged_data.startTime}에 ${merged_data.agentId} 상담원이 ${merged_data.analysisCateNm} 으로 상담을 ${merged_data.duration}초 동안 진행하였습니다.` 
+    `${merged_data.startTime}에 ${merged_data.agentNm} 상담원이 ${merged_data.analysisCateNm} 으로 상담을 ${merged_data.duration}초 동안 진행하였습니다.` 
     + putKeyword(merged_data.keyword_count);
 
     
@@ -251,8 +251,12 @@ cron.schedule('0 0 * * *', () => {
 
 function putKeyword(arr){
   var text = ''
+  if( arr.length > 3 ) {
+    arr = arr.slice( 0, 3) 	
+  }  
   for( i in arr){
-    text = arr[i].keyword + ','
+    text = text + arr[i].keyword + ','
   }
-  return text + '등이 언급되었습니다.';
+  text = text + ' 등이 언급되었습니다.'
+  return text.replace( ', 등', ' 등');
 }
