@@ -363,7 +363,7 @@ router.post("/hot/count", function(req, res){
             result.data.count = 0;
             res.send(result);
         }
-        res.send(resp);
+ 
     }, function(err){
         logger.error("hot_count", err);
         hotStatisticsResult = common.getResult("99", "ERROR", "hot_count");
