@@ -659,6 +659,82 @@ router.post("/relation", function(req, res){
     }
 });
 
+router.post("/issue/top", function(req, res){
+	logger.info("Router for IF_DMA_00108");
+    if(!common.getEmpty(req.body.start_dt)){
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    }
+    if(!common.getEmpty(req.body.end_dt)){
+    	var result = common.getResult("40", "OK", "There is no required end_dt");
+    	res.send(result);
+    }
+    var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
+    var index = common.getIndex(req.body.channel);
+    var interval = req.body.interval || "1D";
+    var dayList = common.getDays(req.body.start_dt, req.body.end_dt, interval);
+    if(common.getEmpty(req.body.category1))
+        body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
+    if(common.getEmpty(req.body.category2))
+        body.query.bool.filter.push({ term : { category2 : req.body.category2 }})
+    if(common.getEmpty(req.body.keyword)){
+        var nest_obj = {
+            nested : {
+                path : "keyword_count",
+                query : {
+                    terms : {
+                        "keyword_count.keyword" : req.body.keyword
+                    }
+                }
+            }
+        }
+        body.query.bool.filter.push(nest_obj);
+    }else{
+    	var result = common.getResult("40", "OK", "There is no required keyword");
+    	res.send(result);
+    }
+
+    body.aggs.keyword_top = {
+    	nested: {
+            path: "keyword_count"
+         },
+         aggs: {
+            aggs_name: {
+             terms: {
+             field: "keyword_count.keyword"
+             	}
+             }
+         }
+    }
+
+    client.search({
+        index,
+        body
+    }).then(function(resp){
+        var result = common.getResult("10", "OK", "issue_top_keyword");
+        result.data.count = resp.aggregations.keyword_top.aggs_name.buckets.length;
+        result.data.result = [];
+        for(i in resp.aggregations.keyword_top.aggs_name.buckets){
+        	for(j in req.body.keyword){
+        		if(resp.aggregations.keyword_top.aggs_name.buckets[i].key == req.body.keyword[j]){
+        			var z = parseInt(i)+1;
+        			var obj = {
+                		no : z,
+                		word : req.body.keyword[j],
+                		count : resp.aggregations.keyword_top.aggs_name.buckets[i].doc_count
+                	}
+        			result.data.result.push(obj);
+        		}
+    		}
+        }
+        res.send(result);
+    }, function(err){
+		logger.error("issue_top_keyword", err);
+        var result = common.getResult("99", "ERROR", "issue_top_keyword");
+        res.send(result);
+    });
+});
+
 router.post("/issue", function(req, res){
 
     logger.info("Router for IF_DMA_00106");
@@ -673,7 +749,6 @@ router.post("/issue", function(req, res){
     var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var index = common.getIndex(req.body.channel);
     var interval = req.body.interval || "1D";
-    var dayList = common.getDays(req.body.start_dt, req.body.end_dt, interval);
     if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
     if(common.getEmpty(req.body.category2))
