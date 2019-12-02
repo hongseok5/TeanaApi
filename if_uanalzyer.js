@@ -247,10 +247,11 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 									    	            console.log("Updated successfully!");
 									    	        }
 									    	    });
-									    	    fs.unlink(config.backup_path+file, function(err){
+									    	    fs.rename(config.backup_path+file, config.backup_path_bak+file, callback);
+									    	    /*fs.unlink(config.backup_path+file, function(err){
 									    	        if( err ) throw err;
 									    	        console.log('file deleted');
-									    	    });
+									    	    });*/
 									    	});
 								    	}
 								    	for(i in data.matches){
@@ -265,6 +266,7 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 								    		var inserEstDtlquery = connection.query(inserEstDtlHisSQL, [ callsetseq, filedata.startTime, filedata.extension, data.id, counselitemid3, counselitemid4, lev3itempoint, lev4itempoint, data.matches[i].frequency, itemtypecd, filedata.agentId ], function (err, rows) {
 								    			console.log('db callsetseq');
 								    			if(err){
+								    				fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
 									    	        connection.release();
 									    	        throw err;
 									    	    }else{
@@ -272,6 +274,7 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 												}
 									    	    connection.commit(function(err){
 									    	        if(err){
+									    	        	fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
 									    	            connection.rollback(function(err){
 									    	                throw err;
 									    	            });
@@ -290,6 +293,7 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 																}
 													    	    connection.commit(function(err){
 													    	        if(err){
+													    	        	fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
 													    	            connection.rollback(function(err){
 													    	                throw err;
 													    	            });
