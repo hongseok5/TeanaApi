@@ -143,12 +143,14 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 			    			    }
 			    		param2.id = rows[i].LEV4_COUNSEL_ITEM_ID;
 			    		param2.extradata = "LEVEL4="+rows[i].LEV4_ITEM_POINT+",counselitemid3="+rows[i].LEV3_COUNSEL_ITEM_ID+",counselitemid4="+rows[i].LEV4_COUNSEL_ITEM_ID+",LEVEL4="+rows[i].LEV4_ITEM_POINT+",ITEM_TYPE_CD="+rows[i].ITEM_TYPE_CD;
-			    		param2.expression = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
+			    		var senteval = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
+			    		param2.expression = senteval.replace(/ /gi, "");
 			    	}else{
 			    		var j = i-1;
 			    		if(rows[j].LEV4_COUNSEL_ITEM_ID == rows[i].LEV4_COUNSEL_ITEM_ID){
-			    			param3 = {
-			    					"expression": rows[i].SENTENCE.replace(/OOO/gi, "${NAME}"),
+			    			var senteval = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
+				    		param3 = {
+			    					"expression": senteval.replace(/ /gi, ""),
 			    					"use": true
 			    		         };
 			    			param2.synonyms.push(param3);
@@ -163,7 +165,9 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 			    				    }
 			    			param2.id = rows[i].LEV4_COUNSEL_ITEM_ID;
 			    			param2.extradata = "LEVEL4="+rows[i].LEV4_ITEM_POINT+",counselitemid3="+rows[i].LEV3_COUNSEL_ITEM_ID+",counselitemid4="+rows[i].LEV4_COUNSEL_ITEM_ID+",LEVEL4="+rows[i].LEV4_ITEM_POINT+",ITEM_TYPE_CD="+rows[i].ITEM_TYPE_CD;
-				    		param2.expression = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
+				    		var senteval = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
+				    		param2.expression = senteval.replace(/ /gi, "");
+				    		
 			    		}
 			    	}
 			    	
@@ -185,7 +189,7 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 	!fs.existsSync(config.backup_path_bak) && fs.mkdirSync(config.backup_path_bak);
 	!fs.existsSync(config.backup_path_error) && fs.mkdirSync(config.backup_path_error);
 	fs.readdir(config.backup_path, function(err, filelist){
-		console.log('file readdir');
+		console.log('file readdir'); 
 		if(err) { return callerror(err); }
 		filelist.forEach(function(file) {
 			console.log('file forEach');
@@ -206,8 +210,9 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 							    	callsetseq = rows[i].SEQ; //resultId에 해당하는 부분만 가져옴
 							    }
 								if(counsetltypeid != null || counsetltypeid != ""){
+									var filedataset = filedata.timeNtalk.replace(/[0-9]/g, "");
 									param = { "id" : counsetltypeid,
-								    		  "text" : filedata.timeNtalk.replace(/[0-9]/g, "")
+								    		  "text" : filedataset.replace(/ /gi, "")
 								    		};
 											
 									logger.debug("counsetltypeid : " +counsetltypeid);		
