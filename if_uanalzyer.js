@@ -201,7 +201,7 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 					var callsetseq = "";
 					pool.getConnection(function(err, connection){
 						console.log('file pool.getConnection');
-						var querystring  = "SELECT NCT.COUNSEL_TYPE_ID, (SELECT CURRENT_VAL FROM NX_SEQUENCE WHERE SEQUENCE_ID = 'CALL_SET_SEQ'  LIMIT 1) AS SEQ FROM NX_COUNSEL_TYPE_MAPPINT NCT, NX_EMP NE WHERE NCT.DEPT_ID = NE.DEPT_ID AND NE.CTI_ID = ? LIMIT 1";
+						var querystring  = "SELECT NCT.COUNSEL_TYPE_ID, (SELECT CURRENT_VAL FROM NX_SEQUENCE WHERE SEQUENCE_ID = 'CALL_SET_SEQ'  LIMIT 1) AS SEQ FROM NX_COUNSEL_TYPE_MAPPING NCT, NX_EMP NE WHERE NCT.DEPT_ID = NE.DEPT_ID AND NE.CTI_ID = ? LIMIT 1";
 						connection.query(querystring, [ filedata.agentId ], function(err, rows, fields) {
 							console.log('db querystring');
 							if (!err){
