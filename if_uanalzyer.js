@@ -312,8 +312,11 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 									logger.error("if_uanalzyer_COUNSEL_TYPE_ID_null", err);
 								}
 							}
-							else
+							else{
+								fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
 								logger.error("if_uanalzyer_Db_Query_2", err);
+							}
+								
 						});
 					});
 				});
