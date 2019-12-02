@@ -306,9 +306,11 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 									    	});
 								    	}
 									}).catch(function (err){
+										fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
 										logger.error("if_uanalzyer_/voc/evaluation/_match", err);
 								    });
 								}else{
+									fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
 									logger.error("if_uanalzyer_COUNSEL_TYPE_ID_null", err);
 								}
 							}
