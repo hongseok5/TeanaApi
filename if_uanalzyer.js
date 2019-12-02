@@ -183,6 +183,7 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 
 var io = schedule.scheduleJob('30 30 * * * *', function(){
 	!fs.existsSync(config.backup_path_bak) && fs.mkdirSync(config.backup_path_bak);
+	!fs.existsSync(config.backup_path_error) && fs.mkdirSync(config.backup_path_error);
 	fs.readdir(config.backup_path, function(err, filelist){
 		console.log('file readdir');
 		if(err) { return callerror(err); }
@@ -274,8 +275,10 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 									    	            if(i == checkrow){
 									    	            	var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.agentId ], function (err, rows) {
 											    	    		if(err){
+											    	    			fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
 													    	    	console.log("bchm err = "+err);
 													    	    	connection.release();
+													    	    	logger.error("if_uanalzyer_Db_Query_callSQL", err);
 													    	        throw err;
 													    	    }else{
 													    	    	logger.info("if_uanalzyer_Db_Query_callSQL", err);
