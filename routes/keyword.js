@@ -716,11 +716,11 @@ router.post("/issue/top", function(req, res){
         result.data.result = [];
         for(i in resp.aggregations.keyword_top.aggs_name.buckets){
         	for(j in req.body.keyword){
-        		if(resp.aggregations.keyword_top.aggs_name.buckets[i].key == req.body.keyword[j]){
+        		if(resp.aggregations.keyword_top.aggs_name.buckets[i].key == req.body.keyword[j].word){
         			var z = parseInt(i)+1;
         			var obj = {
                 		no : z,
-                		word : req.body.keyword[j],
+                		word : req.body.keyword[j].word,
                 		count : resp.aggregations.keyword_top.aggs_name.buckets[i].doc_count
                 	}
         			result.data.result.push(obj);
