@@ -5,21 +5,24 @@ var fs = require('fs');
 var approot = require('app-root-path');
 var config = require(approot + '/config/config');
 const winstonConfig = require(approot + '/lib/logger');
+var crypto = require(approot + '/lib/crypto');
 
 /************************************************************
  * 로그 설정.
  ************************************************************/
 winston.loggers.add("if_uanalzyer", winstonConfig.createLoggerConfig("if_uanalzyer"));
 var logger = winston.loggers.get("if_uanalzyer");
-//var dbConn = require(approot + '/lib/MariaDBConn');
 const mariadb = require('mysql');
 const conn = {
     host : '10.253.42.184',
     user : 'ssgtv',
-    password : 'ssgtv0930',
+    password : 'af6676387824a0ee9bbae73e3da0671e',
     database : 'ssgtv',
     connectionLimit : 5
 };
+
+conn.password = crypto.pwdecrypto(conn.password);
+
 
 var pool = mariadb.createPool(conn);
 
@@ -331,6 +334,7 @@ function getData(){
 	
 	//iu.invoke();
 	io.invoke();
+	
 }
 
 getData();
