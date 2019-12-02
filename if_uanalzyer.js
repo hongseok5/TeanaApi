@@ -329,6 +329,10 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 	})
 }); 
 
+function callback(){
+	console.log("test");
+}
+
 function callerror(err){
 	logger.error("if_uanalzyer_file_error", err);
 }
