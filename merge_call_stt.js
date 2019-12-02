@@ -2,18 +2,48 @@ const approot = require('app-root-path');
 const config = require(approot + '/config/config');
 const common = require(approot + '/routes/common');
 const cron = require('node-cron');
+const schedule = require('node-schedule');
 const mergejson = require('mergejson');
 const fs = require('fs');
 const rp = require('request-promise');
+const mysql = require('mysql');
+const conn = {
+    host : '10.253.42.184',
+    user : 'ssgtv',
+    password : 'ssgtv0930',
+    database : 'ssgtv',
+    connectionLimit : 50
+};
 let day = new Date().getDate();
 let month = new Date().getMonth() + 1;
 let year = new Date().getFullYear();
-//fs.mkdirSync(config.backup_path + year.toString() + month.toString() + day.toString());
+fs.mkdirSync(config.backup_path + year.toString() + month.toString() + day.toString());
 var today = year.toString() + month.toString() + day.toString();
+
+var stop_words = [];
+schedule.scheduleJob('0 0 * * * *', function(){
+  var pool = mysql.createPool(conn);
+  pool.getConnection( function(err, connection){
+    let query = "SELECT keyword FROM nx_keyword WHERE use_yn = 'Y' AND keyword_type = '07'"
+
+    connection.query( query, function(err, rows){
+      if(err){
+        connection.release();
+        throw err;
+      }
+      for( i in rows ){
+        stop_words.push(rows[i].keyword);
+      }
+      console.log(stop_words);
+    });
+  })
+}).invoke();
+
+/*
 var stop_words = fs.readFileSync("./stop_word.txt", "utf-8");
 stop_words = stop_words.split(",");
 console.log(stop_words);
-
+*/
 // 키워드추출 API
 let kwe_option = {
   uri : 'http://localhost:12800/txt_to_kwd',
@@ -218,12 +248,11 @@ function mergeTalk( dataR, dataT  ){
   
 };
 
-cron.schedule('*/10 * * * * *', () => {
+cron.schedule('*/5 * * * * *', () => {
+
   const file_path = config.save_path;
   let file_list = fs.readdirSync(file_path);
   let file_list_r = file_list.filter(el => /\-R$/.test(el));
-  let file_list_t = file_list.filter(el => /\-T$/.test(el));
-  //console.log("check file_nr list : " + file_list_r);
   let count = 0;
   let count_not_ex = 0;
   for( i in file_list_r ){
@@ -291,3 +320,4 @@ function convertDuration( value ){
     return value + "초";
   }
 }
+
