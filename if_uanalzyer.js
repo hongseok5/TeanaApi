@@ -311,7 +311,7 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 									    	        }
 									    	    });
 									    	    
-									    	    connection.release();
+									    	    //connection.release();
 									    	});
 								    	}
 									}).catch(function (err){
