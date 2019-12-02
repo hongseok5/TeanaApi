@@ -21,7 +21,7 @@ const conn = {
     connectionLimit : 5
 };
 
-conn.password = crypto.pwdecrypto(conn.password);
+conn.password = crypto.strdecrypto(conn.password);
 
 
 var pool = mariadb.createPool(conn);
