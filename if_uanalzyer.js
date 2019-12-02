@@ -182,6 +182,7 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 }); 
 
 var io = schedule.scheduleJob('30 30 * * * *', function(){
+	!fs.existsSync(config.backup_path_bak) && fs.mkdirSync(config.backup_path_bak);
 	fs.readdir(config.backup_path, function(err, filelist){
 		console.log('file readdir');
 		if(err) { return callerror(err); }
@@ -288,10 +289,11 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 													    	            console.log("Updated successfully!");
 													    	        }
 													    	    });
-													    	    fs.unlink(config.backup_path+file, function(err){
+													    	    fs.rename(config.backup_path+file, config.backup_path_bak+file, callback);
+													    	    /*fs.unlink(config.backup_path+file, function(err){
 													    	        if( err ) throw err;
 													    	        console.log('file deleted');
-													    	    });
+													    	    });*/
 													    	});
 											    	    }
 									    	        }
@@ -314,12 +316,13 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 				});
 			}else{
 				if(file.substring(file.lastIndexOf("-"),file.lenght) == '-R'){
-					fs.unlink(config.backup_path+file, function(err){
+					fs.rename(config.backup_path+file, config.backup_path_bak+file, callback);
+					/*fs.unlink(config.backup_path+file, function(err){
 		    	        if( err ){
 		    	        	throw err;
 		    	        }
 		    	        console.log('file deleted');
-		    	    });
+		    	    });*/
 				}
 			}
 	    });
