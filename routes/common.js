@@ -259,7 +259,37 @@ var common = {
 		} else {
 			return null;
 		}	
+	},
+	 
+	convertDuration : function( value ){
+		if ( value < 0 ) {
+			return '';
+		} else if ( value > 60 ){
+			let min = value / 60;
+			let sec = value % 60;
+			return parseInt(min) + "분 " + sec + "초 ";
+		} else {
+			return value + "초";
+		}
+	},
+	
+	convertDtm : function( value ){
+		if ( value.length === 14){
+			return `${value.slice(8,10)}:${value.slice(10,12)}:${value.slice(12,14)}`
+		} else {
+			return value;
+		}
+	},
+	
+	convertEmpty : function( value ){
+		if (typeof value != 'undefined' && value) {
+			return value;
+		} else {
+			return '';
+		}
 	}
+
+  
 };
 
 
