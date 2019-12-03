@@ -44,7 +44,7 @@ router.post("/search", function(req, res){
         body.query.bool.filter.push({ term : { mdNm : req.body.MD }});
     if(common.getEmpty(req.body.keyword))
         body.query.bool.filter.push({ term : { keyword : req.body.keyword }});
-
+        
     client.search({
         index ,
         body 
@@ -56,11 +56,11 @@ router.post("/search", function(req, res){
         for(i in test){
         	var obj = {
         		extension : test[i][1]._source.extension,
-        		casenumber : test[i][1]._source.casenumber,
+        		casenumber : common.convertEmpty(test[i][1]._source.casenumber),
         		callDt : test[i][1]._source.startTime.slice(0,8),
-        		startDtm : test[i][1]._source.startTime.slice(8,14),
-        		endDtm : test[i][1]._source.endTime.slice(8,14),
-        		duration : test[i][1]._source.duration,
+        		startDtm : common.convertDtm(test[i][1]._source.startTime),
+        		endDtm : common.convertDtm(test[i][1]._source.endTime),
+        		duration : common.convertDuration(test[i][1]._source.duration),
         		company : test[i][1]._source.company,
         		companyNm : test[i][1]._source.companyNm,
         		productCode : test[i][1]._source.productCode,
