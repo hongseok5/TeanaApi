@@ -786,24 +786,18 @@ router.post("/issue", function(req, res){
         result.data.count = resp.aggregations.keyword_hist.buckets.length;
         result.data.interval = req.body.interval;
         result.data.result = [];
-        for(j in dayList){        	
+        for(j in dayList){  
+        	var obj = {
+    		   	key : dayList[j].key,	
+    		   	word : req.body.keyword,
+    		   	count : 0
+    		}
         	for(i in resp.aggregations.keyword_hist.buckets){
         		if(dayList[j].key == resp.aggregations.keyword_hist.buckets[i].key_as_string){
-    				var obj = {};
-    	            obj.key = dayList[j].key;
-    	            obj.count = resp.aggregations.keyword_hist.buckets[i].doc_count;
-    	            obj.word = req.body.keyword;
-    	            result.data.result.push(obj);
-    			}else{
-    				var obj = {
-        		       	key : dayList[j].key,	
-        		       	word : req.body.keyword,
-        		       	count : 0
-        		    }
-    				result.data.result.push(obj);	
+    				obj.count = resp.aggregations.keyword_hist.buckets[i].doc_count;
     			}
     		}
-            
+        	result.data.result.push(obj);
         }
 
         res.send(result);
