@@ -749,6 +749,7 @@ router.post("/issue", function(req, res){
     var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var index = common.getIndex(req.body.channel);
     var interval = req.body.interval || "1D";
+    var dayList = common.getDays(req.body.start_dt, req.body.end_dt, interval);
     if(common.getEmpty(req.body.category1))
         body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
     if(common.getEmpty(req.body.category2))
@@ -785,9 +786,9 @@ router.post("/issue", function(req, res){
         result.data.count = resp.aggregations.keyword_hist.buckets.length;
         result.data.interval = req.body.interval;
         result.data.result = [];
-        for(i in resp.aggregations.keyword_hist.buckets){
-        	for(j in dayList){
-    			if(dayList[j].key == resp.aggregations.keyword_hist.buckets[i].key_as_string){
+        for(j in dayList){        	
+        	for(i in resp.aggregations.keyword_hist.buckets){
+        		if(dayList[j].key == resp.aggregations.keyword_hist.buckets[i].key_as_string){
     				var obj = {};
     	            obj.key = dayList[j].key;
     	            obj.count = resp.aggregations.keyword_hist.buckets[i].doc_count;
