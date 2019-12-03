@@ -359,241 +359,166 @@ router.post("/hot/count", function(req, res){
 
 });
 
-/*대역변수 /hot/statistics에서 키워드별로 한건씩 조회하여 값 셋팅
- * 키워드 별로 hotStatistics(키워드, req, res, 종료 여부) 호출 	
- * 키워드 수만큼 hotStatistics호출 후 hotStatisticsResult에 데이터 쌓아 놓음. */ 
-var hotStatisticsResult;
-var hotstatisticsobj = new Array();
-var hotstatisticsobj2 = new Array();
-
 router.post("/hot/statistics", function(req, res){
     logger.info("Router for IF_DMA_00104");
-    hotStatisticsResult = common.getResult("10", "OK", "hot_statistics");
-    hotStatisticsResult.data.result = [];
-		
-    if(common.getEmpty(req.body.keyword)){
-    	hotStatisticsResult.data.count = req.body.keyword.length;
-    	var finStr ="";
-    	var keyNum = req.body.keyword.length;
-    	keyNum--;
-    	for(i in req.body.keyword){
-    		if(i == keyNum){
-    			finStr = "Y";
-    		}
-    		hotStatistics(req.body.keyword[i], req, res, finStr, i);
-    	}
-    }else{
-    	var now = dateFormat(new Date(), "yyyymmddHHMMss");
-    	var two_ago = new Date().getHours() - 2 ;
-    	var hour_ago = new Date().getHours() - 1 ;
-    	var now_ago = new Date().getHours();
-    	two_ago = now.slice(0,8) + ( two_ago < 10 ? "0" + two_ago : two_ago )+now.slice(10,14);
-    	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago )+now.slice(10,14);
-    	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago )+now.slice(10,14);
-    	var body = common.getBodyNoSize(two_ago, now_ago);
-    	var index = common.getIndex(req.body.channel);
-    	body.aggs.rt_hot_keyword = {
-    	        range : {
-    	            field : "startTime",
-    	            ranges : [
-    	             { from : two_ago, to : hour_ago },
-    	             { from : hour_ago, to : now_ago }
-    	         
-    	            ]
-    	        },
-    	        aggs : {
-    	            keyword_count : {
-    	                nested : {
-    	                    path : "keyword_count"   
-    	                },
-    	                aggs : {
-    	                    aggs_name : {
-    	                        terms : {
-    	                            field : "keyword_count.keyword",
-    	                            size : 1000
-    	                        }
-    	                    }
-    	                }
-    	            }
-    	        }
-    	    }
-    	client.search({
-            index,
-            body
-        }).then(function(resp){
-        	var result = common.getResult( "10", "OK", "top_keyword");
-            result.data.count = 0;
-            result.data.result = [];
-            if( resp.aggregations.rt_hot_keyword.buckets.length === 2 ){
-            	// 현재시간, 전시간으로 정렬
-                resp.aggregations.rt_hot_keyword.buckets = resp.aggregations.rt_hot_keyword.buckets.sort( function(a, b){
-                    return a.from > b.from ? -1 : a.from < b.from ? 1 : 0;
-                });
-                
-                // 키갑 비교 이중 포문
-                let current_words = resp.aggregations.rt_hot_keyword.buckets[0].keyword_count.aggs_name.buckets;
-                let before_words = resp.aggregations.rt_hot_keyword.buckets[1].keyword_count.aggs_name.buckets;
-                
-                for( i in current_words ){
-                    for( j in before_words ){
-                        if( current_words[i].key === before_words[j].key){
-                            current_words[i].before_count = before_words[j].doc_count;
-                            current_words[i].gap = current_words[i].doc_count - before_words[j].doc_count;
-                            current_words[i].updown = common.getUpdownRate(before_words[j].doc_count, current_words[i].doc_count );
-                            break;
-
-                        } else {
-                            current_words[i].before_count = 0;
-                            current_words[i].gap = current_words[i].doc_count;
-                            current_words[i].updown = "new";
-                        }
-                    }
-                }
-                // gap 순으로 정렬
-                current_words = current_words.sort( function(a, b){
-                    return a.gap > b.gap ? -1 : a.gap < b.gap ? 1 : 0;
-                });
-                if( current_words.length > 5 ){
-                    current_words = current_words.slice(0, 5);
-                }
-                
-                var finStr = "";
-                // 번호부여
-                for ( i in current_words){
-                    if(i == 4){
-            			finStr = "Y";
-            		}
-            		hotStatistics(current_words[i].key, req, res, finStr, i);
-                }
-            }else{
-            	topStatisticsResult = common.getResult( "20", "NODATA", "hot_statistics");
-        		res.send(topStatisticsResult);
-            }
-        }, function(err){
-			logger.error("hot_statistics", err);
-        	hotStatisticsResult = common.getResult("99", "ERROR", "hot_statistics");
-        	res.send(hotStatisticsResult);
-        });
-    }
-});
-
-function hotStatistics(keyword, req, res, final, keycount){
-	var now = dateFormat(new Date(), "yyyymmddHHMMss");
+    var now = dateFormat(new Date(), "yyyymmddHHMMss");
 	var two_ago = new Date().getHours() - 2 ;
 	var hour_ago = new Date().getHours() - 1 ;
 	var now_ago = new Date().getHours();
 	two_ago = now.slice(0,8) + ( two_ago < 10 ? "0" + two_ago : two_ago )+now.slice(10,14);
 	hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago )+now.slice(10,14);
 	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago )+now.slice(10,14);
-	var search_hour_age = new Date().getHours() - 1 ;
-	var search_now_age = new Date().getHours() + 1 ;
-	now = now.slice(0,10) + "0000";
-    search_hour_age = now.slice(0,8) + ( search_hour_age < 10 ? "0" + search_hour_age : search_hour_age ) + "0000";
-    search_now_age = now.slice(0,8) + ( search_now_age < 10 ? "0" + search_now_age : search_now_age ) + "0000";
-    var body = common.getBodyNoSize(search_hour_age, search_now_age);
+	var body = common.getBodyNoSize(two_ago, now_ago);
 	var index = common.getIndex(req.body.channel);
-	
-	if(common.getEmpty(req.body.category1))
-        body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-	if(common.getEmpty(req.body.category2))
-        body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
-    
-	console.log('bchm hour_ago = '+hour_ago);
-	console.log('bchm now_ago = '+now_ago);
-	
-    body.query.bool.must = [
-    	{ 
-          	bool : {
-           		should : [{
-           			nested : {
-           				path : "keyword_count",
-           					query : {
-           						bool : {
-           							must : {
-           								term : {
-           									"keyword_count.keyword" : keyword 
-           								}
-           							}
-           						}
-           					}
-           			}
-           		}]
-           	}
-        }
-    ];
-    body.aggs = {
-    		data_range : {
-    			range : {
-    			field : "startTime",
-    			ranges : [
-    	              {from : two_ago, to : hour_ago},
-    	              {from : hour_ago, to : now_ago}
-    	            ]
-    		}
+		
+    if(common.getEmpty(req.body.keyword)){
+    	var keyobj = new Array();
+    	for(i in req.body.keyword){
+    		keyobj[i] = req.body.keyword[i].word;
     	}
-    };
+    	body.query.bool.must = [
+        	{ 
+              	bool : {
+               		should : [{
+               			nested : {
+               				path : "keyword_count",
+               					query : {
+               						bool : {
+               							must : {
+               								terms : {
+               									"keyword_count.keyword" : keyobj 
+               								}
+               							}
+               						}
+               					}
+               			}
+               		}]
+               	}
+            }
+        ];
+    }
     
-    body.sort = [
-    	{startTime : "asc"}	
-    ];
-    
-    client.search({
+    body.aggs.rt_hot_keyword = {
+	        range : {
+	            field : "startTime",
+	            ranges : [
+	             { from : two_ago, to : hour_ago },
+	             { from : hour_ago, to : now_ago }
+	         
+	            ]
+	        },
+	        aggs : {
+	            keyword_count : {
+	                nested : {
+	                    path : "keyword_count"   
+	                },
+	                aggs : {
+	                    aggs_name : {
+	                        terms : {
+	                            field : "keyword_count.keyword",
+	                            size : 1000
+	                        }
+	                    }
+	                }
+	            }
+	        }
+	    }
+	client.search({
         index,
         body
     }).then(function(resp){
-    	var obj = new Array();
-    	var dateObj = new Array();
-    	test = Object.entries(resp.aggregations.data_range.buckets);
-    	for(i in test){
-    		obj[i] = test[i][1].doc_count;
-    		dateObj[i] = test[i][1].to_as_string;
-    	}
-    	var returnVal1 = 0;
-    	var returnVal2 = 0;
-    	if(dateObj[0] == now_ago){
-    		if(common.getEmpty(obj[0])){
-        		returnVal1 = obj[0];
-        	}
-    	}
-    	if(dateObj[0] == hour_ago){
-    		if(common.getEmpty(obj[0])){
-        		returnVal2 = obj[0];
-        	}
-    	}
-    	if(dateObj[1] == now_ago){
-    		if(common.getEmpty(obj[1])){
-        		returnVal1 = obj[1];
-        	}
-    	}
-    	if(dateObj[1] == hour_ago){
-    		if(common.getEmpty(obj[1])){
-        		returnVal2 = obj[1];
-        	}
-    	}
-    	var returnObj = {
-    		key : "before",	
-			word : keyword,	
-	       	count : returnVal2,
-	    }
-    	var returnObj2 = {
-        	key : "current",	
-        	word : keyword,	
-    	   	count : returnVal1,
-    	}
-    		
-    	hotstatisticsobj[keycount] = returnObj;
-    	hotstatisticsobj2[keycount] = returnObj2;
-		if(final == "Y"){
-			hotStatisticsResult.data.result.push(hotstatisticsobj);
-			hotStatisticsResult.data.result.push(hotstatisticsobj2);
-			res.send(hotStatisticsResult);
-		}
+    	var result = common.getResult( "10", "OK", "top_keyword");
+        result.data.count = 0;
+        result.data.result = [];
+        if( resp.aggregations.rt_hot_keyword.buckets.length === 2 ){
+        	// 현재시간, 전시간으로 정렬
+            resp.aggregations.rt_hot_keyword.buckets = resp.aggregations.rt_hot_keyword.buckets.sort( function(a, b){
+                return a.from > b.from ? -1 : a.from < b.from ? 1 : 0;
+            });
+            
+            // 키갑 비교 이중 포문
+            let current_words = resp.aggregations.rt_hot_keyword.buckets[0].keyword_count.aggs_name.buckets;
+            let before_words = resp.aggregations.rt_hot_keyword.buckets[1].keyword_count.aggs_name.buckets;
+            
+            for( i in current_words ){
+                for( j in before_words ){
+                    if( current_words[i].key === before_words[j].key){
+                        current_words[i].before_count = before_words[j].doc_count;
+                        current_words[i].gap = current_words[i].doc_count - before_words[j].doc_count;
+                        current_words[i].updown = common.getUpdownRate(before_words[j].doc_count, current_words[i].doc_count );
+                        break;
+
+                    } else {
+                        current_words[i].before_count = 0;
+                        current_words[i].gap = current_words[i].doc_count;
+                        current_words[i].updown = "new";
+                    }
+                }
+            }
+            // gap 순으로 정렬
+            current_words = current_words.sort( function(a, b){
+                return a.gap > b.gap ? -1 : a.gap < b.gap ? 1 : 0;
+            });
+            
+            var beforobj = new Array();
+            var newobj = new Array();
+            
+            if(common.getEmpty(req.body.keyword)){
+            	for(k in req.body.keyword){
+                	var obj = {
+            		   	key : "before",	
+            			word : req.body.keyword[k].word,	
+            		  	count : 0,
+            		}
+            		var obj2 = {
+            		   	key : "current",	
+            		   	word : req.body.keyword[k].word,	
+            		   	count : 0,
+            		}
+            		beforobj[k] = obj;
+            		newobj[k] = obj2;
+                }
+            	for ( i in current_words){
+            		for(j in beforobj){
+                		if(current_words[i].key == beforobj[j].word){
+                			beforobj[j].count = current_words[i].before_count;
+                			newobj[j].count = current_words[i].doc_count;
+                		}
+                	}
+            	}
+            }else{
+            	for ( i in current_words){
+            		if(i <= 4){
+                		var obj = {
+                		   	key : "before",	
+                			word : current_words[i].key,	
+                		  	count : current_words[i].before_count,
+                		}
+                		var obj2 = {
+                		   	key : "current",	
+                		   	word : current_words[i].key,	
+                		   	count : current_words[i].doc_count,
+                		}
+                		beforobj[i] = obj;
+            			newobj[i] = obj2;
+             		}
+            	}
+            	
+            }
+            
+            result.data.result.push(beforobj);
+            result.data.result.push(newobj);
+            res.send(result);
+        }else{
+        	result = common.getResult( "20", "NODATA", "hot_statistics");
+    		res.send(result);
+        }
     }, function(err){
 		logger.error("hot_statistics", err);
-    	hotStatisticsResult = common.getResult("99", "ERROR", "hot_statistics");
-    	res.send(hotStatisticsResult);
+		result = common.getResult("99", "ERROR", "hot_statistics");
+    	res.send(result);
     });
-}
+});
 
 router.post("/relation", function(req, res){
     logger.info("Router for IF_DMA_00105");
