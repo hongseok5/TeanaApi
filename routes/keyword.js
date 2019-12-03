@@ -158,14 +158,8 @@ router.post("/top/statistics", function(req, res){
         		topStatisticsResult = common.getResult( "10", "OK", "top_statistics_keyword");
             	topStatisticsResult.data.count = 0;
             	topStatisticsResult.data.result = [];
-            	var finStr = "";
-                for(i in test){
-                	var keyNum = test.length;
-                	keyNum--;
-                	if(i == keyNum){
-            			finStr = "Y";
-            		}
-                	topKeyword(test[i][1].key, req, res, finStr);
+            	for(i in test){
+            		topKeyword(test[i][1].key, req, res, test.length);
                 }
         	}else{
         		topStatisticsResult = common.getResult( "20", "NODATA", "top_statistics_keyword");
@@ -181,18 +175,13 @@ router.post("/top/statistics", function(req, res){
     	topStatisticsResult.data.result = [];
     	var finStr = "";
     	for(i in req.body.keyword){
-    		var keyNum = req.body.keyword.length;
-        	keyNum--;
-        	if(i == keyNum){
-    			finStr = "Y";
-    		}
-    		topKeyword(req.body.keyword[i], req, res, finStr);
+    		topKeyword(req.body.keyword[i], req, res, req.body.keyword.length);
     	}
     }
     
 });
 
-function topKeyword(keyword, req, res, final){
+function topKeyword(keyword, req, res, rownum){
 	var interval = req.body.interval || "1D";
     var index = common.getIndex(req.body.channel);
     var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
@@ -254,8 +243,8 @@ function topKeyword(keyword, req, res, final){
         	topStatisticsResult.data.count = topStatisticsResult.data.count+test[i][1].doc_count;
         	
 	    }
-        topStatisticsResult.data.result.push(obj2);
-        if(final == "Y"){
+    	topStatisticsResult.data.result.push(obj2);
+        if(topStatisticsResult.data.result.length == rownum){
 			res.send(topStatisticsResult);
 		}
     }, function(err){
@@ -391,7 +380,7 @@ router.post("/hot/statistics", function(req, res){
     		if(i == keyNum){
     			finStr = "Y";
     		}
-    		hotStatistics(req.body.keyword[i], req, res, finStr);
+    		hotStatistics(req.body.keyword[i], req, res, finStr, i);
     	}
     }else{
     	var now = dateFormat(new Date(), "yyyymmddHHMMss");
