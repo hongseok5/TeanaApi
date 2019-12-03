@@ -700,10 +700,11 @@ router.post("/issue/top", function(req, res){
         var result = common.getResult("10", "OK", "issue_top_keyword");
         result.data.count = resp.aggregations.keyword_top.aggs_name.buckets.length;
         result.data.result = [];
+        var z = 0;
         for(i in resp.aggregations.keyword_top.aggs_name.buckets){
         	for(j in req.body.keyword){
         		if(resp.aggregations.keyword_top.aggs_name.buckets[i].key == req.body.keyword[j].word){
-        			var z = parseInt(i)+1;
+        			z = parseInt(z)+1;
         			var obj = {
                 		no : z,
                 		word : req.body.keyword[j].word,
