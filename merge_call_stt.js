@@ -39,11 +39,6 @@ schedule.scheduleJob('0 0 * * * *', function(){
   })
 }).invoke();
 
-/*
-var stop_words = fs.readFileSync("./stop_word.txt", "utf-8");
-stop_words = stop_words.split(",");
-console.log(stop_words);
-*/
 // 키워드추출 API
 let kwe_option = {
   uri : 'http://localhost:12800/txt_to_kwd',
@@ -153,7 +148,7 @@ function mergeTalk( dataR, dataT  ){
     let cate_obj = {};
     for( i in values[1].output ){
       let obj = {};
-      obj.category = parseInt(values[1].output[i].id.substr(0, 2));
+      obj.category = parseInt(values[1].output[i].id.substr(0, values[1].output[i].id.indexOf('_')));
       obj.score = values[1].output[i].similarity;
       if( obj.category in cate_obj){
         cate_obj[eval(obj.category)] += obj.score;
@@ -167,7 +162,7 @@ function mergeTalk( dataR, dataT  ){
     for( i in tmp_arr){
       if( cate_obj[tmp_arr[i]] > max ){
         max = cate_obj[tmp_arr[i]]; 
-        max_key = tmp_arr[i]
+        max_key = tmp_arr[i];
       }
     }
     merged_data.analysisCate = max_key;
@@ -224,7 +219,10 @@ function mergeTalk( dataR, dataT  ){
       if(err) 
         console.log(err);
     });
-    
+    fs.writeFile( config.send_smry_path + merged_data.startTime + "-" + merged_data.agentId + ".JSON" , JSON.stringify(file_sending), 'utf8', function(err){
+      if(err) 
+        console.log(err);
+    });
     fs.writeFile(config.write_path + merged_data.startTime + "-" + merged_data.agentId + ".JSON", JSON.stringify(merged_data), 'utf8', function(err) {
       if(err) 
           console.log('Failed to write file!');
@@ -303,7 +301,11 @@ function getDuration( start, end, es ){
       
     value = common.strToDate(end) - common.strToDate(start);
     value = value / 1000;
-    return parseInt( value );
+    if (value > 0){
+      return parseInt( value );
+    } else {
+      return 0;
+    }
   } else {
     return null;
   }
