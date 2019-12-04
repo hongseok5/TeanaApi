@@ -103,7 +103,7 @@ function getData(){
     sj.invoke();
     var sj2 = schedule.scheduleJob('30 30 * * * *', function(){
     	!fs.existsSync(config.send_move_path) && fs.mkdirSync(config.send_move_path);
-    	!fs.existsSync(config.sent_error_path) && fs.mkdirSync(config.sent_error_path);
+    	!fs.existsSync(config.send_error_path) && fs.mkdirSync(config.send_error_path);
         var z = 0;
         fs.readdir(config.send_save_path, function(err, filelist){
         	filelist.forEach(function(file) {
@@ -128,7 +128,7 @@ function getData(){
         	            	if(data.code == "10"){
         	            		fs.rename(config.send_save_path+file, config.send_move_path+send_data.sendTime+z, callback);
         	            	}else if(data.code == "99"){
-        	            		fs.rename(config.send_save_path+file, config.sent_error_path+send_data.sendTime+z, callback);
+        	            		fs.rename(config.send_save_path+file, config.send_error_path+send_data.sendTime+z, callback);
         	            	}
         	            }).catch(function (err){
         	            	logger.error(err);
