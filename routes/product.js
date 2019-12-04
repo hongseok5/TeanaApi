@@ -30,10 +30,8 @@ router.post("/list", function(req, res){
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from, fields);
     var index = common.getIndex(req.body.channel);
     var should = [];
-    if(common.getEmpty(req.body.category1))
-        body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if(common.getEmpty(req.body.category2))
-        body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
+    if(common.getEmpty(req.body.category) && req.body.category != "ALL")
+        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
     if(common.getEmpty(req.body.gender))
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.companyCode))
