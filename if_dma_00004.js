@@ -102,39 +102,43 @@ function getData(){
     });  
     sj.invoke();
     var sj2 = schedule.scheduleJob('30 30 * * * *', function(){
-    	var send_data = {};
-        send_data.params = [];
-        !fs.existsSync(config.send_move_path) && fs.mkdirSync(config.send_move_path);
+    	!fs.existsSync(config.send_move_path) && fs.mkdirSync(config.send_move_path);
         var z = 0;
         fs.readdir(config.send_save_path, function(err, filelist){
         	filelist.forEach(function(file) {
         		fs.readFile(config.send_save_path+file , 'utf-8' , function(err , filedata){
         			if(err) { return callerror(err); }
-        			filedata = JSON.parse(filedata);
+        			var send_data = {};
+        	        send_data.params = [];
+        	        filedata = JSON.parse(filedata);
         			send_data.params.push(filedata);
-        			z = parseInt(z)+1;
         			send_data.sendTime = dateFormat(new Date(), "yyyymmddHHMMss");
-        			fs.rename(config.send_save_path+file, config.send_move_path+send_data.sendTime+z, callback);
+        			rp(options1)
+        	        .then(function (body) {
+        	            var token = JSON.parse(body);
+        	            options2.headers.Authorization = "OAuth " + token.access_token;
+        	            req_body = JSON.stringify(send_data);
+        	            console.log(req_body);
+        	            options2.body = req_body;
+        	            
+        	            rp(options2).then(function ( data ){
+        	            	z = parseInt(z)+1;
+        	            	data = JSON.parse(data);
+        	            	if(data.code == "10"){
+        	            		fs.rename(config.send_save_path+file, config.send_move_path+send_data.sendTime+z, callback);
+        	            	}
+        	            }).catch(function (err){
+        	            	logger.error(err);
+        	            });
+        	        })
+        	        .catch(function (err) {
+        	        	logger.error(err);
+        	        });
+        			
 				});
     		});
     	});
         
-        rp(options1)
-        .then(function (body) {
-            var token = JSON.parse(body);
-            options2.headers.Authorization = "OAuth " + token.access_token;
-            req_body = JSON.stringify(send_data);
-            console.log(req_body);
-            options2.body = req_body;
-            rp(options2).then(function ( data ){
-                logger.info(data);
-            }).catch(function (err){
-            	logger.error(err);
-            });
-        })
-        .catch(function (err) {
-        	logger.error(err);
-        });
     });  
     sj2.invoke();
 }
