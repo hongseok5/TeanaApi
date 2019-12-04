@@ -142,7 +142,7 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 			    			      "synonyms": []
 			    			    }
 			    		param2.id = rows[i].LEV4_COUNSEL_ITEM_ID;
-			    		param2.extradata = "LEVEL4="+rows[i].LEV4_ITEM_POINT+",counselitemid3="+rows[i].LEV3_COUNSEL_ITEM_ID+",counselitemid4="+rows[i].LEV4_COUNSEL_ITEM_ID+",LEVEL4="+rows[i].LEV4_ITEM_POINT+",ITEM_TYPE_CD="+rows[i].ITEM_TYPE_CD;
+			    		param2.extradata = "LEVEL4="+rows[i].LEV4_ITEM_POINT+",counselitemid3="+rows[i].LEV3_COUNSEL_ITEM_ID+",counselitemid4="+rows[i].LEV4_COUNSEL_ITEM_ID+",LEVEL3="+rows[i].LEV3_ITEM_POINT+",ITEM_TYPE_CD="+rows[i].ITEM_TYPE_CD;
 			    		var senteval = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
 			    		param2.expression = senteval.replace(/ /gi, "");
 			    	}else{
@@ -164,7 +164,7 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 			    				      "synonyms": []
 			    				    }
 			    			param2.id = rows[i].LEV4_COUNSEL_ITEM_ID;
-			    			param2.extradata = "LEVEL4="+rows[i].LEV4_ITEM_POINT+",counselitemid3="+rows[i].LEV3_COUNSEL_ITEM_ID+",counselitemid4="+rows[i].LEV4_COUNSEL_ITEM_ID+",LEVEL4="+rows[i].LEV4_ITEM_POINT+",ITEM_TYPE_CD="+rows[i].ITEM_TYPE_CD;
+			    			param2.extradata = "LEVEL4="+rows[i].LEV4_ITEM_POINT+",counselitemid3="+rows[i].LEV3_COUNSEL_ITEM_ID+",counselitemid4="+rows[i].LEV4_COUNSEL_ITEM_ID+",LEVEL3="+rows[i].LEV3_ITEM_POINT+",ITEM_TYPE_CD="+rows[i].ITEM_TYPE_CD;
 				    		var senteval = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
 				    		param2.expression = senteval.replace(/ /gi, "");
 				    		
@@ -188,18 +188,19 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 var io = schedule.scheduleJob('30 30 * * * *', function(){
 	!fs.existsSync(config.backup_path_bak) && fs.mkdirSync(config.backup_path_bak);
 	!fs.existsSync(config.backup_path_error) && fs.mkdirSync(config.backup_path_error);
-	fs.readdir(config.backup_path, function(err, filelist){
-		console.log('file readdir'); 
-		if(err) { return callerror(err); }
-		filelist.forEach(function(file) {
-			console.log('file forEach');
-			if(file.substring(file.lastIndexOf("-"),file.lenght) == '-T'){
-				fs.readFile(config.backup_path+file , 'utf-8' , function(err , filedata){
-					if(err) { return callerror(err); }
-					filedata = JSON.parse(filedata);
-					var counsetltypeid = "";
-					var callsetseq = "";
-					pool.getConnection(function(err, connection){
+	pool.getConnection(function(err, connection){
+		fs.readdir(config.backup_path, function(err, filelist){
+			console.log('file readdir'); 
+			if(err) { return callerror(err); }
+			filelist.forEach(function(file) {
+				console.log('file forEach');
+				if(file.substring(file.lastIndexOf("-"),file.lenght) == '-T'){
+					fs.readFile(config.backup_path+file , 'utf-8' , function(err , filedata){
+						if(err) { return callerror(err); }
+						filedata = JSON.parse(filedata);
+						var counsetltypeid = "";
+						var callsetseq = "";
+
 						console.log('file pool.getConnection');
 						var querystring  = "SELECT NCT.COUNSEL_TYPE_ID, (SELECT CURRENT_VAL FROM NX_SEQUENCE WHERE SEQUENCE_ID = 'CALL_SET_SEQ'  LIMIT 1) AS SEQ FROM NX_COUNSEL_TYPE_MAPPING NCT, NX_EMP NE WHERE NCT.DEPT_ID = NE.DEPT_ID AND NE.CTI_ID = ? LIMIT 1";
 						connection.query(querystring, [ filedata.agentId ], function(err, rows, fields) {
@@ -330,20 +331,20 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 								
 						});
 					});
-				});
-			}else{
-				if(file.substring(file.lastIndexOf("-"),file.lenght) == '-R'){
-					fs.rename(config.backup_path+file, config.backup_path_bak+file, callback);
-					/*fs.unlink(config.backup_path+file, function(err){
-		    	        if( err ){
-		    	        	throw err;
-		    	        }
-		    	        console.log('file deleted');
-		    	    });*/
+				}else{
+					if(file.substring(file.lastIndexOf("-"),file.lenght) == '-R'){
+						fs.rename(config.backup_path+file, config.backup_path_bak+file, callback);
+						/*fs.unlink(config.backup_path+file, function(err){
+			    	        if( err ){
+			    	        	throw err;
+			    	        }
+			    	        console.log('file deleted');
+			    	    });*/
+					}
 				}
-			}
-	    });
-	})
+		    });
+		});
+	});
 }); 
 
 function callback(){
@@ -356,7 +357,7 @@ function callerror(err){
 
 function getData(){
 	
-	//iu.invoke();
+	iu.invoke();
 	io.invoke();
 	
 }
