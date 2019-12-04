@@ -247,7 +247,7 @@ var common = {
 	},
 
 	strToDate : function( str ){
-		if( str.length === 14 ){
+		if( value && str.length === 14 ){
 			var year = str.substring(0, 4);
 			var month = str.substring(4, 6);
 			var day = str.substring(6, 8);
@@ -262,7 +262,7 @@ var common = {
 	},
 	 
 	convertDuration : function( value ){
-		if ( value < 0 ) {
+		if (value && value < 0 ) {
 			return '';
 		} else if ( value > 60 ){
 			let min = value / 60;
@@ -273,8 +273,16 @@ var common = {
 		}
 	},
 	
+	convertDate : function( value ){
+		if ( value && value.length === 8){
+			return `${value.slice(0,4)}-${value.slice(4,6)}-${value.slice(6,8)}`
+		} else {
+			return value;
+		}
+	},
+	
 	convertDtm : function( value ){
-		if ( value.length === 14){
+		if ( value && value.length === 14){
 			return `${value.slice(8,10)}:${value.slice(10,12)}:${value.slice(12,14)}`
 		} else {
 			return value;
@@ -290,7 +298,12 @@ var common = {
 	},
 	
 	convertCategory : function( value ){
-		return parseInt(value);
+		
+		if (typeof value != 'undefined' && value) {
+			return parseInt(value);
+		}else{
+			return value;
+		}
 	}
 
   
