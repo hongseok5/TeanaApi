@@ -161,34 +161,6 @@ router.post("/count", function(req, res){
     let from = req.body.from || 1;
     var body = common.getBody(req.body.start_dt, req.body.end_dt, 0, from);
     
-    if(common.getEmpty(req.body.category) && req.body.category != "ALL")
-        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
-    if(common.getEmpty(req.body.gender))
-        body.query.bool.filter.push({ term : { gender : req.body.gender }});
-    if(common.getEmpty(req.body.companyCode))
-        body.query.bool.filter.push({ term : { company : req.body.companyCode }});
-    if(common.getEmpty(req.body.Mcate))
-        body.query.bool.filter.push({ term : { Mcate : req.body.Mcate }});
-    if(common.getEmpty(req.body.inCate))
-        body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
-    if(common.getEmpty(req.body.MD))
-        body.query.bool.filter.push({ term : { mdNm : req.body.MD }});
-    if(common.getEmpty(req.body.vdn))
-        body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
-    if(common.getEmpty(req.body.vdnGrp))
-        body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
-    if(common.getEmpty(req.body.product)){
-    	for( p in req.body.product ){
-			if(common.getEmpty(req.body.product[p].productCode)) {
-				var term_obj = { term : { productCode : req.body.product[p].productCode}};
-				should.push(term_obj);
-			}
-        } 
-    }
-    body.query.bool.must = [
-        { bool : { should } }
-    ];
-
     body.aggs.neutral = {
         nested : {
             path : "neutral_word"
@@ -246,8 +218,10 @@ router.post("/count", function(req, res){
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
     if(common.getEmpty(req.body.product)){
     	for( p in req.body.product ){
-            var term_obj = { term : { productCode : req.body.product[p].productCode}};
-            should.push(term_obj);
+			if(common.getEmpty(req.body.product[p].productCode)) {
+				var term_obj = { term : { productCode : req.body.product[p].productCode}};
+				should.push(term_obj);
+			}
         } 
     }
     body.query.bool.must = [
