@@ -28,10 +28,8 @@ router.post("/count", function(req, res){
     let should = [];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
     
-    if(common.getEmpty(req.body.category1))
-        body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if(common.getEmpty(req.body.category2))
-        body.query.bool.filter.push({ term : { category2 : req.body.category2 }})
+    if(common.getEmpty(req.body.category) && req.body.category != "ALL")
+        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
     if(common.getEmpty(req.body.age))
     	body.query.bool.filter.push({ range : { age : { gte : age, lte : age + 9}}});    
     if(common.getEmpty(req.body.gender))
@@ -123,10 +121,8 @@ router.post("/statistics", function(req, res){
     let should = [];
     var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     let interval = req.body.interval || "week";
-    if(common.getEmpty(req.body.category1))
-        body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if(common.getEmpty(req.body.category2))
-        body.query.bool.filter.push({ term : { category2 : req.body.category2 }})
+    if(common.getEmpty(req.body.category) && req.body.category != "ALL")
+        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
     if(common.getEmpty(req.body.age))
     	body.query.bool.filter.push({ range : { age : { gte : age, lte : age + 9}}});    
     if(common.getEmpty(req.body.gender))
