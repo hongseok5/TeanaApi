@@ -29,10 +29,9 @@ router.post("/statistics", function(req, res){
     var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     var dayList = common.getDays(req.body.start_dt.toString(), req.body.end_dt.toString(), interval);
 
-    if(common.getEmpty(req.body.category1))
-        body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if(common.getEmpty(req.body.category2))
-        body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
+    if(common.getEmpty(req.body.category) && req.body.category != "ALL")
+        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
+	
         body.aggs.division = {
         	date_histogram : {
         		field : "startTime",
@@ -162,10 +161,8 @@ router.post("/count", function(req, res){
     let from = req.body.from || 1;
     var body = common.getBody(req.body.start_dt, req.body.end_dt, 0, from);
     
-    if(common.getEmpty(req.body.category1))
-        body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if(common.getEmpty(req.body.category2))
-        body.query.bool.filter.push({ term : { category2 : req.body.category2 }})
+    if(common.getEmpty(req.body.category) && req.body.category != "ALL")
+        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
     if(common.getEmpty(req.body.gender))
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.companyCode))
@@ -229,10 +226,8 @@ router.post("/count", function(req, res){
 
     var index = common.getIndex(req.body.channel);
 
-    if(common.getEmpty(req.body.category1))
-        body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if(common.getEmpty(req.body.category2))
-        body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
+    if(common.getEmpty(req.body.category) && req.body.category != "ALL")
+        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
     if(common.getEmpty(req.body.gender))
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.companyCode))
