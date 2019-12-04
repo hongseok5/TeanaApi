@@ -2,10 +2,11 @@ const approot = require('app-root-path');
 const config = require(approot + '/config/config');
 const common = require(approot + '/routes/common');
 const cron = require('node-cron');
-const schedule = require('node-schedule');
+// const schedule = require('node-schedule');
 const mergejson = require('mergejson');
 const fs = require('fs');
 const rp = require('request-promise');
+/*
 const mysql = require('mysql');
 const conn = {
     host : '10.253.42.184',
@@ -14,12 +15,18 @@ const conn = {
     database : 'ssgtv',
     connectionLimit : 50
 };
+*/
 let day = new Date().getDate();
 let month = new Date().getMonth() + 1;
 let year = new Date().getFullYear();
-fs.mkdirSync(config.backup_path + year.toString() + month.toString() + day.toString());
-var today = year.toString() + month.toString() + day.toString();
+var today = year.toString() + (month < 10 ? "0" + month : month.toString()) + (day < 10 ? "0" + day : day.toString());
 
+if(!fs.existsSync(config.backup_path + today)){
+  fs.mkdirSync(config.backup_path + today);
+  console.log("directory created!")
+} 
+
+/*
 var stop_words = [];
 schedule.scheduleJob('0 0 * * * *', function(){
   var pool = mysql.createPool(conn);
@@ -38,7 +45,7 @@ schedule.scheduleJob('0 0 * * * *', function(){
     });
   })
 }).invoke();
-
+*/
 // 키워드추출 API
 let kwe_option = {
   uri : 'http://localhost:12800/txt_to_kwd',
@@ -67,7 +74,7 @@ let cat_option = {
   uri : 'http://localhost:12800/txt_to_doc',
   method : "POST",
   body : {
-      t_col : "cl_mobile_1",
+      t_col : "cl_common_1204",
       text : null,
       mode : 'kma',
       combine_xs : true
@@ -143,17 +150,18 @@ function mergeTalk( dataR, dataT  ){
     for( i in values[0].output){
     	tmp_karr.push(values[0].output[i]);
     }
-    merged_data.keyword_count = tmp_karr.filter( function(v){ return stop_words.indexOf( v.keyword ) == -1 });
+    //merged_data.keyword_count = tmp_karr.filter( function(v){ return stop_words.indexOf( v.keyword ) == -1 });
      
+    merged_data.keyword_count = tmp_karr;
     let cate_obj = {};
     for( i in values[1].output ){
       let obj = {};
-      obj.category = parseInt(values[1].output[i].id.substr(0, values[1].output[i].id.indexOf('_')));
+      obj.category = values[1].output[i].id.substr(0, values[1].output[i].id.indexOf('_'));
       obj.score = values[1].output[i].similarity;
       if( obj.category in cate_obj){
-        cate_obj[eval(obj.category)] += obj.score;
+        cate_obj[obj.category] += obj.score;
       } else {
-        cate_obj[eval(obj.category)] = obj.score;
+        cate_obj[obj.category] = obj.score;
       }
     }
     tmp_arr = Object.keys(cate_obj);
@@ -167,7 +175,6 @@ function mergeTalk( dataR, dataT  ){
     }
     merged_data.analysisCate = max_key;
     merged_data.analysisCateNm = common.getCategory(parseInt(max_key));
-
     merged_data.negative_word = [];
     merged_data.positive_word = [];
     merged_data.neutral_word = [];
@@ -207,6 +214,7 @@ function mergeTalk( dataR, dataT  ){
     merged_data.duration = getDuration( merged_data.startTime, merged_data.endTime , true);
     file_sending = {};
     file_sending.startTime = merged_data.startTime;
+    file_sending.extension = merged_data.extension;
     file_sending.agentId = merged_data.agentId;
     file_sending.channel = "00";
     file_sending.category = merged_data.analysisCate;
@@ -272,8 +280,8 @@ cron.schedule('0 0 * * *', () => {
   day = new Date().getDate();
   month = new Date().getMonth() + 1;
   year = new Date().getFullYear();
-  fs.mkdirSync(config.backup_path + year.toString() + month.toString() + day.toString());
-  today = year.toString() + month.toString() + day.toString();
+  fs.mkdirSync(year.toString() + (month < 10 ? "0" + month : month.toString()) + (day < 10 ? "0" + day : day.toString()));
+  today = year.toString() + (month < 10 ? "0" + month : month.toString()) + (day < 10 ? "0" + day : day.toString());
 });
 
 function putKeyword(arr){
@@ -310,8 +318,6 @@ function getDuration( start, end, es ){
     return null;
   }
 }
-
-
 
 function convertDuration( value ){
   if ( value > 60 ){
