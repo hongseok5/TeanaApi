@@ -89,6 +89,7 @@ router.post("/list", function(req, res){
             for(j in result.data.result){
                 if(product_bucket[i].key == result.data.result[j].productCode){
                     result.data.result[j].count = product_bucket[i].doc_count;
+                    break;
                 } 
             }
         }
