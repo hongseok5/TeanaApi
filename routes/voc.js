@@ -40,13 +40,28 @@ router.post("/search", function(req, res){
         body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
     if(common.getEmpty(req.body.MD))
         body.query.bool.filter.push({ term : { mdNm : req.body.MD }});
-    if(common.getEmpty(req.body.keyword))
-        body.query.bool.filter.push({ term : { keyword : req.body.keyword }});
+    if(common.getEmpty(req.body.keyword) && req.body.keyword != "ALL") {
+		 var nest_obj = {
+            nested : {
+                path : "keyword_count",
+                query : {
+                    term : {
+                        "keyword_count.keyword" : req.body.keyword
+                    }
+                }
+            }
+        }
+        body.query.bool.filter.push(nest_obj);
+	}
+        
 	if(common.getEmpty(req.body.skeyword)) {
-		body.query.bool.filter.simple_query_string = {
-			query: req.body.skeyword,   // 검색어
-            fields: ["timeNtalk", "content", "reContent"]  // 검색어가 있는지 확인하는 복수개의 필드
-        };
+		var query_stting = {
+			simple_query_string : {
+				query: req.body.skeyword,   // 검색어
+				fields: ["timeNtalk", "content", "reContent"]  // 검색어가 있는지 확인하는 복수개의 필드
+			}
+		};
+		body.query.bool.filter.push(query_stting);
 	}
         
     client.search({
