@@ -52,8 +52,10 @@ router.post("/list", function(req, res){
     	body.query.bool.filter.push({ range : { age : { gte : age, lte : age + 9}}});
     if(common.getEmpty(req.body.product)){
     	for( p in req.body.product ){
-            var term_obj = { term : { productCode : req.body.product[p].productCode}};
-            should.push(term_obj);
+			if(common.getEmpty(req.body.product[p].productCode)) {
+				var term_obj = { term : { productCode : req.body.product[p].productCode}};
+				should.push(term_obj);
+			}
         } 
     }
    
