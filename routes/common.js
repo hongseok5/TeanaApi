@@ -287,6 +287,10 @@ var common = {
 		} else {
 			return '';
 		}
+	},
+	
+	convertCategory : function( value ){
+		return parseInt(value);
 	}
 
   
