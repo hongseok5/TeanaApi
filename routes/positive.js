@@ -93,50 +93,35 @@ router.post("/statistics", function(req, res){
         var objarr1 = new Array();
         var objarr2 = new Array();
         var objarr3 = new Array();
+        for(j in dayList){
+        	var obj = {
+        	        key : dayList[j].key,
+        	        division : "negative",
+        	        count : 0
+        	    }
+    			objarr1[j]=obj;
+        	        	
+        	    var obj2 = {
+        	        key : dayList[j].key,
+        	        division : "neutral",
+        	        count : 0
+        	    }
+        	    objarr2[j]=obj2;
+        	        	
+        	    var obj3 = {
+        	        key : dayList[j].key,
+        	        division : "positive",
+        	        count : 0
+        	    }
+        	    objarr3[j]=obj3;
+        }
+        
         for(i in test){
         	for(k in dayList){
         		if(dayList[k].key == test[i][1].key_as_string){
-        			var obj = {
-        	            key : dayList[k].key,
-        	            division : "negative",
-        	            count : test[i][1].negative.doc_count
-        	        }
-        			objarr1[k]=obj;
-        	        	
-        	        var obj2 = {
-        	            key : dayList[k].key,
-        	            division : "neutral",
-        	            count : test[i][1].neutral.doc_count
-        	        }
-        	        objarr2[k]=obj2;
-        	        	
-        	        var obj3 = {
-        	            key : dayList[k].key,
-        	            division : "positive",
-        	            count : test[i][1].positive.doc_count
-        	        }
-        	        objarr3[k]=obj3;
-        		}else{
-        			var obj = {
-            	        key : dayList[k].key,
-            	        division : "negative",
-            	        count : 0
-            	    }
-        			objarr1[k]=obj;
-            	        	
-            	    var obj2 = {
-            	        key : dayList[k].key,
-            	        division : "neutral",
-            	        count : 0
-            	    }
-            	    objarr2[k]=obj2;
-            	        	
-            	    var obj3 = {
-            	        key : dayList[k].key,
-            	        division : "positive",
-            	        count : 0
-            	    }
-            	    objarr3[k]=obj3;
+        			objarr1[k].count=test[i][1].negative.doc_count;
+        	        objarr2[k].count=test[i][1].neutral.doc_count;
+        	        objarr3[k].count=test[i][1].positive.doc_count;
         		}
         	}
         }
