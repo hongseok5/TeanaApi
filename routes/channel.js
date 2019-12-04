@@ -77,16 +77,17 @@ router.post("/count", function(req, res){
     		result.data.result.push(obj2);
         }
         
-        for(p in result.data.result){
-        	for(i in test){
-            	total = total + test[i][1].doc_count;
-            	test2 = Object.entries(test[i][1].index.buckets);
-            	for(j in test2){
+        
+        for(i in test){
+           	total = total + test[i][1].doc_count;
+           	test2 = Object.entries(test[i][1].index.buckets);
+            for(j in test2){
+            	for(p in result.data.result){
             		var channelcheck = result.data.result[p];
             		for(l in channelcheck){
             			if(channelcheck[l].key == test[i][1].key_as_string && channelcheck[l].channel == test2[j][1].key){
             				result.data.result[p][l].count = test2[j][1].doc_count;
-                		}else if(channelcheck[l].key == test[i][1].key_as_string && "call" == test2[j][1].key.substring(0,4)){
+                		}else if(channelcheck[l].key == test[i][1].key_as_string && channelcheck[l].channel == test2[j][1].key.substring(0,4)){
                 			result.data.result[p][l].count = parseInt(result.data.result[p][l].count)+parseInt(test2[j][1].doc_count);
                 		}
             		}
