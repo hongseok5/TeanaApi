@@ -28,17 +28,15 @@ router.post("/search", function(req, res){
     var source = ["extension","casenumber","endTime","duration","company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId", "content", "reContent"];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from, source);
     var index = common.getIndex(req.body.channel);
-    if(common.getEmpty(req.body.category1))
-        body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
-    if(common.getEmpty(req.body.category2))
-        body.query.bool.filter.push({ term : { category2 : req.body.category2 }})
+    if(common.getEmpty(req.body.category) && req.body.category != "ALL")
+        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
     if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
     if(common.getEmpty(req.body.productCode))
         body.query.bool.filter.push({ term : { product : req.body.productCode }});
-    if(common.getEmpty(req.body.Mcate))
+    if(common.getEmpty(req.body.Mcate) && req.body.Mcate != "ALL")
         body.query.bool.filter.push({ term : { Mcate : req.body.Mcate }});
-    if(common.getEmpty(req.body.inCate))
+    if(common.getEmpty(req.body.inCate) && req.body.inCate != "ALL")
         body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
     if(common.getEmpty(req.body.MD))
         body.query.bool.filter.push({ term : { mdNm : req.body.MD }});
