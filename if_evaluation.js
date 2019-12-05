@@ -118,13 +118,15 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 					connection.query(querystring, [typerows[k].COUNSEL_TYPE_ID], function(err, rows, fields) {
 						if (!err){
 							param1 = {
-									  "id": typerows[k].COUNSEL_TYPE_ID,
-									  "extradata": "name="+typerows[k].TITLE+",counselitemid="+typerows[k].COUNSEL_ITEM_ID,
+									  "id": "",
+									  "extradata": "",
 									  "use": true,
 									  "expressions": []
 									};
 							for(var i=0; i<rows.length; i++){
 						    	if(i == 0){
+						    		param1.id = rows[i].COUNSEL_TYPE_ID;
+						    		param1.extradata = "name="+rows[i].TITLE+",counselitemid="+rows[i].LEV1_COUNSEL_ITEM_ID;
 						    		param2 = {
 						    			      "id": "",
 						    			      "extradata": "",
