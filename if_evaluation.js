@@ -10,8 +10,8 @@ var crypto = require(approot + '/lib/crypto');
 /************************************************************
  * 로그 설정.
  ************************************************************/
-winston.loggers.add("if_uanalzyer", winstonConfig.createLoggerConfig("if_uanalzyer"));
-var logger = winston.loggers.get("if_uanalzyer");
+winston.loggers.add("if_evaluation", winstonConfig.createLoggerConfig("if_evaluation"));
+var logger = winston.loggers.get("if_evaluation");
 const mariadb = require('mysql');
 const conn = {
     host : '10.253.42.184',
@@ -26,7 +26,7 @@ conn.password = crypto.strdecrypto(conn.password);
 
 var pool = mariadb.createPool(conn);
 
-var options2 = {
+var options = {
     method: 'POST',
     uri: 'http://10.253.42.185:12800/voc/evaluation/_sync',
     headers: {
@@ -39,8 +39,8 @@ var options2 = {
     }
 };
 
-var iu = schedule.scheduleJob('30 30 * * * *', function(){
-	console.log('bchm'); 
+var iu = schedule.scheduleJob('0 20 9 * * *', function(){
+	//console.log('bchm'); 
 	var typequerystring = " SELECT COUNSEL_TYPE_ID, COUNSEL_ITEM_ID, TITLE FROM NX_COUNSEL_ITEM WHERE PRE_COUNSEL_ITEM_ID='top' ";
 	var querystring = "SELECT A.* FROM "
 					+" (SELECT NCT.COUNSEL_TYPE_ID "
@@ -112,7 +112,7 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 	
 	pool.getConnection(function(err, connection){
 		connection.query(typequerystring, function(typeerr, typerows, typefields) {
-			console.log('bchm 2');
+			//console.log('bchm 2');
 			for(var k=0;  k<typerows.length; k++){
 				if (!typeerr){
 					connection.query(querystring, [typerows[k].COUNSEL_TYPE_ID], function(err, rows, fields) {
@@ -166,20 +166,25 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 						    	
 						    }
 							
-							options2.body = JSON.stringify(param1);
-						    rp(options2).then(function ( data ){
+							options.body = JSON.stringify(param1);
+						    rp(options).then(function ( data ){
 						    	data = JSON.parse(data);
+								if(data.error) {
+									logger.error("if_evaluation_/voc/evaluation/_sync [" + data.id + "] [" + data.message + "] Error" );
+								}else{
+									logger.info("if_evaluation_/voc/evaluation/_sync [" + data.id + "] Completed" );
+								}
 						    }).catch(function (err){
-						    	logger.error("if_uanalzyer_/voc/evaluation/_sync", err);
+						    	logger.error("if_evaluation_/voc/evaluation/_sync", err);
 						    });
 							
 						}
 						else
-							logger.error("if_uanalzyer_Db_Query", err);
+							logger.error("if_evaluation_Db_Query", err);
 					});
 				}
 				else
-					logger.error("if_uanalzyer_Db_Query", err);
+					logger.error("if_evaluation_Db_Query", err);
 			}
 		});
 	});
