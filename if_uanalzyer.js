@@ -183,8 +183,7 @@ function getData(){
 							}
 								
 						});
-						//커넥션 반환.
-						connection.release();
+						
 						
 					});
 				}else{
@@ -200,6 +199,8 @@ function getData(){
 				}
 		    });
 		});
+		//커넥션 반환.
+		connection.release();
 	});
 	
 	logger.info("if_uanalzyer_End");
