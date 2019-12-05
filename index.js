@@ -8,7 +8,7 @@ const winston = require('winston');
 //const if0003 = require('./if_dma_00003.js');
 const elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({ 
-  host : '10.253.42.185:9200',
+  host : '10.253.42.122:9200',
   log: 'trace',
   apiVersion: '6.8' // insert 수행시 필요한 설정
 });

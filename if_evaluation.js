@@ -40,6 +40,7 @@ var options2 = {
 };
 
 var iu = schedule.scheduleJob('30 30 * * * *', function(){
+	console.log('bchm'); 
 	var typequerystring = " SELECT COUNSEL_TYPE_ID, COUNSEL_ITEM_ID, TITLE FROM NX_COUNSEL_ITEM WHERE PRE_COUNSEL_ITEM_ID='top' ";
 	var querystring = "SELECT A.* FROM "
 					+" (SELECT NCT.COUNSEL_TYPE_ID "
@@ -111,7 +112,9 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 	
 	pool.getConnection(function(err, connection){
 		connection.query(typequerystring, function(typeerr, typerows, typefields) {
-			for(k in typerows.length){
+			console.log('bchm 2');
+			for(var k=0;  k<typerows.length; k++){
+				console.log('bchm row = '+typerows.length);
 				if (!typeerr){
 					param1 = {
 							  "id": typerows[k].COUNSEL_TYPE_ID,
@@ -119,10 +122,10 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 							  "use": true,
 							  "expressions": []
 							};
-					
+					console.log('bchm typerows[k].COUNSEL_TYPE_ID = '+typerows[k].COUNSEL_TYPE_ID);
 					connection.query(querystring, function(err, rows, fields) {
 						if (!err){
-							for(i in rows.length){
+							for(var i=0; i<rows.length; i++){
 						    	if(i == 0){
 						    		param2 = {
 						    			      "id": "",

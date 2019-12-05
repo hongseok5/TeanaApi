@@ -5,16 +5,13 @@ const dateFormat = require('dateformat');
 var fs = require('fs');
 var approot = require('app-root-path');
 var config = require(approot + '/config/config');
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.json(),
-    defaultMeta: { service: 'if_dma_00003' },
-    transports: [
-      new winston.transports.File({ filename: './logs/error.log', level: 'error' }),
-      new winston.transports.File({ filename: './logs/if_dma_00003.log' })
-    ]
-  });
-console.log("process.pid:"+process.pid);
+const winstonConfig = require(approot + '/lib/logger');
+
+/************************************************************
+ * 로그 설정.
+ ************************************************************/
+winston.loggers.add("if_dma_00003", winstonConfig.createLoggerConfig("if_dma_00003"));
+var logger = winston.loggers.get("if_dma_00003");
 
 var options1 = {
     method: 'POST',
@@ -51,7 +48,7 @@ var sj01 = schedule.scheduleJob('30 30 * * * *', function(){
     .then(function ( data ){
     	data = JSON.parse(data);
     	if(data.status.code == "10"){
-    		fs.mkdirSync(config.channel_save_path+data.data.channel);
+    		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
         	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
         	var filecontext = data.data.result.data_list;
             fs.writeFile(filename, filecontext, "utf8", function(err) {
@@ -74,7 +71,7 @@ var sj02 = schedule.scheduleJob('20 30 * * * *', function(){
     .then(function ( data ){
     	data = JSON.parse(data);
     	if(data.status.code == "10"){
-    		fs.mkdirSync(config.channel_save_path+data.data.channel);
+    		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
         	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
         	var filecontext = data.data.result.data_list;
             fs.writeFile(filename, filecontext, "utf8", function(err) {
@@ -97,7 +94,7 @@ var sj03 = schedule.scheduleJob('10 30 * * * *', function(){
     .then(function ( data ){
     	data = JSON.parse(data);
     	if(data.status.code == "10"){
-    		fs.mkdirSync(config.channel_save_path+data.data.channel);
+    		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
         	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
         	var filecontext = data.data.result.data_list;
             fs.writeFile(filename, filecontext, "utf8", function(err) {
@@ -120,7 +117,7 @@ var sj04 = schedule.scheduleJob('0 30 * * * *', function(){
     .then(function ( data ){
         data = JSON.parse(data);
         if(data.status.code == "10"){
-        	fs.mkdirSync(config.channel_save_path+data.data.channel);
+        	!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
         	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
         	var filecontext = data.data.result.data_list;
             fs.writeFile(filename, filecontext, "utf8", function(err) {

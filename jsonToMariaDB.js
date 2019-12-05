@@ -9,11 +9,12 @@ const conn = {
 };
 
 var pool = mysql.createPool(conn);
+
 pool.getConnection(function(err, connection){
 
   var updateQL = "update ua_call set hum_score = ?, mod_dtm = now() where call_num = ?";
   var insertQL = "insert into ua_call (call_num, start_time, extension, reg_dtm, mod_dtm) values (?,?,?,now(), now())";
-  var jsdata = fs.readFileSync('D:\\TeAnaApi\\file\\test_param.json','utf-8' ,(err,data)=>{
+  var jsdata = fs.readFileSync('C:\\work\\TeAnaApi\\file\\test_param.json','utf-8' ,(err,data)=>{
     if(err) 
         throw err;
   });

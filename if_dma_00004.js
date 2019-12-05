@@ -68,10 +68,6 @@ function getData(){
 	        			if(err) { return callerror(err); }
 	        			filedata = JSON.parse(filedata);
 	        			var querystring  = "UPDATE UA_CALL SET CATEGORY1 = LPAD(?, 10, '0'), SUMMARY = ? WHERE START_TIME = ? AND EXTENSION = ?";
-	        			console.log('bchm filedata.category = '+filedata.category);
-	        			console.log('bchm filedata.summary = '+filedata.summary);
-	        			console.log('bchm filedata.startTime = '+filedata.startTime);
-	        			console.log('bchm filedata.extension = '+filedata.extension);
 	        			
 	        			var callSQLquery = connection.query(querystring, [ filedata.category, filedata.summary, filedata.startTime, filedata.extension ], function (err, rows) {
 	        				if(err){
