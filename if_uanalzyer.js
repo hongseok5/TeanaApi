@@ -39,7 +39,8 @@ var options1 = {
 	}
 };
 
-var io = schedule.scheduleJob('30 30 * * * *', function(){
+function getData(){
+	logger.info("if_uanalzyer_Start");
 	!fs.existsSync(config.backup_path_bak) && fs.mkdirSync(config.backup_path_bak);
 	!fs.existsSync(config.backup_path_error) && fs.mkdirSync(config.backup_path_error);
 	pool.getConnection(function(err, connection){
@@ -87,7 +88,6 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 								    	if(data.matches.length == 0){
 								    		var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.agentId ], function (err, rows) {
 							    	    		if(err){
-									    	    	console.log("bchm err = "+err);
 									    	    	connection.release();
 									    	        throw err;
 									    	    }else{
@@ -139,7 +139,6 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 									    	            	var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.agentId ], function (err, rows) {
 											    	    		if(err){
 											    	    			fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
-													    	    	console.log("bchm err = "+err);
 													    	    	connection.release();
 													    	    	logger.error("if_uanalzyer_Db_Query_callSQL", err);
 													    	        throw err;
@@ -199,20 +198,15 @@ var io = schedule.scheduleJob('30 30 * * * *', function(){
 		    });
 		});
 	});
-}); 
+	logger.info("if_uanalzyer_End");
+} 
 
 function callback(){
-	console.log("test");
+	console.log("file remove susscces");
 }
 
 function callerror(err){
 	logger.error("if_uanalzyer_file_error", err);
-}
-
-function getData(){
-	
-	io.invoke();
-	
 }
 
 getData();
