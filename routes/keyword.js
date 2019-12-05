@@ -640,7 +640,6 @@ router.post("/issue/top", function(req, res){
         		}
     		}
         }
-        console.log('bchm result.data.result = '+JSON.stringify(result.data.result));
         res.send(result);
     }, function(err){
 		logger.error("issue_top_keyword", err);
