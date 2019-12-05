@@ -112,6 +112,7 @@ var iu = schedule.scheduleJob('0 20 9 * * *', function(){
 	
 	pool.getConnection(function(err, connection){
 		connection.query(typequerystring, function(typeerr, typerows, typefields) {
+			
 			//console.log('bchm 2');
 			for(var k=0;  k<typerows.length; k++){
 				if (!typeerr){
@@ -187,6 +188,8 @@ var iu = schedule.scheduleJob('0 20 9 * * *', function(){
 					logger.error("if_evaluation_Db_Query", err);
 			}
 		});
+		//커넥션 반환.
+		connection.release();
 	});
 }); 
 
