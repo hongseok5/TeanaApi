@@ -107,7 +107,7 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 					+"   	  LEFT JOIN NX_COUNSEL_TYPE NCT "
 					+"   	   ON (NCI.COUNSEL_TYPE_ID = NCT.COUNSEL_TYPE_ID AND NCT.USE_YN = 'Y') "
 					+"  ) A "
-					+"  WHERE A.SENTENCE IS NOT NULL	 "
+					+"  WHERE A.SENTENCE IS NOT NULL AND COUNSEL_TYPE_ID = ?	 "
 					+" ORDER BY LEV3_COUNSEL_ITEM_ID, LEV4_COUNSEL_ITEM_ID, LEVEL, SORT_ORDER ";
 	
 	pool.getConnection(function(err, connection){
@@ -123,7 +123,7 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 							  "expressions": []
 							};
 					console.log('bchm typerows[k].COUNSEL_TYPE_ID = '+typerows[k].COUNSEL_TYPE_ID);
-					connection.query(querystring, function(err, rows, fields) {
+					connection.query(querystring, [typerows[k].COUNSEL_TYPE_ID], function(err, rows, fields) {
 						if (!err){
 							for(var i=0; i<rows.length; i++){
 						    	if(i == 0){
