@@ -612,7 +612,8 @@ router.post("/issue/top", function(req, res){
          aggs: {
             aggs_name: {
              terms: {
-             field: "keyword_count.keyword"
+             field: "keyword_count.keyword",
+             size : "1000"
              	}
              }
          }
@@ -639,6 +640,7 @@ router.post("/issue/top", function(req, res){
         		}
     		}
         }
+        console.log('bchm result.data.result = '+JSON.stringify(result.data.result));
         res.send(result);
     }, function(err){
 		logger.error("issue_top_keyword", err);
