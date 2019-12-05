@@ -40,6 +40,7 @@ var options2 = {
 };
 
 var iu = schedule.scheduleJob('30 30 * * * *', function(){
+	var typequerystring = " SELECT COUNSEL_TYPE_ID, COUNSEL_ITEM_ID, TITLE FROM NX_COUNSEL_ITEM WHERE PRE_COUNSEL_ITEM_ID='top' ";
 	var querystring = "SELECT A.* FROM "
 					+" (SELECT NCT.COUNSEL_TYPE_ID "
 					+" 	   , NCT.TITLE	 "
@@ -107,66 +108,77 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 					+"  ) A "
 					+"  WHERE A.SENTENCE IS NOT NULL	 "
 					+" ORDER BY LEV3_COUNSEL_ITEM_ID, LEV4_COUNSEL_ITEM_ID, LEVEL, SORT_ORDER ";
-	param1 = {
-			  "id": "",
-			  "extradata": "",
-			  "use": true,
-			  "expressions": []
-			};
+	
 	pool.getConnection(function(err, connection){
-		connection.query(querystring, function(err, rows, fields) {
-			if (!err){
-				for(var i=0; i<rows.length;i++){
-			    	if(i == 0){
-			    		param1.id = rows[i].COUNSEL_TYPE_ID;
-			    		param1.extradata = "name="+rows[i].TITLE+",counselitemid="+rows[i].LEV1_COUNSEL_ITEM_ID;
-			    		param2 = {
-			    			      "id": "",
-			    			      "extradata": "",
-			    			      "use": true,
-			    			      "expression": "",
-			    			      "synonyms": []
-			    			    }
-			    		param2.id = rows[i].LEV4_COUNSEL_ITEM_ID;
-			    		param2.extradata = "LEVEL4="+rows[i].LEV4_ITEM_POINT+",counselitemid3="+rows[i].LEV3_COUNSEL_ITEM_ID+",counselitemid4="+rows[i].LEV4_COUNSEL_ITEM_ID+",LEVEL3="+rows[i].LEV3_ITEM_POINT+",ITEM_TYPE_CD="+rows[i].ITEM_TYPE_CD;
-			    		var senteval = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
-			    		param2.expression = senteval.replace(/ /gi, "");
-			    	}else{
-			    		var j = i-1;
-			    		if(rows[j].LEV4_COUNSEL_ITEM_ID == rows[i].LEV4_COUNSEL_ITEM_ID){
-			    			var senteval = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
-				    		param3 = {
-			    					"expression": senteval.replace(/ /gi, ""),
-			    					"use": true
-			    		         };
-			    			param2.synonyms.push(param3);
-			    		}else{
-			    			param1.expressions.push(param2);
-			    			param2 = {
-			    				      "id": "",
-			    				      "extradata": "",
-			    				      "use": true,
-			    				      "expression": "",
-			    				      "synonyms": []
-			    				    }
-			    			param2.id = rows[i].LEV4_COUNSEL_ITEM_ID;
-			    			param2.extradata = "LEVEL4="+rows[i].LEV4_ITEM_POINT+",counselitemid3="+rows[i].LEV3_COUNSEL_ITEM_ID+",counselitemid4="+rows[i].LEV4_COUNSEL_ITEM_ID+",LEVEL3="+rows[i].LEV3_ITEM_POINT+",ITEM_TYPE_CD="+rows[i].ITEM_TYPE_CD;
-				    		var senteval = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
-				    		param2.expression = senteval.replace(/ /gi, "");
-				    		
-			    		}
-			    	}
-			    	
-			    }
-				options2.body = JSON.stringify(param1);
-			    rp(options2).then(function ( data ){
-			    	data = JSON.parse(data);
-			    }).catch(function (err){
-			    	logger.error("if_uanalzyer_/voc/evaluation/_sync", err);
-			    });
+		connection.query(typequerystring, function(typeerr, typerows, typefields) {
+			for(k in typerows.length){
+				if (!typeerr){
+					param1 = {
+							  "id": typerows[k].COUNSEL_TYPE_ID,
+							  "extradata": "name="+typerows[k].TITLE+",counselitemid="+typerows[k].COUNSEL_ITEM_ID,
+							  "use": true,
+							  "expressions": []
+							};
+					
+					connection.query(querystring, function(err, rows, fields) {
+						if (!err){
+							for(i in rows.length){
+						    	if(i == 0){
+						    		param2 = {
+						    			      "id": "",
+						    			      "extradata": "",
+						    			      "use": true,
+						    			      "expression": "",
+						    			      "synonyms": []
+						    			    }
+						    		param2.id = rows[i].LEV4_COUNSEL_ITEM_ID;
+						    		param2.extradata = "LEVEL4="+rows[i].LEV4_ITEM_POINT+",counselitemid3="+rows[i].LEV3_COUNSEL_ITEM_ID+",counselitemid4="+rows[i].LEV4_COUNSEL_ITEM_ID+",LEVEL3="+rows[i].LEV3_ITEM_POINT+",ITEM_TYPE_CD="+rows[i].ITEM_TYPE_CD;
+						    		var senteval = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
+						    		param2.expression = senteval.replace(/ /gi, "");
+						    	}else{
+						    		var j = i-1;
+						    		if(rows[j].LEV4_COUNSEL_ITEM_ID == rows[i].LEV4_COUNSEL_ITEM_ID){
+						    			var senteval = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
+							    		param3 = {
+						    					"expression": senteval.replace(/ /gi, ""),
+						    					"use": true
+						    		         };
+						    			param2.synonyms.push(param3);
+						    		}else{
+						    			param1.expressions.push(param2);
+						    			param2 = {
+						    				      "id": "",
+						    				      "extradata": "",
+						    				      "use": true,
+						    				      "expression": "",
+						    				      "synonyms": []
+						    				    }
+						    			param2.id = rows[i].LEV4_COUNSEL_ITEM_ID;
+						    			param2.extradata = "LEVEL4="+rows[i].LEV4_ITEM_POINT+",counselitemid3="+rows[i].LEV3_COUNSEL_ITEM_ID+",counselitemid4="+rows[i].LEV4_COUNSEL_ITEM_ID+",LEVEL3="+rows[i].LEV3_ITEM_POINT+",ITEM_TYPE_CD="+rows[i].ITEM_TYPE_CD;
+							    		var senteval = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
+							    		param2.expression = senteval.replace(/ /gi, "");
+							    		
+						    		}
+						    	}
+						    	
+						    }
+							
+						}
+						else
+							logger.error("if_uanalzyer_Db_Query", err);
+					});
+					
+					options2.body = JSON.stringify(param1);
+				    rp(options2).then(function ( data ){
+				    	data = JSON.parse(data);
+				    }).catch(function (err){
+				    	logger.error("if_uanalzyer_/voc/evaluation/_sync", err);
+				    });
+				
+				}
+				else
+					logger.error("if_uanalzyer_Db_Query", err);
 			}
-			else
-				logger.error("if_uanalzyer_Db_Query", err);
 		});
 	});
 }); 
