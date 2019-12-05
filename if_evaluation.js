@@ -166,18 +166,17 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 						    	
 						    }
 							
+							options2.body = JSON.stringify(param1);
+						    rp(options2).then(function ( data ){
+						    	data = JSON.parse(data);
+						    }).catch(function (err){
+						    	logger.error("if_uanalzyer_/voc/evaluation/_sync", err);
+						    });
+							
 						}
 						else
 							logger.error("if_uanalzyer_Db_Query", err);
 					});
-					
-					options2.body = JSON.stringify(param1);
-				    rp(options2).then(function ( data ){
-				    	data = JSON.parse(data);
-				    }).catch(function (err){
-				    	logger.error("if_uanalzyer_/voc/evaluation/_sync", err);
-				    });
-				
 				}
 				else
 					logger.error("if_uanalzyer_Db_Query", err);
