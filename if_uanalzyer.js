@@ -183,6 +183,9 @@ function getData(){
 							}
 								
 						});
+						//커넥션 반환.
+						connection.release();
+						
 					});
 				}else{
 					if(file.substring(file.lastIndexOf("-"),file.lenght) == '-R'){
@@ -198,6 +201,7 @@ function getData(){
 		    });
 		});
 	});
+	
 	logger.info("if_uanalzyer_End");
 } 
 
