@@ -114,17 +114,15 @@ var iu = schedule.scheduleJob('30 30 * * * *', function(){
 		connection.query(typequerystring, function(typeerr, typerows, typefields) {
 			console.log('bchm 2');
 			for(var k=0;  k<typerows.length; k++){
-				console.log('bchm row = '+typerows.length);
 				if (!typeerr){
-					param1 = {
-							  "id": typerows[k].COUNSEL_TYPE_ID,
-							  "extradata": "name="+typerows[k].TITLE+",counselitemid="+typerows[k].COUNSEL_ITEM_ID,
-							  "use": true,
-							  "expressions": []
-							};
-					console.log('bchm typerows[k].COUNSEL_TYPE_ID = '+typerows[k].COUNSEL_TYPE_ID);
 					connection.query(querystring, [typerows[k].COUNSEL_TYPE_ID], function(err, rows, fields) {
 						if (!err){
+							param1 = {
+									  "id": typerows[k].COUNSEL_TYPE_ID,
+									  "extradata": "name="+typerows[k].TITLE+",counselitemid="+typerows[k].COUNSEL_ITEM_ID,
+									  "use": true,
+									  "expressions": []
+									};
 							for(var i=0; i<rows.length; i++){
 						    	if(i == 0){
 						    		param2 = {
