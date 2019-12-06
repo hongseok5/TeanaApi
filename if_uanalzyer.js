@@ -40,7 +40,7 @@ var options1 = {
 	}
 };
 
-var io = schedule.scheduleJob('30 30 * * * *', function(){
+var io = schedule.scheduleJob('*/30 * * * * *', function(){
 	logger.info("if_uanalzyer_Start");
 	var tempdate = dateFormat(new Date(), "yyyymmddHHMMss");
 	var tempfolder = config.backup_path+tempdate+"_temp\\";
@@ -239,7 +239,7 @@ function callerror(err){
 }
 
 function getData(){
-	//io.invoke();
+	io.invoke();
 	folderdelete.invoke();
 }
 getData();
