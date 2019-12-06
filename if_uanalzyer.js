@@ -43,7 +43,7 @@ var options1 = {
 var io = schedule.scheduleJob('*/30 * * * * *', function(){
 	logger.info("if_uanalzyer_Start");
 	var tempdate = dateFormat(new Date(), "yyyymmddHHMMss");
-	var tempfolder = config.backup_path+tempdate+"_temp\\";
+	var tempfolder = config.backup_path_bak+tempdate+"_temp\\";
 	
 	!fs.existsSync(tempfolder) && fs.mkdirSync(tempfolder);
 	!fs.existsSync(config.backup_path_bak) && fs.mkdirSync(config.backup_path_bak);
@@ -220,10 +220,10 @@ var folderdelete = schedule.scheduleJob('0 30 9 * * *', function(){
 	var day_ago = new Date().getDate() - 1 ;
 	day_ago = tempdate.slice(0,6) + ( day_ago < 8 ? "0" + day_ago : day_ago );
     
-	fs.readdirSync(config.backup_path).forEach(function(file, index){
+	fs.readdirSync(config.backup_path_bak).forEach(function(file, index){
 		if(file.substring(0,8) == day_ago){
 			if(file.substring(file.lastIndexOf("_"),file.length) == '_temp'){
-				fs.rmdirSync(config.backup_path+file);
+				fs.rmdirSync(config.backup_path_bak+file);
 			}
 		}
 	});
