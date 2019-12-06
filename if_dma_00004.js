@@ -61,9 +61,7 @@ function getData(){
 	    var z = 0;
 	    pool.getConnection(function(err, connection){
 	    	fs.readdir(config.send_smry_path, function(err, filelist){
-	        	console.log('bchm filelist.length = '+filelist.length);
 	        	filelist.forEach(function(file) {
-	        		console.log('bchm file = '+file);
 	        		fs.readFile(config.send_smry_path+file , 'utf-8' , function(err , filedata){
 	        			if(err) { return callerror(err); }
 	        			filedata = JSON.parse(filedata);
@@ -86,7 +84,6 @@ function getData(){
 					            }
 					        });
 					        z = parseInt(z)+1;
-					        console.log('bchm z = '+z);
 					        send_data.sendTime = dateFormat(new Date(), "yyyymmddHHMMss");
 				        	fs.rename(config.send_smry_path+file, config.sent_save_path+send_data.sendTime+z, callback);
 					    });
