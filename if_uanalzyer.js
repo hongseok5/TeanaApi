@@ -222,7 +222,10 @@ var folderdelete = schedule.scheduleJob('0 30 9 * * *', function(){
     
 	fs.readdirSync(config.backup_path).forEach(function(file, index){
 		if(file.substring(0,8) == day_ago){
-			fs.rmdirSync(config.backup_path+file);
+			if(file.substring(file.lastIndexOf("-"),file.length) != '-R' && file.substring(file.lastIndexOf("-"),file.length) != '-T'){
+				fs.rmdirSync(config.backup_path+file);
+			}
+			
 		}
 	});
 	
@@ -237,7 +240,7 @@ function callerror(err){
 }
 
 function getData(){
-	io.invoke();
+	//io.invoke();
 	folderdelete.invoke();
 }
 getData();
