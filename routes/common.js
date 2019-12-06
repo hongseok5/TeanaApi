@@ -247,7 +247,7 @@ var common = {
 	},
 
 	strToDate : function( str ){
-		if( value && str.length === 14 ){
+		if( str && str.length === 14 ){
 			var year = str.substring(0, 4);
 			var month = str.substring(4, 6);
 			var day = str.substring(6, 8);
