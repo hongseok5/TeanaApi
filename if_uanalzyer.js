@@ -222,10 +222,9 @@ var folderdelete = schedule.scheduleJob('0 30 9 * * *', function(){
     
 	fs.readdirSync(config.backup_path).forEach(function(file, index){
 		if(file.substring(0,8) == day_ago){
-			if(file.substring(file.lastIndexOf("-"),file.length) != '-R' && file.substring(file.lastIndexOf("-"),file.length) != '-T'){
+			if(file.substring(file.lastIndexOf("_"),file.length) == '_temp'){
 				fs.rmdirSync(config.backup_path+file);
 			}
-			
 		}
 	});
 	
