@@ -6,6 +6,10 @@ const cron = require('node-cron');
 const mergejson = require('mergejson');
 const fs = require('fs');
 const rp = require('request-promise');
+var winston = require('winston');
+const winstonConfig = require(approot + '/lib/logger');
+winston.loggers.add("merge", winstonConfig.createLoggerConfig("merge"));
+var logger = winston.loggers.get("merge");
 /*
 const mysql = require('mysql');
 const conn = {
@@ -20,10 +24,10 @@ let day = new Date().getDate();
 let month = new Date().getMonth() + 1;
 let year = new Date().getFullYear();
 var today = year.toString() + (month < 10 ? "0" + month : month.toString()) + (day < 10 ? "0" + day : day.toString());
-
+logger.info("day : " + today);
 if(!fs.existsSync(config.backup_path + today)){
   fs.mkdirSync(config.backup_path + today);
-  console.log("directory created!")
+  logger.info("day : " + today);
 } 
 
 /*
@@ -88,7 +92,8 @@ let file_merge_async = function (file_nr, file_nt){
   let promiseFile = function (file_name) {
     return new Promise(function (resolve, reject) {
           fs.readFile(file_name, 'utf-8' ,(err,data)=>{
-              if(err) throw err;
+              if(err)
+                logger.error(err);
               if(data !== undefined){
                 resolve(JSON.parse(data));
               } else {
@@ -225,31 +230,33 @@ function mergeTalk( dataR, dataT  ){
     
     fs.writeFile( config.send_save_path + merged_data.startTime + "-" + merged_data.agentId + ".JSON" , JSON.stringify(file_sending), 'utf8', function(err){
       if(err) 
-        console.log(err);
+        logger.error("file write fail : " + merged_data.startTime + merged_data.agentId + err);
     });
     fs.writeFile( config.send_smry_path + merged_data.startTime + "-" + merged_data.agentId + ".JSON" , JSON.stringify(file_sending), 'utf8', function(err){
       if(err) 
-        console.log(err);
+        logger.error("file write fail : " + merged_data.startTime + merged_data.agentId + err);
     });
     fs.writeFile(config.write_path + merged_data.startTime + "-" + merged_data.agentId + ".JSON", JSON.stringify(merged_data), 'utf8', function(err) {
       if(err) 
-          console.log('Failed to write file!');
+        logger.error("file write fail : " + merged_data.startTime + merged_data.agentId + err);
       else
           fs.rename(config.save_path + merged_data.startTime + "-" + merged_data.agentId + "-R", 
                     config.backup_path + today + '/' + merged_data.startTime + "-" + merged_data.agentId + "-R", 
                     function(err){
-                      if (err) console.log( err);
+                      if (err)
+                        logger.error("file move fail : " + merged_data.startTime + merged_data.agentId + err);
    
                     });
           fs.rename(config.save_path + merged_data.startTime + "-" + merged_data.agentId + "-T", 
                     config.backup_path + today + '/' + merged_data.startTime + "-" + merged_data.agentId + "-T", 
                     function(err){
-                      if (err) console.log( err);
-    
+                      if (err)
+                        logger.error("file move fail : " + merged_data.startTime + merged_data.agentId + err); 
                     });
     });
   }, function(err){
-    if(err) throw err;
+    if(err)
+      logger.error(err); 
   });
   
 };
@@ -272,7 +279,7 @@ cron.schedule('*/5 * * * * *', () => {
       count_not_ex++;
     }
   }
-  console.log(new Date() + "finished : " + count + " not pair : " + count_not_ex);
+  logger.info(new Date() + "finished : " + count + " not pair : " + count_not_ex);
 });
 
 cron.schedule('0 0 * * *', () => {
@@ -280,8 +287,9 @@ cron.schedule('0 0 * * *', () => {
   day = new Date().getDate();
   month = new Date().getMonth() + 1;
   year = new Date().getFullYear();
-  fs.mkdirSync(year.toString() + (month < 10 ? "0" + month : month.toString()) + (day < 10 ? "0" + day : day.toString()));
   today = year.toString() + (month < 10 ? "0" + month : month.toString()) + (day < 10 ? "0" + day : day.toString());
+  fs.mkdirSync(config.backup_path + today);  
+  logger.info("mkdir " + today);
 });
 
 function putKeyword(arr){

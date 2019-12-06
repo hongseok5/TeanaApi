@@ -49,7 +49,7 @@ function getData(){
 			if(err) { return callerror(err); }
 			filelist.forEach(function(file) {
 				console.log('file forEach');
-				if(file.substring(file.lastIndexOf("-"),file.lenght) == '-T'){
+				if(file.substring(file.lastIndexOf("-"),file.length) == '-T'){
 					fs.readFile(config.backup_path+file , 'utf-8' , function(err , filedata){
 						if(err) { return callerror(err); }
 						filedata = JSON.parse(filedata);
@@ -187,7 +187,7 @@ function getData(){
 						
 					});
 				}else{
-					if(file.substring(file.lastIndexOf("-"),file.lenght) == '-R'){
+					if(file.substring(file.lastIndexOf("-"),file.length) == '-R'){
 						fs.rename(config.backup_path+file, config.backup_path_bak+file, callback);
 						/*fs.unlink(config.backup_path+file, function(err){
 			    	        if( err ){
