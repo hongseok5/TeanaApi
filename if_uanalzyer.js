@@ -216,12 +216,17 @@ var io = schedule.scheduleJob('*/30 * * * * *', function(){
 }); 
 
 var folderdelete = schedule.scheduleJob('0 30 9 * * *', function(){
+	/*
 	var tempdate = dateFormat(new Date(), "yyyymmddHHMMss");
 	var day_ago = new Date().getDate() - 1 ;
 	day_ago = tempdate.slice(0,6) + ( day_ago < 8 ? "0" + day_ago : day_ago );
+    */
+	var tempdate = dateFormat(new Date(), "yyyymmddHHMMss");
+    var day_ago = new Date().getHours() - 1 ;
+    day_ago = tempdate.slice(0,8) + ( day_ago < 10 ? "0" + day_ago : day_ago );
     
 	fs.readdirSync(config.backup_path_bak).forEach(function(file, index){
-		if(file.substring(0,8) == day_ago){
+		if(file.substring(0,10) == day_ago){
 			if(file.substring(file.lastIndexOf("_"),file.length) == '_temp'){
 				fs.rmdirSync(config.backup_path_bak+file);
 			}
