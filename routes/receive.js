@@ -30,7 +30,7 @@ router.post('/call', (req, res) => {
       var document = {
         index : 'call_'+req.body.ifId.slice(0,6),
         type : "doc",
-        id : req.body.ifId,
+        id : req.body.ifId.replace('_','-'),
         body : { 
           vdn : req.body.vdn,
           vdnGrp : req.body.vdnGrp,
