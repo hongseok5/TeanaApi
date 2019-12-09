@@ -32,34 +32,39 @@ router.post('/call', (req, res) => {
         type : "doc",
         id : req.body.ifId.replace('_','-'),
         body : { 
-          vdn : req.body.vdn,
-          vdnGrp : req.body.vdnGrp,
-          vdnNm : req.body.vdnNm,
-          vdnGrpNm : req.body.GrpNm,
-          inCate : req.body.inCate,
-          inCateNm : req.body.inCateNm,
-          category1 : req.body.category1,
-          category1Nm : req.body.category1Nm,
-          category2 : req.body.category2,
-          category2Nm : req.body.category2Nm,
-          productCode : req.body.productCode,
-          productNm : req.body.productNm,
-          Mcate : req.body.Mcate,
-          McateNm : req.body.McateNm,
-          company : req.body.company,
-          companyNm : req.body.companyNm,
-          mdId : req.body.mdId,
-          mdNm : req.body.mdNm,
-          PCate : req.body.PCate,
-          PCateNm : req.body.PCateNm,
-          age : req.body.age,
-          gender : req.body.gender,
-          reasonCate1 : req.body.reasonCate1,
-          reasonCate1Nm : req.body.reasonCate1Nm,
-          reasonCate2 : req.body.reasonCate2,
-          reasonCate2Nm : req.body.reasonCate2Nm,
-          caseId : req.body.caseId
-        }
+		  doc : {
+			  vdn : req.body.vdn,
+			  vdnGrp : req.body.vdnGrp,
+			  vdnNm : req.body.vdnNm,
+			  vdnGrpNm : req.body.GrpNm,
+			  inCate : req.body.inCate,
+			  inCateNm : req.body.inCateNm,
+			  category1 : req.body.category1,
+			  category1Nm : req.body.category1Nm,
+			  category2 : req.body.category2,
+			  category2Nm : req.body.category2Nm,
+			  productCode : req.body.productCode,
+			  productNm : req.body.productNm,
+			  Mcate : req.body.Mcate,
+			  McateNm : req.body.McateNm,
+			  company : req.body.company,
+			  companyNm : req.body.companyNm,
+			  mdId : req.body.mdId,
+			  mdNm : req.body.mdNm,
+			  PCate : req.body.PCate,
+			  PCateNm : req.body.PCateNm,
+			  age : req.body.age,
+			  gender : req.body.gender,
+			  reasonCate1 : req.body.reasonCate1,
+			  reasonCate1Nm : req.body.reasonCate1Nm,
+			  reasonCate2 : req.body.reasonCate2,
+			  reasonCate2Nm : req.body.reasonCate2Nm,
+			  caseId : req.body.caseId,
+			  caseNumber : req.body.caseNumber,
+			  customerNumber : req.body.customerNumber
+			},
+		  doc_as_upsert: true
+		}
       };
       
       !fs.existsSync(config.process_save_path) && fs.mkdirSync(config.process_save_path);
@@ -69,7 +74,7 @@ router.post('/call', (req, res) => {
 	  logger.info("filename: " +  filename);
 	  logger.info("filecontext: " +  filecontext);
 	  
-	  client.index(document).then(function(resp) {
+	  client.update(document).then(function(resp) {
 	        var result = {
 	          ifId : req.ifId,
 	          code : "10",
