@@ -3,7 +3,10 @@ const wss = new WebSocketS({ port : 3000 });
 const approot = require('app-root-path');
 const config = require(approot + '/config/config');
 const fs = require('fs');
-
+var winston = require('winston');
+const winstonConfig = require(approot + '/lib/logger');
+winston.loggers.add("ws_server", winstonConfig.createLoggerConfig("ws_server"));
+var logger = winston.loggers.get("ws_server");
 // 키워드추출 API
 
 console.log("process.pid:"+process.pid);
@@ -14,6 +17,7 @@ wss.on("connection", function(ws){
   ws.on("message", function(message) {
     
     let data = JSON.parse(message);
+    logger.info( new Date() + " at " + data.startTime + '-' + data.agentId)
     let filePath = config.save_path;
     let fileName = filePath + data.startTime + "-" + data.agentId + "-" + data.transType;
     let result = {};
@@ -27,6 +31,7 @@ wss.on("connection", function(ws){
       
       fs.writeFile(fileName, message, 'utf-8', function(err) {
         if(err) {
+          logger.error( new Date() + " at file error" + err);
             result.code = "99";
             result.message = "파일 수신 실패";
             ws.send(JSON.stringify(result));
@@ -37,8 +42,9 @@ wss.on("connection", function(ws){
           }
       });
     } else {
+      logger.error( new Date() + " at data key undefined ");
       result.code = "99";
-      result.message = "필수값 누락";
+      result.message = "필수값 누락";      
       ws.send(JSON.stringify(result));
     }
   });

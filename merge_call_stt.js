@@ -30,26 +30,6 @@ if(!fs.existsSync(config.backup_path + today)){
   logger.info("day : " + today);
 } 
 
-/*
-var stop_words = [];
-schedule.scheduleJob('0 0 * * * *', function(){
-  var pool = mysql.createPool(conn);
-  pool.getConnection( function(err, connection){
-    let query = "SELECT keyword FROM nx_keyword WHERE use_yn = 'Y' AND keyword_type = '07'"
-
-    connection.query( query, function(err, rows){
-      if(err){
-        connection.release();
-        throw err;
-      }
-      for( i in rows ){
-        stop_words.push(rows[i].keyword);
-      }
-      console.log(stop_words);
-    });
-  })
-}).invoke();
-*/
 // 키워드추출 API
 let kwe_option = {
   uri : 'http://localhost:12800/txt_to_kwd',
@@ -107,13 +87,12 @@ let file_merge_async = function (file_nr, file_nt){
            .then(function(values){
             mergeTalk(values[0], values[1]);
           }, function(err){
-            console.log(err);
+            logger.error("merging error : " + err);
           }).catch();
 };
 
 function mergeTalk( dataR, dataT  ){
   // T : SSG , R :CST
-  
   dataT.timeNtalkT = dataT.timeNtalk;
   dataR.timeNtalkR = dataR.timeNtalk;
   let merged_talk = []; // 병합한 대화를 담을 배열
@@ -256,7 +235,7 @@ function mergeTalk( dataR, dataT  ){
     });
   }, function(err){
     if(err)
-      logger.error(err); 
+      logger.error("TextAnalysis Server doesn't response :" + err); 
   });
   
 };
