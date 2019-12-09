@@ -74,6 +74,14 @@ router.post('/call', (req, res) => {
 	  logger.info("filename: " +  filename);
 	  logger.info("filecontext: " +  filecontext);
 	  
+	  fs.writeFile(filename, filecontext, "utf8", function(err) {
+		  if(err) {
+			logger.error("File write error : ", err);
+		  }else{
+			logger.info("File write : " + filename);
+		  }
+      });
+	  
 	  client.update(document).then(function(resp) {
 	        var result = {
 	          ifId : req.ifId,
