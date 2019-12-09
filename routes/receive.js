@@ -17,12 +17,13 @@ var fs = require('fs');
 
 router.post('/call', (req, res) => {
     logger.info("HTTP POST /receive/call");
+	
+	logger.info("ifId:" + req.body.ifId);
+	logger.info("vdn:" + req.body.vdn);
+	logger.info("vdnGrp:" + req.body.vdnGrp);
+	logger.info("vdnGrpNm:" + req.body.vdnGrpNm);
+	
 	if( req.body.ifId !== undefined && req.body.vdn !== undefined && req.body.vdnGrp !== undefined && req.body.vdnGrpNm !== undefined ){
-
-		logger.info("ifId:" + req.body.ifId);
-		logger.info("vdn:" + req.body.vdn);
-		logger.info("vdnGrp:" + req.body.vdnGrp);
-		logger.info("vdnGrpNm:" + req.body.vdnGrpNm);
 
       var result = {
         ifId : req.body.ifId
