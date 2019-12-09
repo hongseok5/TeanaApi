@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+var http = require('http');
 var client = require('../index');
 var common = require('./common');
 var approot = require('app-root-path');
@@ -27,7 +28,7 @@ router.post('/call', (req, res) => {
         ifId : req.body.ifId
       };
       var document = {
-        index : "call_info_201911",
+        index : 'call_'+req.body.ifId.slice(0,6),
         type : "doc",
         id : req.body.ifId,
         body : { 
@@ -68,61 +69,27 @@ router.post('/call', (req, res) => {
 	  logger.info("filename: " +  filename);
 	  logger.info("filecontext: " +  filecontext);
 	  
-	  
-  	  fs.writeFile(filename, filecontext, "utf8", function(err) {
-		  if(err) {
-			logger.error("File write error : ", err);
-		  }else{
-			logger.info("File write : " + filename);
-		  }
-      });
-      client.index(document).then(function(resp) {
-        var result = {
-          ifId : req.ifId,
-          code : "10",
-          message : "OK"
-        }
-        res.send(result);
-      }, function(err){
-        var result = {
-          ifId : req.ifId,
-          code : "99",
-          message : "ERROR"
-        }
-        res.send(result);
-      });
+	  client.index(document).then(function(resp) {
+	        var result = {
+	          ifId : req.ifId,
+	          code : "10",
+	          message : "OK"
+	        }
+	        res.send(result);
+	      }, function(err){
+	        var result = {
+	          ifId : req.ifId,
+	          code : "99",
+	          message : "ERROR"
+	        }
+	        res.send(result);
+	      });
       
     } else {
 	  logger.info("ifId, vdn, vdnGrp, vdnGrpNm  undefined ");
       result = common.getResult("40", "No ifId", "receive_call");
       res.send(result);
     }
-  
-    /*
-    if (result.ifId === undefined){
-     result.code = "99";
-     result.message = "필수값 누락";
-     res.send(JSON.stringify(result));
-    } else {
-      **  파일쓰기 코드, 파일에 쓰지 않고 ES에 바로 저장하기 **
-     fs.writeFile(config.write_path + result.ifId + ".JSON",  'utf-8', function(err) {
-       if(err) {
-
-         result.code = "99";
-         result.message = "파일 수신 실패";
-         res.send(JSON.stringify(result));
-         console.log('파일 쓰기 실패');
-
-       } else {
-         result.code = "10";
-         result.message = "파일 정상 수신";
-         res.send(JSON.stringify(result));
-         console.log('파일 쓰기 완료');
-       }
-     });
-    }
-    */
   });
-
 
 module.exports = router;
