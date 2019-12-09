@@ -61,7 +61,7 @@ router.post("/count", function(req, res){
     body.aggs.cate1_terms = {
         terms : {
             field : "analysisCateNm",
-            size : 10
+            size : 1000
         },
         aggs : {
             avd_value : { avg : { field : "duration" } }
@@ -152,7 +152,8 @@ router.post("/statistics", function(req, res){
     ];
     body.aggs.aggs_class = {
         terms : {
-           field : "analysisCateNm"
+           field : "analysisCateNm",
+		   size : 1000
         },
         aggs : {
             avd_value : { avg : { field : "duration" } }
