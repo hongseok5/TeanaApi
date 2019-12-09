@@ -37,7 +37,7 @@ router.post('/call', (req, res) => {
 			  vdn : req.body.vdn,
 			  vdnGrp : req.body.vdnGrp,
 			  vdnNm : req.body.vdnNm,
-			  vdnGrpNm : req.body.GrpNm,
+			  vdnGrpNm : req.body.vdnGrpNm,
 			  inCate : req.body.inCate,
 			  inCateNm : req.body.inCateNm,
 			  category1 : req.body.category1,
