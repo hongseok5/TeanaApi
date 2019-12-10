@@ -31,7 +31,7 @@ var common = {
 	},
     getBody : function( start_dt, end_dt, size, from, source ){
     	var fromcheck = (parseInt(from)-1)*parseInt(size);
-    	if(from !== undefined){
+    	if(from == undefined){
     		obj_body = {
     	            query : {
     	                bool : {
