@@ -50,6 +50,7 @@ router.post("/statistics", function(req, res){
         { bool : { should } }
     ];
 
+/**
     body.aggs.aggs_gender = {
 		terms : {
             field : "gender"
@@ -63,6 +64,22 @@ router.post("/statistics", function(req, res){
             }
         }
     }    
+*/
+
+    body.aggs.aggs_age = {
+		histogram : {
+			field : "age",
+			interval : 10
+		},
+        aggs : {
+            aggs_gender : {
+                terms : {
+					field : "gender"
+				}
+            }
+        }
+    }
+
 
     client.search({
         index,
@@ -71,11 +88,11 @@ router.post("/statistics", function(req, res){
         var result = common.getResult("10", "OK", "statistics_by_customer");
         result.data.count = resp.hits.total;
         result.data.result = [];
-		var objArr = new Array();
-		var objArr2 = new Array();
+		var objArr = new Array();	//1
+		var objArr2 = new Array();	//2
 		
         logger.debug(resp.aggregations);
-        for(i in resp.aggregations.aggs_gender.buckets){
+/**        for(i in resp.aggregations.aggs_gender.buckets){
             for( j in resp.aggregations.aggs_gender.buckets[i].aggs_age.buckets){
                 var obj = {};
                 obj.gender = resp.aggregations.aggs_gender.buckets[i].key;
@@ -87,7 +104,53 @@ router.post("/statistics", function(req, res){
 			result.data.result.push(objArr);
 			objArr = new Array();
         }
-        res.send(result);
+*/   
+
+        for(i in resp.aggregations.aggs_age.buckets){
+			if(resp.aggregations.aggs_age.buckets[i].aggs_gender.buckets.length == 2) {
+				for(j in resp.aggregations.aggs_age.buckets[i].aggs_gender.buckets){
+					var obj = {};
+					obj.gender = resp.aggregations.aggs_age.buckets[i].aggs_gender.buckets[j].key;
+					obj.division = resp.aggregations.aggs_age.buckets[i].key;
+					obj.count = resp.aggregations.aggs_age.buckets[i].aggs_gender.buckets[j].doc_count;
+					if(resp.aggregations.aggs_age.buckets[i].aggs_gender.buckets[j].key == "1") {
+						objArr.push(obj);
+					}else{
+						objArr2.push(obj);
+					}
+				}
+			}else{
+				var obj = {};
+				var obj2 = {};
+				
+				for(j in resp.aggregations.aggs_age.buckets[i].aggs_gender.buckets){
+					obj.gender = resp.aggregations.aggs_age.buckets[i].aggs_gender.buckets[j].key;
+					obj.division = resp.aggregations.aggs_age.buckets[i].key;
+					obj.count = resp.aggregations.aggs_age.buckets[i].aggs_gender.buckets[j].doc_count;
+				}
+				
+				if(obj.gender == "1") {
+					obj2.gender =  2;
+					obj2.division = obj.division;
+					obj2.count = 0;
+										
+					objArr.push(obj);
+					objArr2.push(obj2);
+				}else if(obj.gender != undefined){
+					obj2.gender =  1;
+					obj2.division = obj.division;
+					obj2.count = 0;
+										
+					objArr.push(obj2);
+					objArr2.push(obj);
+				}
+			}
+        }
+		
+		result.data.result.push(objArr);
+		result.data.result.push(objArr2);
+		
+		res.send(result);
     }, function(err){
 		logger.error("statistics_by_customer ", err);
         var result = common.getResult("99", "ERROR", "statistics_by_customer");
