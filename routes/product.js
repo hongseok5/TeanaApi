@@ -43,9 +43,9 @@ router.post("/list", function(req, res){
         body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
     if(common.getEmpty(req.body.MD))
         body.query.bool.filter.push({ term : { mdNm : req.body.MD }});
-    if(common.getEmpty(req.body.vdn))
+    if(common.getEmpty(req.body.vdn) && req.body.vdn != "ALL")
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
-    if(common.getEmpty(req.body.vdnGrp))
+    if(common.getEmpty(req.body.vdnGrp) && req.body.vdnGrp != "ALL")
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
     if(common.getEmpty(req.body.gender))
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
