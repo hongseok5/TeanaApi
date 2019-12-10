@@ -82,18 +82,17 @@ router.post("/list", function(req, res){
         var result = common.getResult("10", "OK", "list_by_product");
         result.data.count = resp.aggregations.aggs_product.buckets.length;
         result.data.result = [];
-
+        //product_bucket = resp.hits.hits;
         product_bucket = resp.aggregations.aggs_product.buckets;
         for( i in resp.hits.hits){
-            obj = resp.hits.hits[i]._source;
+            obj = resp.hits.hits[i]._source;   
             result.data.result.push(obj);
         }
-
         for( i in result.data.result){
             result.data.result[i].count = 0; 
             for( j in product_bucket){
                 if( result.data.result[i].productCode == product_bucket[j].key){
-                    result.data.result[i].count = product_bucket[i].doc_count;
+                    result.data.result[i].count = product_bucket[j].doc_count;
                     break;
                 }    
             }
