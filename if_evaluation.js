@@ -41,82 +41,82 @@ var options = {
 
 var iu = schedule.scheduleJob('0 20 9 * * *', function(){
 	//console.log('bchm'); 
-	var typequerystring = " SELECT COUNSEL_TYPE_ID, COUNSEL_ITEM_ID, TITLE FROM NX_COUNSEL_ITEM WHERE PRE_COUNSEL_ITEM_ID='top' ";
-	var querystring = "SELECT A.* FROM "
-					+" (SELECT NCT.COUNSEL_TYPE_ID "
-					+" 	   , NCT.TITLE	 "
-					+" 	   , NCI.LEV3_COUNSEL_ITEM_ID	 "
-					+" 	   , NCI.LEV4_COUNSEL_ITEM_ID	 "
-					+" 	   , NCI.ITEM_TYPE_CD "
-					+" 	   , NCI.LEV4 "
-					+" 	   , NCI.LEVEL "
-					+" 	   , NCI.LEV3_ITEM_POINT "
-					+"       , NCI.LEV4_ITEM_POINT "
-					+"       , NCS.SENTENCE "
-					+" 	   , NCI.SORT_ORDER "
-					+" 	   , NCT.DEPT_ID "
-					+" 	   , NCS.COUNSEL_SENTENCE_ID "
-					+"   FROM (SELECT NCI4.TITLE AS LEV4 "
-					+" 	   , NCI3.COUNSEL_ITEM_ID AS LEV3_COUNSEL_ITEM_ID "
-					+" 	   , NCI4.COUNSEL_ITEM_ID AS LEV4_COUNSEL_ITEM_ID "
-					+" 	   , NCI3.ITEM_TYPE_CD "
-					+" 	   , NCI1.COUNSEL_TYPE_ID "
-					+" 	   , NCI3.ITEM_POINT AS LEV3_ITEM_POINT "
-					+"   	   , NCI4.ITEM_POINT AS LEV4_ITEM_POINT "
-					+"   	   , NCI4.LEVEL "
-					+"   	   , NCI4.SORT_ORDER "
-					+"   	   , NCI4.MATCH_EST_YN "
-					+"   FROM NX_COUNSEL_ITEM AS NCI1 "
-					+"   LEFT JOIN NX_COUNSEL_ITEM AS NCI3 ON NCI3.PRE_COUNSEL_ITEM_ID = NCI1.COUNSEL_ITEM_ID "
-					+"   LEFT JOIN NX_COUNSEL_ITEM AS NCI4 ON NCI4.PRE_COUNSEL_ITEM_ID = NCI3.COUNSEL_ITEM_ID "
-					+"  WHERE NCI4.LEVEL = 3 "
-					+" ) NCI LEFT JOIN NX_COUNSEL_TYPE NCT "
-					+"   	   ON (NCI.COUNSEL_TYPE_ID = NCT.COUNSEL_TYPE_ID AND NCT.USE_YN = 'Y') "
-					+"   	  LEFT JOIN NX_COUNSEL_SENTENCE NCS "
-					+"   	   ON (NCI.COUNSEL_TYPE_ID = NCS.COUNSEL_TYPE_ID AND NCI.LEV4_COUNSEL_ITEM_ID = NCS.COUNSEL_ITEM_ID AND NCS.USE_YN = 'Y') "
-					+" UNION ALL "
-					+" SELECT NCT.COUNSEL_TYPE_ID "
-					+" 	   , NCT.TITLE	 "
-					+" 	   , NCI.LEV3_COUNSEL_ITEM_ID	 "
-					+" 	   , NCI.LEV4_COUNSEL_ITEM_ID	 "
-					+" 	   , NCI.ITEM_TYPE_CD "
-					+" 	   , NCI.LEV4 "
-					+" 	   , NCI.LEVEL "
-					+" 	   , NCI.LEV3_ITEM_POINT "
-					+"       , NCI.LEV4_ITEM_POINT "
-					+"       , NCK.KEYWORD "
-					+" 	   , NCI.SORT_ORDER "
-					+" 	   , NCT.DEPT_ID "
-					+" 	   , NCK.COUNSEL_KEYWORD_ID "
-					+"   FROM (SELECT NCI4.TITLE AS LEV4 "
-					+" 	   , NCI3.COUNSEL_ITEM_ID AS LEV3_COUNSEL_ITEM_ID "
-					+" 	   , NCI4.COUNSEL_ITEM_ID AS LEV4_COUNSEL_ITEM_ID "
-					+" 	   , NCI3.ITEM_TYPE_CD "
-					+" 	   , NCI1.COUNSEL_TYPE_ID "
-					+" 	   , NCI3.ITEM_POINT AS LEV3_ITEM_POINT "
-					+"   	   , NCI4.ITEM_POINT AS LEV4_ITEM_POINT "
-					+"   	   , NCI4.LEVEL "
-					+"   	   , NCI4.SORT_ORDER "
-					+"   	   , NCI4.MATCH_EST_YN "
-					+"   FROM NX_COUNSEL_ITEM AS NCI1 "
-					+"   LEFT JOIN NX_COUNSEL_ITEM AS NCI3 ON NCI3.PRE_COUNSEL_ITEM_ID = NCI1.COUNSEL_ITEM_ID "
-					+"   LEFT JOIN NX_COUNSEL_ITEM AS NCI4 ON NCI4.PRE_COUNSEL_ITEM_ID = NCI3.COUNSEL_ITEM_ID "
-					+"  WHERE NCI4.LEVEL = 3 "
-					+" ) NCI LEFT JOIN NX_COUNSEL_KEYWORD NCK "
-					+"   	   ON (NCI.COUNSEL_TYPE_ID = NCK.COUNSEL_TYPE_ID AND NCI.LEV4_COUNSEL_ITEM_ID = NCK.COUNSEL_ITEM_ID AND NCK.USE_YN = 'Y')	 "
-					+"   	  LEFT JOIN NX_COUNSEL_TYPE NCT "
-					+"   	   ON (NCI.COUNSEL_TYPE_ID = NCT.COUNSEL_TYPE_ID AND NCT.USE_YN = 'Y') "
-					+"  ) A "
-					+"  WHERE A.SENTENCE IS NOT NULL AND COUNSEL_TYPE_ID = ?	 "
-					+" ORDER BY LEV3_COUNSEL_ITEM_ID, LEV4_COUNSEL_ITEM_ID, LEVEL, SORT_ORDER ";
-	
+	var typequerystring = " select counsel_type_id, counsel_item_id, title from nx_counsel_item where pre_counsel_item_id='top' ";
+	var querystring = "select a.* from "
+					+" (select nct.counsel_type_id "
+					+" 	   , nct.title	 "
+					+" 	   , nci.lev3_counsel_item_id	 "
+					+" 	   , nci.lev4_counsel_item_id	 "
+					+" 	   , nci.item_type_cd "
+					+" 	   , nci.lev4 "
+					+" 	   , nci.level "
+					+" 	   , nci.lev3_item_point "
+					+"       , nci.lev4_item_point "
+					+"       , ncs.sentence "
+					+" 	   , nci.sort_order "
+					+" 	   , nct.dept_id "
+					+" 	   , ncs.counsel_sentence_id "
+					+"   from (select nci4.title as lev4 "
+					+" 	   , nci3.counsel_item_id as lev3_counsel_item_id "
+					+" 	   , nci4.counsel_item_id as lev4_counsel_item_id "
+					+" 	   , nci3.item_type_cd "
+					+" 	   , nci1.counsel_type_id "
+					+" 	   , nci3.item_point as lev3_item_point "
+					+"   	   , nci4.item_point as lev4_item_point "
+					+"   	   , nci4.level "
+					+"   	   , nci4.sort_order "
+					+"   	   , nci4.match_est_yn "
+					+"   from nx_counsel_item as nci1 "
+					+"   left join nx_counsel_item as nci3 on nci3.pre_counsel_item_id = nci1.counsel_item_id "
+					+"   left join nx_counsel_item as nci4 on nci4.pre_counsel_item_id = nci3.counsel_item_id "
+					+"  where nci4.level = 3 "
+					+" ) nci left join nx_counsel_type nct "
+					+"   	   on (nci.counsel_type_id = nct.counsel_type_id and nct.use_yn = 'Y') "
+					+"   	  left join nx_counsel_sentence ncs "
+					+"   	   on (nci.counsel_type_id = ncs.counsel_type_id and nci.lev4_counsel_item_id = ncs.counsel_item_id and ncs.use_yn = 'Y') "
+					+" union all "
+					+" select nct.counsel_type_id "
+					+" 	   , nct.title	 "
+					+" 	   , nci.lev3_counsel_item_id	 "
+					+" 	   , nci.lev4_counsel_item_id	 "
+					+" 	   , nci.item_type_cd "
+					+" 	   , nci.lev4 "
+					+" 	   , nci.level "
+					+" 	   , nci.lev3_item_point "
+					+"       , nci.lev4_item_point "
+					+"       , nck.keyword "
+					+" 	   , nci.sort_order "
+					+" 	   , nct.dept_id "
+					+" 	   , nck.counsel_keyword_id "
+					+"   from (select nci4.title as lev4 "
+					+" 	   , nci3.counsel_item_id as lev3_counsel_item_id "
+					+" 	   , nci4.counsel_item_id as lev4_counsel_item_id "
+					+" 	   , nci3.item_type_cd "
+					+" 	   , nci1.counsel_type_id "
+					+" 	   , nci3.item_point as lev3_item_point "
+					+"   	   , nci4.item_point as lev4_item_point "
+					+"   	   , nci4.level "
+					+"   	   , nci4.sort_order "
+					+"   	   , nci4.match_est_yn "
+					+"   from nx_counsel_item as nci1 "
+					+"   left join nx_counsel_item as nci3 on nci3.pre_counsel_item_id = nci1.counsel_item_id "
+					+"   left join nx_counsel_item as nci4 on nci4.pre_counsel_item_id = nci3.counsel_item_id "
+					+"  where nci4.level = 3 "
+					+" ) nci left join nx_counsel_keyword nck "
+					+"   	   on (nci.counsel_type_id = nck.counsel_type_id and nci.lev4_counsel_item_id = nck.counsel_item_id and nck.use_yn = 'Y')	 "
+					+"   	  left join nx_counsel_type nct "
+					+"   	   on (nci.counsel_type_id = nct.counsel_type_id and nct.use_yn = 'Y') "
+					+"  ) a "
+					+"  where a.sentence is not null and counsel_type_id = ?	 "
+					+" order by lev3_counsel_item_id, lev4_counsel_item_id, level, sort_order ";
+	  
 	pool.getConnection(function(err, connection){
 		connection.query(typequerystring, function(typeerr, typerows, typefields) {
 			
 			//console.log('bchm 2');
 			for(var k=0;  k<typerows.length; k++){
 				if (!typeerr){
-					connection.query(querystring, [typerows[k].COUNSEL_TYPE_ID], function(err, rows, fields) {
+					connection.query(querystring, [typerows[k].counsel_type_id], function(err, rows, fields) {
 						if (!err){
 							param1 = {
 									  "id": "",
@@ -126,8 +126,8 @@ var iu = schedule.scheduleJob('0 20 9 * * *', function(){
 									};
 							for(var i=0; i<rows.length; i++){
 						    	if(i == 0){
-						    		param1.id = rows[i].COUNSEL_TYPE_ID;
-						    		param1.extradata = "name="+rows[i].TITLE+",counselitemid="+rows[i].LEV1_COUNSEL_ITEM_ID;
+						    		param1.id = rows[i].counsel_type_id;
+						    		param1.extradata = "name="+rows[i].title+",counselitemid="+rows[i].lev1_counsel_item_id;
 						    		param2 = {
 						    			      "id": "",
 						    			      "extradata": "",
@@ -135,14 +135,14 @@ var iu = schedule.scheduleJob('0 20 9 * * *', function(){
 						    			      "expression": "",
 						    			      "synonyms": []
 						    			    }
-						    		param2.id = rows[i].LEV4_COUNSEL_ITEM_ID;
-						    		param2.extradata = "LEVEL4="+rows[i].LEV4_ITEM_POINT+",counselitemid3="+rows[i].LEV3_COUNSEL_ITEM_ID+",counselitemid4="+rows[i].LEV4_COUNSEL_ITEM_ID+",LEVEL3="+rows[i].LEV3_ITEM_POINT+",ITEM_TYPE_CD="+rows[i].ITEM_TYPE_CD;
-						    		var senteval = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
+						    		param2.id = rows[i].lev4_counsel_item_id;
+						    		param2.extradata = "level4="+rows[i].lev4_item_point+",counselitemid3="+rows[i].lev3_counsel_item_id+",counselitemid4="+rows[i].lev4_counsel_item_id+",level3="+rows[i].lev3_item_point+",item_type_cd="+rows[i].item_type_cd;
+						    		var senteval = rows[i].sentence.replace(/OOO/gi, "${NAME}");
 						    		param2.expression = senteval.replace(/ /gi, "");
 						    	}else{
 						    		var j = i-1;
-						    		if(rows[j].LEV4_COUNSEL_ITEM_ID == rows[i].LEV4_COUNSEL_ITEM_ID){
-						    			var senteval = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
+						    		if(rows[j].lev4_counsel_item_id == rows[i].lev4_counsel_item_id){
+						    			var senteval = rows[i].sentence.replace(/OOO/gi, "${NAME}");
 							    		param3 = {
 						    					"expression": senteval.replace(/ /gi, ""),
 						    					"use": true
@@ -157,9 +157,9 @@ var iu = schedule.scheduleJob('0 20 9 * * *', function(){
 						    				      "expression": "",
 						    				      "synonyms": []
 						    				    }
-						    			param2.id = rows[i].LEV4_COUNSEL_ITEM_ID;
-						    			param2.extradata = "LEVEL4="+rows[i].LEV4_ITEM_POINT+",counselitemid3="+rows[i].LEV3_COUNSEL_ITEM_ID+",counselitemid4="+rows[i].LEV4_COUNSEL_ITEM_ID+",LEVEL3="+rows[i].LEV3_ITEM_POINT+",ITEM_TYPE_CD="+rows[i].ITEM_TYPE_CD;
-							    		var senteval = rows[i].SENTENCE.replace(/OOO/gi, "${NAME}");
+						    			param2.id = rows[i].lev4_counsel_item_id;
+						    			param2.extradata = "level4="+rows[i].lev4_item_point+",counselitemid3="+rows[i].lev3_counsel_item_id+",counselitemid4="+rows[i].lev4_counsel_item_id+",level3="+rows[i].lev3_item_point+",item_type_cd="+rows[i].item_type_cd;
+							    		var senteval = rows[i].sentence.replace(/OOO/gi, "${NAME}");
 							    		param2.expression = senteval.replace(/ /gi, "");
 							    		
 						    		}

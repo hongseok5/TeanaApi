@@ -69,13 +69,13 @@ var io = schedule.scheduleJob('*/30 * * * * *', function(){
 							var callsetseq = "";
 
 							console.log('file pool.getConnection');
-							var querystring  = "SELECT NCT.COUNSEL_TYPE_ID, (SELECT CURRENT_VAL FROM NX_SEQUENCE WHERE SEQUENCE_ID = 'CALL_SET_SEQ'  LIMIT 1) AS SEQ FROM NX_COUNSEL_TYPE_MAPPING NCT, NX_EMP NE WHERE NCT.DEPT_ID = NE.DEPT_ID AND NE.CTI_ID = ? LIMIT 1";
+							var querystring  = "select nct.counsel_type_id, (select current_val from nx_sequence where sequence_id = 'CALL_SET_SEQ'  limit 1) as seq from nx_counsel_type_mapping nct, nx_emp ne where nct.dept_id = ne.dept_id and ne.cti_id = ? limit 1";
 							connection.query(querystring, [ filedata.agentId ], function(err, rows, fields) {
 								console.log('db querystring');
 								if (!err){
 									for(var i=0; i<rows.length;i++){
-								    	counsetltypeid = rows[i].COUNSEL_TYPE_ID; //resultId에 해당하는 부분만 가져옴
-								    	callsetseq = rows[i].SEQ; //resultId에 해당하는 부분만 가져옴
+								    	counsetltypeid = rows[i].counsel_type_id; //resultId에 해당하는 부분만 가져옴
+								    	callsetseq = rows[i].seq; //resultId에 해당하는 부분만 가져옴
 								    }
 									if(counsetltypeid != null || counsetltypeid != ""){
 										var filedataset = filedata.timeNtalk.replace(/[0-9]/g, "");
@@ -88,11 +88,11 @@ var io = schedule.scheduleJob('*/30 * * * * *', function(){
 									    options1.body = JSON.stringify(param);
 									    rp(options1).then(function ( data ){
 									    	console.log('db rp(options1)');
-									    	var callSQL = "CALL call_counsel_set(?, ?, ?, ?)";
-									    	var inserEstDtlHisSQL = "  INSERT INTO NX_COUNSEL_ITEM_HIS (CALL_SET_SEQ, START_TIME, EXTENSION, COUNSEL_TYPE_ID, EMP_ID  "
-													    		+", DEPT_ID, LEV3_COUNSEL_ITEM_ID, LEV4_COUNSEL_ITEM_ID, LEV3_ITEM_POINT, LEV4_ITEM_POINT "
-													    		+", ITEM_COUNT, ITEM_TYPE_CD, REG_ID, REG_IP, REG_DTM, MOD_ID, MOD_IP, MOD_DTM) "
-													    		+"select ?, ?, ?, ?, emp_id, dept_id, ?, ?, ?, ?, ?, ?, 'SYSTEM', '0.0.0.0', sysdate(), 'SYSTEM', '0.0.0.0', sysdate() from NX_EMP where cti_id=? ";
+									    	var callSQL = "call call_counsel_set(?, ?, ?, ?)";
+									    	var inserEstDtlHisSQL = "  insert into nx_counsel_item_his (call_set_seq, start_time, extension, counsel_type_id, emp_id  "
+													    		+", dept_id, lev3_counsel_item_id, lev4_counsel_item_id, lev3_item_point, lev4_item_point "
+													    		+", item_count, item_type_cd, reg_id, reg_ip, reg_dtm, mod_id, mod_ip, mod_dtm) "
+													    		+"select ?, ?, ?, ?, emp_id, dept_id, ?, ?, ?, ?, ?, ?, 'SYSTEM', '0.0.0.0', sysdate(), 'SYSTEM', '0.0.0.0', sysdate() from nx_emp where cti_id=? ";
 
 									    	console.log('db data'+data);
 									    	data = JSON.parse(data);
@@ -224,7 +224,7 @@ var folderdelete = schedule.scheduleJob('0 30 9 * * *', function(){
 	var tempdate = dateFormat(new Date(), "yyyymmddHHMMss");
     var day_ago = new Date().getHours() - 1 ;
     day_ago = tempdate.slice(0,8) + ( day_ago < 10 ? "0" + day_ago : day_ago );
-    
+      
 	fs.readdirSync(config.backup_path_bak).forEach(function(file, index){
 		if(file.substring(0,10) == day_ago){
 			if(file.substring(file.lastIndexOf("_"),file.length) == '_temp'){

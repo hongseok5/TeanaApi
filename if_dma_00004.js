@@ -51,7 +51,7 @@ var options2 = {
     timeout: 10000,
     body : ""
 };
-
+  
 function getData(){
     var path = config.send_save_path;
     var sj = schedule.scheduleJob('30 30 * * * *', function(){
@@ -65,7 +65,7 @@ function getData(){
 	        		fs.readFile(config.send_smry_path+file , 'utf-8' , function(err , filedata){
 	        			if(err) { return callerror(err); }
 	        			filedata = JSON.parse(filedata);
-	        			var querystring  = "UPDATE UA_CALL SET CATEGORY1 = LPAD(?, 10, '0'), SUMMARY = ? WHERE START_TIME = ? AND EXTENSION = ?";
+	        			var querystring  = "update ua_call set category1 = lpad(?, 10, '0'), summary = ? where start_time = ? and extension = ?";
 	        			
 	        			var callSQLquery = connection.query(querystring, [ filedata.category, filedata.summary, filedata.startTime, filedata.extension ], function (err, rows) {
 	        				if(err){
