@@ -33,8 +33,6 @@ router.post("/list", function(req, res){
     var should = [];
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
         body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
-    if(common.getEmpty(req.body.gender))
-        body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
     if(common.getEmpty(req.body.Mcate) && req.body.Mcate != "ALL")
