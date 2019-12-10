@@ -40,10 +40,12 @@ router.post("/statistics", function(req, res){
     if(common.getEmpty(req.body.age) && req.body.age != "ALL")
         body.query.bool.filter.push({ range : { age : { gte : age, lte : age + 9}}});
 
-    if(common.getEmpty(req.body.product)){
+	if(common.getEmpty(req.body.product)){
     	for( p in req.body.product ){
-            var term_obj = { term : { productCode : req.body.product[p].productCode}};
-            should.push(term_obj);
+			if(common.getEmpty(req.body.product[p].productCode)) {
+				var term_obj = { term : { productCode : req.body.product[p].productCode}};
+				should.push(term_obj);
+			}
         } 
     }
 	body.query.bool.must = [
@@ -130,14 +132,14 @@ router.post("/statistics", function(req, res){
 				}
 				
 				if(obj.gender == "1") {
-					obj2.gender =  2;
+					obj2.gender =  "2";
 					obj2.division = obj.division;
 					obj2.count = 0;
 										
 					objArr.push(obj);
 					objArr2.push(obj2);
 				}else if(obj.gender != undefined){
-					obj2.gender =  1;
+					obj2.gender =  "1";
 					obj2.division = obj.division;
 					obj2.count = 0;
 										
