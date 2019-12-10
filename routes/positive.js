@@ -202,7 +202,9 @@ router.post("/count", function(req, res){
 
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
         body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
-    if(common.getEmpty(req.body.gender))
+    if(common.getEmpty(req.body.age) && req.body.age != "ALL")
+    	body.query.bool.filter.push({ range : { age : { gte : age, lte : age + 9}}});    
+    if(common.getEmpty(req.body.gender) && req.body.gender != "ALL")
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
