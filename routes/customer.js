@@ -31,12 +31,12 @@ router.post("/statistics", function(req, res){
 
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
         body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
-    if(common.getEmpty(req.body.gender)) {
+    if(common.getEmpty(req.body.gender) && req.body.gender != "ALL") {
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
 	}else{
 		body.query.bool.filter.push({ terms : { gender : ["1","2"] }});
 	}
-    if(common.getEmpty(req.body.age))
+    if(common.getEmpty(req.body.age)&& req.body.age != "ALL")
         body.query.bool.filter.push({ range : { age : { gte : age, lte : age + 9}}});
 
     body.aggs.aggs_gender = {
