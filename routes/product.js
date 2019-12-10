@@ -47,9 +47,9 @@ router.post("/list", function(req, res){
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
     if(common.getEmpty(req.body.vdnGrp) && req.body.vdnGrp != "ALL")
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
-    if(common.getEmpty(req.body.gender))
+    if(common.getEmpty(req.body.gender) && req.body.gender != "ALL")
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
-    if(common.getEmpty(req.body.age))
+    if(common.getEmpty(req.body.age) && req.body.age != "ALL")
     	body.query.bool.filter.push({ range : { age : { gte : age, lte : age + 9}}});
     if(common.getEmpty(req.body.product)){
     	for( p in req.body.product ){
