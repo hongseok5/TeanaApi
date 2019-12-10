@@ -30,7 +30,7 @@ router.post("/statistics", function(req, res){
     var dayList = common.getDays(req.body.start_dt.toString(), req.body.end_dt.toString(), interval);
 
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
-        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
+        body.query.bool.filter.push({ term : { analysisCate : req.body.category}});
 	
         body.aggs.division = {
         	date_histogram : {
@@ -201,7 +201,7 @@ router.post("/count", function(req, res){
     var index = common.getIndex(req.body.channel);
 
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
-        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
+        body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
     if(common.getEmpty(req.body.gender))
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.companyCode))
