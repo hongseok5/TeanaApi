@@ -68,7 +68,9 @@ router.post("/list", function(req, res){
 
     body.aggs.aggs_product = {
         terms : {
-            field : "productCode"
+            field : "productCode",
+            min_doc_count : 1,
+            size : 10000
         }
     }
   
@@ -85,14 +87,17 @@ router.post("/list", function(req, res){
             obj = resp.hits.hits[i]._source;
             result.data.result.push(obj);
         }
-        for(i in product_bucket){
-            for(j in result.data.result){
-                if(product_bucket[i].key == result.data.result[j].productCode){
-                    result.data.result[j].count = product_bucket[i].doc_count;
+
+        for( i in result.data.result){
+            result.data.result[i].count = 0; 
+            for( j in product_bucket){
+                if( result.data.result[i].productCode == product_bucket[j].key){
+                    result.data.result[i].count = product_bucket[i].doc_count;
                     break;
-                } 
+                }    
             }
         }
+
         res.send(result);
     }, function(err){
 		logger.error("list_by_product ", err);
