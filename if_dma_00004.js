@@ -91,6 +91,7 @@ function getData(){
 	    		});
 	    		
 	    	});
+			connection.release();
 	    });
     });  
     sj.invoke();
