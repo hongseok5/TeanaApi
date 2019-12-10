@@ -18,11 +18,6 @@ var fs = require('fs');
 router.post('/call', (req, res) => {
     logger.info("HTTP POST /receive/call");
 	
-	logger.info("ifId:" + req.body.ifId);
-	logger.info("vdn:" + req.body.vdn);
-	logger.info("vdnGrp:" + req.body.vdnGrp);
-	logger.info("vdnGrpNm:" + req.body.vdnGrpNm);
-	
 	if( req.body.ifId !== undefined && req.body.vdn !== undefined && req.body.vdnGrp !== undefined && req.body.vdnGrpNm !== undefined ){
 
       var result = {
@@ -101,7 +96,15 @@ router.post('/call', (req, res) => {
       
     } else {
 	  logger.info("ifId, vdn, vdnGrp, vdnGrpNm  undefined ");
-      result = common.getResult("40", "No ifId", "receive_call");
+	  logger.info("ifId:" + req.body.ifId);
+	  logger.info("vdn:" + req.body.vdn);
+	  logger.info("vdnGrp:" + req.body.vdnGrp);
+	  logger.info("vdnGrpNm:" + req.body.vdnGrpNm);
+	  logger.info("caseId:" + req.body.caseId);
+	  logger.info("caseNumber:" + req.body.caseNumber);
+	  logger.info("inCateNm:" + req.body.inCateNm);	  
+      
+	  result = common.getResult("40", "No ifId", "receive_call");
       res.send(result);
     }
   });
