@@ -2,15 +2,16 @@ const approot = require('app-root-path');
 const config = require(approot + '/config/config');
 const common = require(approot + '/routes/common');
 const cron = require('node-cron');
-// const schedule = require('node-schedule');
+const schedule = require('node-schedule');
 const mergejson = require('mergejson');
 const fs = require('fs');
 const rp = require('request-promise');
+const dateformat = require('dateformat');
 var winston = require('winston');
 const winstonConfig = require(approot + '/lib/logger');
 winston.loggers.add("merge", winstonConfig.createLoggerConfig("merge"));
 var logger = winston.loggers.get("merge");
-/*
+
 const mysql = require('mysql');
 const conn = {
     host : '10.253.42.184',
@@ -19,7 +20,7 @@ const conn = {
     database : 'ssgtv',
     connectionLimit : 50
 };
-*/
+
 let day = new Date().getDate();
 let month = new Date().getMonth() + 1;
 let year = new Date().getFullYear();
@@ -29,6 +30,31 @@ if(!fs.existsSync(config.backup_path + today)){
   fs.mkdirSync(config.backup_path + today);
   logger.info("day : " + today);
 } 
+
+
+var stop_words = [];
+schedule.scheduleJob('0 0 * * * *', function(){
+  var pool = mysql.createPool(conn);
+  pool.getConnection( function(err, connection){
+    let query = "SELECT keyword FROM nx_keyword WHERE use_yn = 'Y' AND keyword_type = '07' AND reg_dtm > ?" 
+    //dateformat( new Date().setHours(-12), 'yyyy-mm-dd HH:MM:ss');
+    //console.log( "query : "  + query );
+    connection.query( query,[dateformat( new Date().setHours(-1), 'yyyy-mm-dd HH:MM:ss') ], function(err, rows){
+      if(err){
+        connection.release();
+        throw err;
+      }
+      if( rows.length == 0 ) console.log("zero result");
+      for( i in rows ){
+        fs.appendFile('/app/TeAna/TeAnaTextAnalytics-1.2.0/dic/stopword.txt', '\n' +  rows[i].keyword, function(err){ 
+	 if(err) throw err;
+         console.log("stopword" + rows[i].keyword + " writed");
+	});
+      }
+      //console.log(stop_words);
+    });
+  })
+});
 
 // 키워드추출 API
 let kwe_option = {
@@ -58,7 +84,7 @@ let cat_option = {
   uri : 'http://localhost:12800/txt_to_doc',
   method : "POST",
   body : {
-      t_col : "cl_common_1204",
+      t_col : "cl_common_1209",
       text : null,
       mode : 'kma',
       combine_xs : true
@@ -87,12 +113,13 @@ let file_merge_async = function (file_nr, file_nt){
            .then(function(values){
             mergeTalk(values[0], values[1]);
           }, function(err){
-            logger.error("merging error : " + err);
+            console.log(err);
           }).catch();
 };
 
 function mergeTalk( dataR, dataT  ){
   // T : SSG , R :CST
+  
   dataT.timeNtalkT = dataT.timeNtalk;
   dataR.timeNtalkR = dataR.timeNtalk;
   let merged_talk = []; // 병합한 대화를 담을 배열
