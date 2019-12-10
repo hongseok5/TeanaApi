@@ -85,8 +85,6 @@ var count4 = 0; //duration
 rl.on('line' , function(line){
        
       getApiResult(line);
-      //console.log(`finished : keyword = ${count1}, sentimental = ${count2}, category = ${count3}, duration = ${count4}`);
-      //console.log(`result file at ${file_path}result/reindexing_${resultAt}.json`);
 })
 
 function getDuration( start, end, es ){
@@ -103,11 +101,6 @@ function getDuration( start, end, es ){
     }
 }
 
-/*
-async function(rlif){
- rlif.on('line', function(line)
-}
-*/
 function sleep(ms){
   return new Promise( resolve => {
     setTimeout(resolve, ms);
@@ -161,31 +154,33 @@ async function getApiResult( line ){
     
         // negative 추출
         tmp_array = [];
-        if( Array.isArray( values[2].sentimental.negative.keywords ))
-          tmp_array = values[2].sentimental.negative.keywords;
+        for(i in values[2].sentimental.negative.keywords){
+          tmp_array.push(values[2].sentimental.negative.keywords[i].keyword);
+        }
         tmp_array = Array.from(new Set(tmp_array)); // 중복 키워드 제거 
         for( i in tmp_array ){
           let obj = { count : -1 , word : tmp_array[i]};
-          line.negative_word.push(obj);
+          merged_data.negative_word.push(obj);
         }
         // positive 추출
         tmp_array = [];
-        if( Array.isArray( values[2].sentimental.positive.keywords ))
-          tmp_array = values[2].sentimental.positive.keywords;
-        tmp_array = Array.from(new Set(tmp_array)); // 중복 키워드 제거 
+        for(i in values[2].sentimental.positive.keywords){
+          tmp_array.push(values[2].sentimental.positive.keywords[i].keyword)
+        }
+        tmp_array = Array.from(new Set(tmp_array)); // 중복 키워드 제거
         for(i in tmp_array){
           let obj = { count : 1, word : tmp_array[i]};
-          line.positive_word.push(obj);
+          merged_data.positive_word.push(obj);
         }
-    
         // neutral 추출
         tmp_array = [];
-        if( Array.isArray( values[2].sentimental.neutral.keywords ))
-          tmp_array = values[2].sentimental.neutral.keywords;
-        tmp_array = Array.from(new Set(tmp_array)); // 중복 키워드 제거 
+        for(i in values[2].sentimental.neutral.keywords){
+          tmp_array.push(values[2].sentimental.neutral.keywords[i].keyword)
+        }
+        tmp_array = Array.from(new Set(tmp_array)); // 중복 키워드 제거
         for(i in tmp_array){
           let obj = { count : 0, word : tmp_array[i]};
-          line.neutral_word.push(obj);
+          merged_data.neutral_word.push(obj);
         }
         if( common.getEmpty(line.startTime) && common.getEmpty(line.endTime)){
             line.duration = getDuration( line.startTime, line.endTime , true);
