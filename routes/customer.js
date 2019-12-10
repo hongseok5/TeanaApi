@@ -26,6 +26,7 @@ router.post("/statistics", function(req, res){
     let age = parseInt( req.body.age ); // 전체일 경우 어떤 값으로 오는지 확인?
     let size = req.body.size || 10;
     let from = req.body.from || 1;
+	let should = [];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
     var index = common.getIndex(req.body.channel);
 
@@ -36,8 +37,18 @@ router.post("/statistics", function(req, res){
 	}else{
 		body.query.bool.filter.push({ terms : { gender : ["1","2"] }});
 	}
-    if(common.getEmpty(req.body.age)&& req.body.age != "ALL")
+    if(common.getEmpty(req.body.age) && req.body.age != "ALL")
         body.query.bool.filter.push({ range : { age : { gte : age, lte : age + 9}}});
+
+    if(common.getEmpty(req.body.product)){
+    	for( p in req.body.product ){
+            var term_obj = { term : { productCode : req.body.product[p].productCode}};
+            should.push(term_obj);
+        } 
+    }
+	body.query.bool.must = [
+        { bool : { should } }
+    ];
 
     body.aggs.aggs_gender = {
 		terms : {
