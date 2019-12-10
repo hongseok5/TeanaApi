@@ -14,7 +14,7 @@ winston.loggers.add("product", winstonConfig.createLoggerConfig("product"));
 var logger = winston.loggers.get("product");
 
 router.post("/list", function(req, res){
-    logger.info("Router for IF_DMA_00004");
+    logger.info("Router for IF_DMA_00501");
     if(!common.getEmpty(req.body.start_dt)){
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
@@ -60,7 +60,7 @@ router.post("/list", function(req, res){
     }
    
 	// productCode가 있는 것만 추출
-	body.query.bool.filter.push({ exists : { "field" : "productCode" }});
+    body.query.bool.filter.push({ exists : { "field" : "productCode" }});
 
     body.query.bool.must = [
         { bool : { should } }
@@ -79,7 +79,7 @@ router.post("/list", function(req, res){
         body 
     }).then(function(resp){
         var result = common.getResult("10", "OK", "list_by_product");
-        result.data.count = resp.hits.total;
+        result.data.count = resp.aggregations.aggs_product.buckets.length;
         result.data.result = [];
 
         product_bucket = resp.aggregations.aggs_product.buckets;
