@@ -29,7 +29,7 @@ router.post("/count", function(req, res){
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from);
     
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
-        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
+        body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
     if(common.getEmpty(req.body.age))
     	body.query.bool.filter.push({ range : { age : { gte : age, lte : age + 9}}});    
     if(common.getEmpty(req.body.gender))
@@ -124,7 +124,7 @@ router.post("/statistics", function(req, res){
     var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     let interval = req.body.interval || "week";
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
-        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
+        body.query.bool.filter.push({ term : { analysisCate : common.req.body.category }});
     if(common.getEmpty(req.body.age))
     	body.query.bool.filter.push({ range : { age : { gte : age, lte : age + 9}}});    
     if(common.getEmpty(req.body.gender))

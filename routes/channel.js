@@ -29,7 +29,7 @@ router.post("/count", function(req, res){
     var interval = req.body.interval || "1D";
     var dayList = common.getDays(req.body.start_dt, req.body.end_dt, interval);
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
-        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
+        body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
 
     body.aggs.day = {
       	date_histogram : {
