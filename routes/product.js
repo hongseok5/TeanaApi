@@ -25,6 +25,7 @@ router.post("/list", function(req, res){
     }
     let size = req.body.size || 10 ;
     let from = req.body.from || 1 ;
+    console.log( req.body.size, req.body.from);
     let age = parseInt(req.body.age);
     var fields = ["no", "company", "companyNm", "productCode", "productNm", "Mcate", "McateNm", "mdId", "mdNm"];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from, fields);
@@ -69,7 +70,7 @@ router.post("/list", function(req, res){
     body.aggs.aggs_product = {
         terms : {
             field : "productCode",
-            min_doc_count : 1,
+            min_doc_count : 0,
             size : 10000
         }
     }
