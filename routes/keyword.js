@@ -44,7 +44,7 @@ router.post("/top", function(req, res){
     var index = common.getIndex(req.body.channel);
     
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
-        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
+        body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
     if(common.getEmpty(req.body.gender))
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.companyCode))
@@ -187,7 +187,7 @@ function topKeyword(keyword, req, res, rownum){
     var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     	
 	if(common.getEmpty(req.body.category) && req.body.category != "ALL")
-        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
+        body.query.bool.filter.push({ term : { analysisCate : req.body.category}});
 
 	
     body.query.bool.must = [
@@ -586,7 +586,7 @@ router.post("/issue/top", function(req, res){
     var dayList = common.getDays(req.body.start_dt, req.body.end_dt, interval);
 
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
-        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
+        body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
 
     if(common.getEmpty(req.body.keyword)){
         var nest_obj = {
@@ -665,7 +665,7 @@ router.post("/issue", function(req, res){
     var dayList = common.getDays(req.body.start_dt, req.body.end_dt, interval);
    
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
-        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
+        body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
 
     if(common.getEmpty(req.body.keyword)){
         var nest_obj = {
@@ -736,7 +736,7 @@ router.post("/issue/statistics", function(req, res){
     var index = common.getIndex(req.body.channel);
 
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
-        body.query.bool.filter.push({ term : { analysisCate : common.convertCategory(req.body.category) }});
+        body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
 
     if(common.getEmpty(req.body.keyword)){
     	 var nest_obj = {
