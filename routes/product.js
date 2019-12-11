@@ -74,7 +74,7 @@ router.post("/list", function(req, res){
             size : 10000
         }
     }
-  
+    
     client.search({
         index,
         body 
@@ -85,7 +85,7 @@ router.post("/list", function(req, res){
         product_bucket = resp.aggregations.aggs_product.buckets;
     
         for( i in resp.hits.hits){
-            obj = resp.hits.hits[i]._source;   
+            obj = resp.hits.hits[i]._source;    // _source.a + source.b+ source.c...
             tmp_set.add(JSON.stringify(obj));   // 중복제거 
         }
    
@@ -108,6 +108,12 @@ router.post("/list", function(req, res){
         if( result.data.count > 10){
             result.data.result = result.data.result.slice( (parseInt(from)-1) * 10, (parseInt(from)-1) * 10 + 10);  // 페이징
         }
+        from = from * 10;
+        for( var i = 0 ; i < 10; i++) {
+            
+            result.data.result[i].no = from + i + 1; 
+        }
+
         res.send(result);
     }, function(err){
 		logger.error("list_by_product ", err);
