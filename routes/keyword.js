@@ -433,6 +433,7 @@ router.post("/hot/statistics", function(req, res){
 	            }
 	        }
 	    }
+		
 	client.search({
         index,
         body
