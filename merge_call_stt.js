@@ -36,14 +36,13 @@ var stop_words = [];
 schedule.scheduleJob('0 0 * * * *', function(){
   var pool = mysql.createPool(conn);
   pool.getConnection( function(err, connection){
-    let query = "SELECT keyword FROM nx_keyword WHERE use_yn = 'Y' AND keyword_type = '07' AND reg_dtm > ?" 
-    //dateformat( new Date().setHours(-12), 'yyyy-mm-dd HH:MM:ss');
-    //console.log( "query : "  + query );
-    connection.query( query,[dateformat( new Date().setHours(-1), 'yyyy-mm-dd HH:MM:ss') ], function(err, rows){
+    let query = "SELECT keyword FROM nx_keyword WHERE use_yn = 'Y' AND keyword_type = '07' AND reg_dtm >= date_add( now(), interval -1 hour)" 
+    connection.query( query, function(err, rows){
       if(err){
         connection.release();
         throw err;
       }
+      logger.info("query result at " + dateformat(new Date(),'yyyy-mm-dd HH:MM:ss') + " : "  + JSON.stringify(rows));
       if( rows.length == 0 ) console.log("zero result");
       for( i in rows ){
         fs.appendFile('/app/TeAna/TeAnaTextAnalytics-1.2.0/dic/stopword.txt', '\n' +  rows[i].keyword, function(err){ 
@@ -84,7 +83,7 @@ let cat_option = {
   uri : 'http://localhost:12800/txt_to_doc',
   method : "POST",
   body : {
-      t_col : "cl_common_1209",
+      t_col : "cl_common_1211",
       text : null,
       mode : 'kma',
       combine_xs : true

@@ -2,7 +2,7 @@ const fs = require('fs');
 const readline = require('readline');
 const mysql = require('mysql');
 const conn = {
-    host : '10.253.42.121',
+    host : '10.253.42.184',
     user : 'ssgtv',
     password : 'ssgtv0930',
     database : 'ssgtv',
@@ -10,15 +10,12 @@ const conn = {
 };
 const rp = require('request-promise');
 const dateformat = require('dateformat');
-// var file_path = "D:\\TeAnaApi\\pos_neg_neu.csv";
-// 파일 읽을때는 무조건 큰 따옴표!!!!!!!!!!!!!!!!
-// var csvtojson = require('csvtojson');
 
 let option = {
   uri : 'http://10.253.42.122:12800/voc/sentimental/_sync',
   method : "POST",
   body : {
-    id : "sent_2",
+    id : "sent_3",
     extradata : "name=긍부정 평가, user=admin1",
     use : true,
     keywords : []
@@ -28,18 +25,14 @@ let option = {
 
 var pool = mysql.createPool(conn);
 pool.getConnection(function (err, connection){
-  let query = "SELECT keyword_id, keyword_type, keyword \
-                FROM nx_keyword \
-                WHERE use_yn = 'Y' AND keyword_type IN ('01', '05', '06') AND ( mod_dtm >= ? OR reg_dtm >= ? )";  // last value
-  connection.query(query, [ dateformat(new Date().setHours(-10), "yyyy-mm-dd HH:MM:ss"), dateformat(new Date().setHours(-10), "yyyy-mm-dd HH:MM:ss") ], function(err, rows){
+  let query = "SELECT keyword_id, keyword_type, keyword FROM nx_keyword  WHERE use_yn = 'Y' AND keyword_type IN ('01', '05', '06') AND ( mod_dtm >= date_add( now(), interval -1 day) OR reg_dtm >= date_add( now(), interval -l day) )";  // last value
+  connection.query(query,  function(err, rows){
     if(err){
       connection.release();
       throw err;
     }
     console.log(rows);
-    console.log(rows.length);
-    connection.release();
-    /*
+    
     pos_list = [];
     neg_list = [];
     neu_lest = [];
@@ -105,95 +98,12 @@ pool.getConnection(function (err, connection){
     
     rp(option).then(function(data){
       console.log("success!");
-      console.log(data);
-      console.log(option.body);
     }, function(err){
       console.log(err);
     });
-    */
-    //connection.release();
+    
+    connection.release();
   })
 
 });
 
-
-
-
-
-/*
-csvtojson().fromFile(file_path).then((data)=>{
-  pos_list = [];
-  neg_list = [];
-  neu_lest = [];
-  for( i in data){
-    if(row[i].keyword_type == 1){
-      pos_list.push(row[i]);
-    } else if(row[i].keyword_type == 0) {
-      neu_lest.push(row[i]);
-    } else {
-      neg_list.push(row[i]);
-    }
-  }
-
-  for(i in pos_list){
-    let keyword_el = {
-      id : null,
-      extradata : null,
-      use : true,
-      keyword : null,
-      strength : null,
-      synonyms : []
-    }
-    if(row[i].keyword !== undefined){
-      keyword_el.id = "pos-" + parseInt(i);
-      keyword_el.keyword = row[i].keyword;
-      keyword_el.keyword_type = row[i].keyword_type;
-      option.body.keywords.push(keyword_el);
-    }
-  }
-
-  for(i in neg_list){
-    let keyword_el = {
-      id : null,
-      extradata : null,
-      use : true,
-      keyword : null,
-      strength : null,
-      synonyms : []
-    }
-    if(row[i].keyword !== undefined){
-      keyword_el.id = "neg-" + parseInt(i);
-      keyword_el.keyword = row[i].keyword;
-      keyword_el.keyword_type = row[i].keyword_type;
-      option.body.keywords.push(keyword_el);
-    }
-  }
-  for(i in neu_lest){
-    let keyword_el = {
-      id : null,
-      extradata : null,
-      use : true,
-      keyword : null,
-      strength : null,
-      synonyms : []
-    }
-    if(row[i].keyword !== undefined){
-      keyword_el.id = "neu-" + parseInt(i);
-      keyword_el.keyword = row[i].keyword;
-      keyword_el.keyword_type = row[i].keyword_type;
-      option.body.keywords.push(keyword_el);
-    }
-  }
-  
-  rp(option).then(function(data){
-    console.log("success!");
-    console.log(data);
-    console.log(option.body);
-  }, function(err){
-    console.log(err);
-  });
-  
-}, function(err){
-  console.log(err);
-});
-*/
