@@ -26,7 +26,6 @@ router.post("/list", function(req, res){
     let size = req.body.size || 10 ;
     let from = req.body.from || 1 ;
     console.log( req.body.size, req.body.from);
-    let age = parseInt(req.body.age);
     var fields = [ "company", "companyNm", "productCode", "productNm", "Mcate", "McateNm", "mdId", "mdNm"];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, 10000, 1, fields);
     var index = common.getIndex(req.body.channel);
@@ -48,7 +47,7 @@ router.post("/list", function(req, res){
     if(common.getEmpty(req.body.gender) && req.body.gender != "ALL")
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.age) && req.body.age != "ALL")
-    	body.query.bool.filter.push({ range : { age : { gte : age, lte : age + 9}}});
+    	body.query.bool.filter.push({ range : { age : { gte : parseInt(req.body.age), lte : parseInt(req.body.age) + 9}}});
     if(common.getEmpty(req.body.product)){
     	for( p in req.body.product ){
 			if(common.getEmpty(req.body.product[p].productCode)) {

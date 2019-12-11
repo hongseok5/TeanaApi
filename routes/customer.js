@@ -23,7 +23,6 @@ router.post("/statistics", function(req, res){
     	var result = common.getResult("40", "OK", "There is no required end_dt");
     	res.send(result);
     }
-    let age = parseInt( req.body.age ); // 전체일 경우 어떤 값으로 오는지 확인?
     let size = req.body.size || 10;
     let from = req.body.from || 1;
 	let should = [];
@@ -38,7 +37,7 @@ router.post("/statistics", function(req, res){
 		body.query.bool.filter.push({ terms : { gender : ["1","2"] }});
 	}
     if(common.getEmpty(req.body.age) && req.body.age != "ALL")
-        body.query.bool.filter.push({ range : { age : { gte : age, lte : age + 9}}});
+    	body.query.bool.filter.push({ range : { age : { gte : parseInt(req.body.age), lte : parseInt(req.body.age) + 9}}});
 
 	if(common.getEmpty(req.body.product)){
     	for( p in req.body.product ){
