@@ -134,6 +134,10 @@ router.post("/top/statistics", function(req, res){
     var index = common.getIndex(req.body.channel);
     if(req.body.keyword == undefined || req.body.keyword == "" || req.body.keyword == null){
     	var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
+		
+		if(common.getEmpty(req.body.category) && req.body.category != "ALL")
+			body.query.bool.filter.push({ term : { analysisCate : req.body.category }});		
+		
     	body.aggs = {
     		keyword_count :{	
     			nested : {
