@@ -33,7 +33,7 @@ router.post("/search", function(req, res){
     if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
     if(common.getEmpty(req.body.productCode))
-        body.query.bool.filter.push({ term : { product : req.body.productCode }});
+        body.query.bool.filter.push({ term : { productCode : req.body.productCode }});
     if(common.getEmpty(req.body.Mcate) && req.body.Mcate != "ALL")
         body.query.bool.filter.push({ term : { Mcate : req.body.Mcate }});
     if(common.getEmpty(req.body.inCate) && req.body.inCate != "ALL")
