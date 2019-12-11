@@ -65,6 +65,8 @@ router.post("/list", function(req, res){
         { bool : { should } }
     ]
 
+	body.query.bool.must_not = { "term": { "productCode": ""}};
+
     body.aggs.aggs_product = {
         terms : {
             field : "productCode",
