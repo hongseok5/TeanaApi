@@ -523,11 +523,11 @@ router.post("/hot/statistics", function(req, res){
 router.post("/relation", function(req, res){
     logger.info("Router for IF_DMA_00105");
     var rel_word_option = {
-        uri : 'http://localhost:12800/kwd_to_kwd',
+        uri : 'http://10.253.42.122:12800/kwd_to_kwd',
         method : "POST",
         body : {
             keyword : [],
-            t_vec : "mobile_test8",
+            t_vec : "wv_common_1203",
             size : 10
         },
         json : true
