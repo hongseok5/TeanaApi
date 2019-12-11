@@ -267,7 +267,10 @@ router.post("/hot/count", function(req, res){
     hour_ago = now.slice(0,8) + ( hour_ago < 10 ? "0" + hour_ago : hour_ago ) + now.slice(10, 14);
     two_hour = now.slice(0,8) + ( two_hour < 10 ? "0" + two_hour : two_hour ) + now.slice(10, 14);
     var body = common.getBodyNoSize( two_hour, now);   // 실제로는 hour_ago, hour_after로 넣고 테스트 시에는 하드코딩값 or 임의값 전달
-    
+
+    if(common.getEmpty(req.body.category) && req.body.category != "ALL")
+        body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
+
     body.aggs.rt_hot_keyword = {
         range : {
             field : "startTime",
@@ -370,7 +373,10 @@ router.post("/hot/statistics", function(req, res){
 	now_ago = now.slice(0,8) + ( now_ago < 10 ? "0" + now_ago : now_ago )+now.slice(10,14);
 	var body = common.getBodyNoSize(two_ago, now_ago);
 	var index = common.getIndex(req.body.channel);
-		
+	
+	if(common.getEmpty(req.body.category) && req.body.category != "ALL")
+        body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
+
     if(common.getEmpty(req.body.keyword)){
     	var keyobj = new Array();
     	for(i in req.body.keyword){
