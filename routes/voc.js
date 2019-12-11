@@ -90,7 +90,7 @@ router.post("/search", function(req, res){
         		mdNm : test[i][1]._source.mdNm,
         		startTime : test[i][1]._source.startTime,
 				extension : test[i][1]._source.extension,
-        		channel : test[i][1]._index,
+        		channel : common.getIndexCode(test[i][1]._index),
         		ifId : test[i][1]._source.ifId,
 				content : test[i][1]._source.content,
 				reContent : test[i][1]._source.reContent

@@ -22,6 +22,24 @@ var common = {
                 return "call_*,mobile,pc,homepage,ars";
         }
     },
+    getIndexCode : function(code){
+        switch(code){
+            case "mobile":
+                return "01";
+            case "pc":
+                return "02";
+            case "homepage":
+                return "03";
+            case "ars":
+				return "04";
+			case "chat":
+				return "05";
+			case "alliance":
+				return "06";
+            default:
+                return "00";
+        }
+    },
 	getEmpty : function (value) {
 		var rtn = false;
 		if (typeof value != 'undefined' && value) {
