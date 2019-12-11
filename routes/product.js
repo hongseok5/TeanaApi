@@ -27,8 +27,8 @@ router.post("/list", function(req, res){
     let from = req.body.from || 1 ;
     console.log( req.body.size, req.body.from);
     let age = parseInt(req.body.age);
-    var fields = ["no", "company", "companyNm", "productCode", "productNm", "Mcate", "McateNm", "mdId", "mdNm"];
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from, fields);
+    var fields = [ "company", "companyNm", "productCode", "productNm", "Mcate", "McateNm", "mdId", "mdNm"];
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, 10000, 1, fields);
     var index = common.getIndex(req.body.channel);
     var should = [];
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
@@ -66,7 +66,7 @@ router.post("/list", function(req, res){
     ]
 
 	body.query.bool.must_not = { "term": { "productCode": ""}};
-
+    body.sort = { startTime : "desc"};
     body.aggs.aggs_product = {
         terms : {
             field : "productCode",
@@ -80,24 +80,34 @@ router.post("/list", function(req, res){
         body 
     }).then(function(resp){
         var result = common.getResult("10", "OK", "list_by_product");
-        result.data.count = resp.aggregations.aggs_product.buckets.length;
         result.data.result = [];
-        //product_bucket = resp.hits.hits;
+        var tmp_set = new Set();
         product_bucket = resp.aggregations.aggs_product.buckets;
+    
         for( i in resp.hits.hits){
             obj = resp.hits.hits[i]._source;   
-            result.data.result.push(obj);
+            tmp_set.add(JSON.stringify(obj));   // 중복제거 
         }
-        for( i in result.data.result){
-            result.data.result[i].count = 0; 
+   
+        for( i of tmp_set){
+            var obj = JSON.parse(i);
+            obj.count = 0;
             for( j in product_bucket){
-                if( result.data.result[i].productCode == product_bucket[j].key){
-                    result.data.result[i].count = product_bucket[j].doc_count;
+                if( obj.productCode == product_bucket[j].key){
+                    obj.count = product_bucket[j].doc_count;
+                    result.data.result.push(obj);
                     break;
                 }    
             }
         }
+        result.data.count = result.data.result.length;
+        result.data.result = result.data.result.sort( function(a, b){
+            return a.count > b.count ? -1 : a.count < b.count ? 1 : 0;  // 상품 건수별 정렬
+        });
 
+        if( result.data.count > 10){
+            result.data.result = result.data.result.slice( (parseInt(from)-1) * 10, (parseInt(from)-1) * 10 + 10);  // 페이징
+        }
         res.send(result);
     }, function(err){
 		logger.error("list_by_product ", err);
