@@ -15,7 +15,7 @@ let option = {
   uri : 'http://10.253.42.122:12800/voc/sentimental/_sync',
   method : "POST",
   body : {
-    id : "sent_3",
+    id : "sent_1",
     extradata : "name=긍부정 평가, user=admin1",
     use : true,
     keywords : []
@@ -25,7 +25,11 @@ let option = {
 
 var pool = mysql.createPool(conn);
 pool.getConnection(function (err, connection){
-  let query = "SELECT keyword_id, keyword_type, keyword FROM nx_keyword  WHERE use_yn = 'Y' AND keyword_type IN ('01', '05', '06') AND ( mod_dtm >= date_add( now(), interval -1 day) OR reg_dtm >= date_add( now(), interval -l day) )";  // last value
+  if(err){
+    throw err;
+  }
+  let query = "SELECT keyword_id, keyword_type, keyword FROM nx_keyword " + 
+              "WHERE use_yn = 'Y' AND keyword_type IN ('01', '05', '06') AND ( mod_dtm >= date_add( now(), interval -1 day) OR reg_dtm >= date_add( now(), interval -1 day) )";  // last value
   connection.query(query,  function(err, rows){
     if(err){
       connection.release();
@@ -98,12 +102,11 @@ pool.getConnection(function (err, connection){
     
     rp(option).then(function(data){
       console.log("success!");
+      connection.release();
     }, function(err){
       console.log(err);
+      connection.release();
     });
-    
-    connection.release();
+    process.exit();
   })
-
 });
-
