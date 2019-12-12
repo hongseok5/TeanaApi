@@ -12,7 +12,7 @@ const winstonConfig = require(approot + '/lib/logger');
  ************************************************************/
 winston.loggers.add("if_dma_00003", winstonConfig.createLoggerConfig("if_dma_00003"));
 var logger = winston.loggers.get("if_dma_00003");
-
+//개발
 var options1 = {
     method: 'POST',
     uri: 'https://ssgtv--devlje.my.salesforce.com/services/oauth2/token',
@@ -37,6 +37,32 @@ var options2 = {
     timeout: 10000,
     body : ""
 };
+/*//운영
+	var options1 = {
+	    method: 'POST',
+	    uri: 'https://ssgtv.my.salesforce.com/services/oauth2/token',
+	    form: {
+	        // Like <input type="text" name="name">
+	        grant_type:"password",
+	        client_id:"3MVG9G9pzCUSkzZtVB4GJTSLCTQkd603oOXC8D_P3pSbY7HDNQiqwXGhC2nWLBshnTVLtA2Xb585GhATB82XY",
+	        client_secret:"3462DFDEA0ED1EE5358C67EFE599CF7976D1662B93A51AE6F5C91D27CCD904D1",
+	        username : "ifuser@shinsegae.com",
+	        password : "demo123!"
+	    },
+	    headers: {},
+	    timeout: 5000
+	};
+
+	var options2 = {
+	    method: 'POST',
+	    uri: 'https://ssgtv.my.salesforce.com/services/apexrest/IF_STCS_DMA_00003',
+	    headers: {
+	        Authorization : null
+	    },
+	    timeout: 10000,
+	    body : ""
+	};
+*/
 //var channel_codes = ["01", "02", "03", "04"];
 
 var sj01 = schedule.scheduleJob('30 30 * * * *', function(){
@@ -137,7 +163,6 @@ function getData(){
 
         var token = JSON.parse(body);
         options2.headers.Authorization = "OAuth " + token.access_token;
-
         sj01.invoke();
         sj02.invoke();
         sj03.invoke();

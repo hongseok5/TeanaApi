@@ -51,7 +51,34 @@ var options2 = {
     timeout: 10000,
     body : ""
 };
-  
+/*//운영
+var options1 = {
+    method: 'POST',
+    uri: 'https://ssgtv.my.salesforce.com/services/oauth2/token',
+    form: {
+        // Like <input type="text" name="name">
+        grant_type:"password",
+        client_id:"3MVG9G9pzCUSkzZtVB4GJTSLCTQkd603oOXC8D_P3pSbY7HDNQiqwXGhC2nWLBshnTVLtA2Xb585GhATB82XY",
+        client_secret:"3462DFDEA0ED1EE5358C67EFE599CF7976D1662B93A51AE6F5C91D27CCD904D1",
+        username : "ifuser@shinsegae.com",
+        password : "demo123!"
+    },
+    headers: {},
+    timeout: 5000
+};
+
+var options2 = {
+    method: 'POST',
+    uri: 'https://ssgtv.my.salesforce.com/services/apexrest/IF_STCS_DMA_00003',
+    headers: {
+        Authorization : null,
+        "Content-Type" : "application/json",
+    },
+    timeout: 10000,
+    body : ""
+};
+*/
+
 function getData(){
     var path = config.send_save_path;
     var sj = schedule.scheduleJob('30 30 * * * *', function(){
