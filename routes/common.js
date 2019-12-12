@@ -197,7 +197,6 @@ var common = {
     			}
         	}
     	}else if(interval == "1M"){
-    		month++;
     		for(var i=0; i<month; i++){
     			if(i == 0){
     				var obj = {
