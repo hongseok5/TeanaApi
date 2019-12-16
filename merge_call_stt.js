@@ -14,7 +14,7 @@ var logger = winston.loggers.get("merge");
 
 const mysql = require('mysql');
 const conn = {
-    host : '10.253.42.184',
+    host : '10.253.42.184', // 개발
     user : 'ssgtv',
     password : 'ssgtv0930',
     database : 'ssgtv',
@@ -31,11 +31,10 @@ if(!fs.existsSync(config.backup_path + today)){
   logger.info("day : " + today);
 } 
 
-
-var stop_words = [];
 schedule.scheduleJob('0 0 * * * *', function(){
   var pool = mysql.createPool(conn);
   pool.getConnection( function(err, connection){
+    if(err) throw err;
     let query = "SELECT keyword FROM nx_keyword WHERE use_yn = 'Y' AND keyword_type = '07' AND reg_dtm >= date_add( now(), interval -1 hour)" 
     connection.query( query, function(err, rows){
       if(err){
@@ -43,14 +42,13 @@ schedule.scheduleJob('0 0 * * * *', function(){
         throw err;
       }
       logger.info("query result at " + dateformat(new Date(),'yyyy-mm-dd HH:MM:ss') + " : "  + JSON.stringify(rows));
-      if( rows.length == 0 ) console.log("zero result");
       for( i in rows ){
         fs.appendFile('/app/TeAna/TeAnaTextAnalytics-1.2.0/dic/stopword.txt', '\n' +  rows[i].keyword, function(err){ 
-	 if(err) throw err;
-         console.log("stopword" + rows[i].keyword + " writed");
-	});
+        if(err) throw err;
+        logger.info("stopword" + rows[i].keyword + " writed");
+        });
       }
-      //console.log(stop_words);
+      connection.release();
     });
   })
 });

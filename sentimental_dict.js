@@ -29,7 +29,7 @@ pool.getConnection(function (err, connection){
     throw err;
   }
   let query = "SELECT keyword_id, keyword_type, keyword FROM nx_keyword " + 
-              "WHERE use_yn = 'Y' AND keyword_type IN ('01', '05', '06') AND ( mod_dtm >= date_add( now(), interval -1 day) OR reg_dtm >= date_add( now(), interval -1 day) )";  // last value
+              "WHERE use_yn = 'Y' AND keyword_type IN ('01', '05', '06')";  //특정 단어만 추가할 수 없고 전체 단어를 한 번에 등록해야함.
   connection.query(query,  function(err, rows){
     if(err){
       connection.release();
