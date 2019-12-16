@@ -47,7 +47,7 @@ router.post("/list", function(req, res){
     if(common.getEmpty(req.body.gender) && req.body.gender != "ALL")
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.age) && req.body.age != "ALL")
-    	body.query.bool.filter.push({ range : { age : { gte : parseInt(req.body.age), lte : parseInt(req.body.age) + 9}}});
+    	body.query.bool.filter.push({ range : { age : { gte : Number(req.body.age), lte : Number(req.body.age) + 9}}});
     if(common.getEmpty(req.body.product)){
     	for( p in req.body.product ){
 			if(common.getEmpty(req.body.product[p].productCode)) {
@@ -84,35 +84,45 @@ router.post("/list", function(req, res){
         product_bucket = resp.aggregations.aggs_product.buckets;
     
         for( i in resp.hits.hits){
-            obj = resp.hits.hits[i]._source;    // _source.a + source.b+ source.c...
-            tmp_set.add(JSON.stringify(obj));   // 중복제거 
+    
+            tmp_set.add(resp.hits.hits[i]._source.productCode);   // 중복제거 
         }
-   
-        for( i of tmp_set){
-            var obj = JSON.parse(i);
-            obj.count = 0;
-            for( j in product_bucket){
-                if( obj.productCode == product_bucket[j].key){
-                    obj.count = product_bucket[j].doc_count;
-                    result.data.result.push(obj);
+  
+        for(i of tmp_set){
+            //console.log(typeof i);
+            for( j in resp.hits.hits){
+                if( i == resp.hits.hits[j]._source.productCode){
+                    result.data.result.push(resp.hits.hits[j]._source);
                     break;
                 }    
             }
         }
+
+        for( i in result.data.result ){
+            result.data.result[i].count = 0;
+            for( j in product_bucket){
+                if( result.data.result[i].productCode === product_bucket[j].key){
+                    result.data.result[i].count = product_bucket[j].doc_count;
+                    break;
+                }
+            }
+        }
+
         result.data.count = result.data.result.length;
         result.data.result = result.data.result.sort( function(a, b){
             return a.count > b.count ? -1 : a.count < b.count ? 1 : 0;  // 상품 건수별 정렬
         });
 
         if( result.data.count > 10){
-            result.data.result = result.data.result.slice( (parseInt(from)-1) * 10, (parseInt(from)-1) * 10 + 10);  // 페이징
+            result.data.result = result.data.result.slice( (Number(from)-1) * 10, (Number(from)-1) * 10 + 100);  // 페이징
         }
         from = from * 10;
+        
         for( var i = 0 ; i < 10; i++) {
             
             result.data.result[i].no = from + i + 1; 
         }
-
+        
         res.send(result);
     }, function(err){
 		logger.error("list_by_product ", err);
