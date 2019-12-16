@@ -103,10 +103,12 @@ pool.getConnection(function (err, connection){
     rp(option).then(function(data){
       console.log("success!");
       connection.release();
+      process.exit();
     }, function(err){
       console.log(err);
       connection.release();
+      process.exit();
     });
-    process.exit();
+    
   })
 });
