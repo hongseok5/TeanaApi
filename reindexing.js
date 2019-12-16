@@ -2,7 +2,7 @@ const fs = require('fs');
 const rp = require('request-promise');
 var approot = require('app-root-path');
 const common = require(approot + '/routes/common');
-const elasticsearch = require('elasticsearch');
+//const elasticsearch = require('elasticsearch');
 const dateformat = require('dateformat');
 const readline = require('readline');
 /**
@@ -13,13 +13,6 @@ const readline = require('readline');
  * 키워드추출, 긍부정어추출, 카테고리분류, duration 값 계산만 수행됨.
  */
 
-/*
-var client = new elasticsearch.Client({ 
-  host : '10.253.42.122:9200',
-  log: 'trace',
-  apiVersion: '6.8' // insert 수행시 필요한 설정
-});
-*/
 let kwe_option = {
     uri : 'http://10.253.42.122:12800/txt_to_kwd',
     method : "POST",
@@ -55,7 +48,6 @@ let kwe_option = {
     json : true
 }
 
-//var index_list = ["00", "01", "02", "03", "04", "05", "06" ];
 var file_path = "/data/reindexing_data/" + process.argv[2];
 //var file_path_local = "./file_write/reindexing_201911330.json";
 var resultAt = dateformat(new Date(), "yyyymmddHHMMss");
@@ -77,11 +69,6 @@ const rl = readline.createInterface({
 })
 
 var count1 = 0; // kwd
-/*
-var count2 = 0; // pnn
-var count3 = 0; //category 
-var count4 = 0; //duration
-*/
 rl.on('line' , function(line){
        
       getApiResult(line);
@@ -92,7 +79,7 @@ function getDuration( start, end, es ){
       value = common.strToDate(end) - common.strToDate(start);
       value = value / 1000;
       if (value > 0){
-        return parseInt( value );
+        return Number( value );
       } else {
         return 0;
       }
@@ -108,7 +95,7 @@ function sleep(ms){
 }
 var ms = 0;
 async function getApiResult( line ){
-    //count1++;
+
     line = JSON.parse(line);
     ms += 50;
     await sleep(ms);
@@ -120,7 +107,6 @@ async function getApiResult( line ){
     Promise.all([rp(kwe_option), rp(cat_option),rp(pnn_option)]).then(function(values){
 
         if( Array.isArray( values[0].output )){
-            //console.log("check array true");
             line.keyword_count = values[0].output;    
         } else {
             console.log("check array else" + count1 + JSON.stringify(values[0]));
@@ -147,7 +133,7 @@ async function getApiResult( line ){
           }
         }
         line.analysisCate = max_key;
-        line.analysisCateNm = common.getCategory(parseInt(max_key));
+        line.analysisCateNm = common.getCategory(Number(max_key));
         line.negative_word = [];
         line.positive_word = [];
         line.neutral_word = [];

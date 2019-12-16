@@ -284,7 +284,7 @@ var common = {
 		} else if ( value > 60 ){
 			let min = value / 60;
 			let sec = value % 60;
-			return parseInt(min) + "분 " + sec + "초 ";
+			return Number(min) + "분 " + sec + "초 ";
 		} else {
 			return value + "초";
 		}

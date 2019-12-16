@@ -184,7 +184,7 @@ function mergeTalk( dataR, dataT  ){
       }
     }
     merged_data.analysisCate = max_key;
-    merged_data.analysisCateNm = common.getCategory(parseInt(max_key));
+    merged_data.analysisCateNm = common.getCategory(Number(max_key));
     merged_data.negative_word = [];
     merged_data.positive_word = [];
     merged_data.neutral_word = [];
@@ -323,7 +323,7 @@ function getDuration( start, end, es ){
     value = common.strToDate(end) - common.strToDate(start);
     value = value / 1000;
     if (value > 0){
-      return parseInt( value );
+      return Number( value );
     } else {
       return 0;
     }
@@ -336,7 +336,7 @@ function convertDuration( value ){
   if ( value > 60 ){
     let min = value / 60;
     let sec = value % 60;
-    return parseInt(min) + "분 " + sec + "초 ";
+    return Number(min) + "분 " + sec + "초 ";
   } else {
     return value + "초";
   }
