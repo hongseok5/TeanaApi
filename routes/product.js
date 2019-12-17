@@ -84,12 +84,10 @@ router.post("/list", function(req, res){
         product_bucket = resp.aggregations.aggs_product.buckets;
     
         for( i in resp.hits.hits){
-    
             tmp_set.add(resp.hits.hits[i]._source.productCode);   // 중복제거 
         }
   
         for(i of tmp_set){
-            //console.log(typeof i);
             for( j in resp.hits.hits){
                 if( i == resp.hits.hits[j]._source.productCode){
                     result.data.result.push(resp.hits.hits[j]._source);
@@ -113,17 +111,16 @@ router.post("/list", function(req, res){
             return a.count > b.count ? -1 : a.count < b.count ? 1 : 0;  // 상품 건수별 정렬
         });
 
-        if( result.data.count > 10){
+        if( result.data.count >= 10){
             result.data.result = result.data.result.slice( (Number(from)-1) * 10, (Number(from)-1) * 10 + 100);  // 페이징
+            from = from * 10;
+            for( var i = 0 ; i < 10; i++) {
+                result.data.result[i].no = from + i + 1; 
+            }
+            res.send(result);
+        } else {
+            res.send(result);
         }
-        from = from * 10;
-        
-        for( var i = 0 ; i < 10; i++) {
-            
-            result.data.result[i].no = from + i + 1; 
-        }
-        
-        res.send(result);
     }, function(err){
 		logger.error("list_by_product ", err);
         var result = common.getResult("99", "ERROR", "list_by_product");
