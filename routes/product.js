@@ -34,12 +34,12 @@ router.post("/list", function(req, res){
         body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
     if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
-    if(common.getEmpty(req.body.Mcate) && req.body.Mcate != "ALL")
-        body.query.bool.filter.push({ term : { Mcate : req.body.Mcate }});
+    if(common.getEmpty(req.body.mCate) && req.body.mCate != "ALL")
+        body.query.bool.filter.push({ term : { Mcate : req.body.mCate }});
     if(common.getEmpty(req.body.inCate) && req.body.inCate != "ALL")
         body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
-    if(common.getEmpty(req.body.MD))
-        body.query.bool.filter.push({ term : { mdNm : req.body.MD }});
+    if(common.getEmpty(req.body.mdNm))
+        body.query.bool.filter.push({ term : { mdNm : req.body.mdNm }});
     if(common.getEmpty(req.body.vdn) && req.body.vdn != "ALL")
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
     if(common.getEmpty(req.body.vdnGrp) && req.body.vdnGrp != "ALL")
