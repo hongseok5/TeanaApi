@@ -14,7 +14,7 @@ winston.loggers.add("product", winstonConfig.createLoggerConfig("product"));
 var logger = winston.loggers.get("product");
 
 router.post("/list", function(req, res){
-    logger.info("Router for IF_DMA_00501");
+    logger.info("Router for IF_DMA_00501" + JSON.stringify(req.body));
     if(!common.getEmpty(req.body.start_dt)){
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
@@ -25,7 +25,7 @@ router.post("/list", function(req, res){
     }
     let size = req.body.size || 10 ;
     let from = req.body.from || 1 ;
-    console.log( req.body.size, req.body.from);
+
     var fields = [ "company", "companyNm", "productCode", "productNm", "Mcate", "McateNm", "mdId", "mdNm"];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, 10000, 1, fields);
     var index = common.getIndex(req.body.channel);
@@ -56,7 +56,7 @@ router.post("/list", function(req, res){
 			}
         } 
     }
-   
+    
 	// productCode가 있는 것만 추출
     body.query.bool.filter.push({ exists : { "field" : "productCode" }});
 
@@ -111,25 +111,21 @@ router.post("/list", function(req, res){
             return a.count > b.count ? -1 : a.count < b.count ? 1 : 0;  // 상품 건수별 정렬
         });
 
-        if( result.data.count >= 10){
-            result.data.result = result.data.result.slice( (Number(from)-1) * 10, (Number(from)-1) * 10 + 100);  // 페이징
-            from = from * 10;
-            for( var i = 0 ; i < 10; i++) {
-                result.data.result[i].no = from + i + 1; 
-            }
-            res.send(result);
-        } else if(result.data.count === 0){
+        if( result.data.count > 10){
+            size = Number(size);
+            from = Number(from);
+            result.data.result = result.data.result.slice( (from-1) * size, (from-1) * size + size);  // 페이징
             res.send(result);
         } else {
-            for( var i = 0 ; i < result.data.count; i++) {
-                result.data.result[i].no = from + i + 1; 
-            }
             res.send(result);
         }
     }, function(err){
-		logger.error("list_by_product ", err);
+        if(err){
+            logger.error("list_by_product ", err);
+        }
         var result = common.getResult("99", "ERROR", "list_by_product");
         res.send(result);
+        
     });
 });
 
