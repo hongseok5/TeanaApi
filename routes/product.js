@@ -118,7 +118,12 @@ router.post("/list", function(req, res){
                 result.data.result[i].no = from + i + 1; 
             }
             res.send(result);
+        } else if(result.data.count === 0){
+            res.send(result);
         } else {
+            for( var i = 0 ; i < result.data.count; i++) {
+                result.data.result[i].no = from + i + 1; 
+            }
             res.send(result);
         }
     }, function(err){
