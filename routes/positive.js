@@ -270,5 +270,135 @@ router.post("/count", function(req, res){
     });
 });
 
+router.post("/keyword", function(req, res){
+    logger.info("Router for ");
+    if(!common.getEmpty(req.body.start_dt)){
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    }
+    if(!common.getEmpty(req.body.end_dt)){
+    	var result = common.getResult("40", "OK", "There is no required end_dt");
+    	res.send(result);
+    }
+    // 긍,부정어 현황
+    // neg, pos, neu 3개 필드만 sum 해서 비유을 구하는지?
+    let should = [];
+    var index = common.getIndex(req.body.channel);
+    let from = req.body.from || 1;
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, 0, from);
+    
+    if(common.getEmpty(req.body.division)){
+    	if(req.body.division == "neutral"){
+    		body.aggs.division = {
+    		        nested : {
+    		            path : "neutral_word"
+    		        },
+    		        aggs : {
+    		            count : {
+    		            	terms : {
+    		                    field : "neutral_word.word",
+    		                    size : 5
+    		                }
+    		            }
+    		        }
+    		    };
+    	}else if(req.body.division == "positive"){
+    		body.aggs.division = {
+    		        nested : {
+    		            path : "positive_word"
+    		        },
+    		        aggs : {
+    		            count : {
+    		            	terms : {
+    		                    field : "positive_word.word",
+    		                    size : 5
+    		                }
+    		            }
+    		        }
+    		    };
+    	}else if(req.body.division == "negative"){
+    		body.aggs.division = {
+    		        nested : {
+    		            path : "negative_word"
+    		        },
+    		        aggs : {
+    		            count : {
+    		            	terms : {
+    		                    field : "negative_word.word",
+    		                    size : 5
+    		                }
+    		            }
+    		        }
+    		    };
+    	}else{
+    		var result = common.getResult("40", "OK", "There is no required start_dt");
+        	res.send(result);
+    	}
+    }else{
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    }
+
+    var index = common.getIndex(req.body.channel);
+
+    if(common.getEmpty(req.body.category) && req.body.category != "ALL")
+        body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
+    if(common.getEmpty(req.body.age) && req.body.age != "ALL")
+    	body.query.bool.filter.push({ range : { age : { gte : parseInt(req.body.age), lte : parseInt(req.body.age) + 9}}});    
+    if(common.getEmpty(req.body.gender) && req.body.gender != "ALL")
+        body.query.bool.filter.push({ term : { gender : req.body.gender }});
+    if(common.getEmpty(req.body.companyCode))
+        body.query.bool.filter.push({ term : { company : req.body.companyCode }});
+    if(common.getEmpty(req.body.mCate)&& req.body.mCate != "ALL")
+        body.query.bool.filter.push({ term : { Mcate : req.body.mCate }});
+    if(common.getEmpty(req.body.inCate) && req.body.inCate != "ALL")
+        body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
+    if(common.getEmpty(req.body.mdNm))
+        body.query.bool.filter.push({ term : { mdNm : req.body.mdNm }});
+    if(common.getEmpty(req.body.vdn) && req.body.vdn != "ALL")
+        body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
+    if(common.getEmpty(req.body.vdnGrp) && req.body.vdnGrp != "ALL")
+        body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
+    if(common.getEmpty(req.body.product)){
+    	for( p in req.body.product ){
+			if(common.getEmpty(req.body.product[p].productCode)) {
+				var term_obj = { term : { productCode : req.body.product[p].productCode}};
+				should.push(term_obj);
+			}
+        } 
+    }
+    body.query.bool.must = [
+        { bool : { should } }
+    ];
+
+    body.query.bool.should = [] // exist
+    client.search({
+        index,
+        body
+    }).then(function(resp){
+        
+        var result = common.getResult("10", "OK", "count_by_positive")
+        result.data.result = {} ;
+    	result.data.result.divison = [];
+    	test = Object.entries(resp.aggregations.division.count.buckets);
+    	
+    	for(i in test){
+    		var z = parseInt(i)+1;
+    		var obj = {
+    			key : test[i][1].key,	
+        		count : test[i][1].doc_count,
+        		no : z
+    		}
+    		result.data.result.divison.push(obj);
+        }
+        res.send(result);
+
+    }, function(err){
+		logger.error("count_by_positive ", err);
+        var result = common.getResult("99", "ERROR", "count_by_positive");
+        res.send(result);
+    });
+});
+
 
 module.exports = router;
