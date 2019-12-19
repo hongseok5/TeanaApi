@@ -14,7 +14,7 @@ winston.loggers.add("product", winstonConfig.createLoggerConfig("product"));
 var logger = winston.loggers.get("product");
 
 router.post("/list", function(req, res){
-    logger.info("Router for IF_DMA_00501" + JSON.stringify(req.body));
+    //logger.info("Router for IF_DMA_00501" + JSON.stringify(req.body));
     if(!common.getEmpty(req.body.start_dt)){
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
@@ -69,63 +69,108 @@ router.post("/list", function(req, res){
     body.aggs.aggs_product = {
         terms : {
             field : "productCode",
-            min_doc_count : 0,
+            min_doc_count : 1,  //default, could be higher if buckets more than 10,000
             size : 10000
         }
     }
     
+    var result = common.getResult(null, null, "list_by_product");
+    result.data.result = [];
+    
+    let tmp_array = [];
+    let p_count = 0;
+    let scroll_sum = 0;
     client.search({
         index,
-        body 
-    }).then(function(resp){
-        var result = common.getResult("10", "OK", "list_by_product");
-        result.data.result = [];
-        var tmp_set = new Set();
-        product_bucket = resp.aggregations.aggs_product.buckets;
-    
-        for( i in resp.hits.hits){
-            tmp_set.add(resp.hits.hits[i]._source.productCode);   // 중복제거 
+        body,
+        scroll : "10s"    
+    }, function getMoreUntilEnd(err, resp){
+        if(err){
+            result.status.code = "99";
+            result.status.message = "ERROR"
+            res.send(result);
         }
-  
-        for(i of tmp_set){
-            for( j in resp.hits.hits){
-                if( i == resp.hits.hits[j]._source.productCode){
-                    result.data.result.push(resp.hits.hits[j]._source);
-                    break;
-                }    
+        scroll_sum += resp.hits.hits.length;
+        if( resp.aggregations !== undefined){
+            // first resp
+            result.data.count = resp.aggregations.aggs_product.buckets.length;
+            if(resp.aggregations.aggs_product.buckets.length == 0){
+                result.status.code = "10";
+                result.status.message = "OK"
+                res.send(result);
+                return;
+            } else if( resp.aggregations.aggs_product.buckets.length > 10){
+                size = Number(size);
+                from = Number(from);
+                tmp_array = resp.aggregations.aggs_product.buckets.slice( (from-1) * size, (from-1) * size + size);  // 페이징
+            } else {
+                tmp_array = resp.aggregations.aggs_product.buckets
             }
-        }
-
-        for( i in result.data.result ){
-            result.data.result[i].count = 0;
-            for( j in product_bucket){
-                if( result.data.result[i].productCode === product_bucket[j].key){
-                    result.data.result[i].count = product_bucket[j].doc_count;
-                    break;
+            
+            for( i in tmp_array){
+                for( j in resp.hits.hits){
+                    if( tmp_array[i].key === resp.hits.hits[j]._source.productCode ){
+                        let obj = {};
+                        obj.company = resp.hits.hits[j]._source.company;
+                        obj.companyNm = resp.hits.hits[j]._source.companyNm;
+                        obj.productCode = resp.hits.hits[j]._source.productCode;
+                        obj.productNm = resp.hits.hits[j]._source.productNm;
+                        obj.Mcate = resp.hits.hits[j]._source.Mcate;
+                        obj.McateNm = resp.hits.hits[j]._source.McateNm;
+                        obj.mdId = resp.hits.hits[j]._source.mdId;
+                        obj.mdNm = resp.hits.hits[j]._source.mdNm;
+                        obj.count = tmp_array[i].doc_count;
+                        result.data.result.push(obj);
+                        p_count++;
+                        break;
+                    }
                 }
             }
-        }
-
-        result.data.count = result.data.result.length;
-        result.data.result = result.data.result.sort( function(a, b){
-            return a.count > b.count ? -1 : a.count < b.count ? 1 : 0;  // 상품 건수별 정렬
-        });
-
-        if( result.data.count > 10){
-            size = Number(size);
-            from = Number(from);
-            result.data.result = result.data.result.slice( (from-1) * size, (from-1) * size + size);  // 페이징
-            res.send(result);
+            if( scroll_sum < resp.hits.total  && p_count < tmp_array.length){
+                client.scroll({
+                    scrollId : resp._scroll_id,
+                    scroll: "10s"
+                }, getMoreUntilEnd);
+            } else {
+                result.status.code = "10";
+                result.status.message = "OK"
+                res.send(result);
+            }
         } else {
-            res.send(result);
+            // scroll response
+            for( i in tmp_array){
+                for( j in resp.hits.hits){
+                    if( tmp_array[i].key === resp.hits.hits[j]._source.productCode ){
+                        let obj = {};
+                        obj.company = resp.hits.hits[j]._source.company;
+                        obj.companyNm = resp.hits.hits[j]._source.companyNm;
+                        obj.productCode = resp.hits.hits[j]._source.productCode;
+                        obj.productNm = resp.hits.hits[j]._source.productNm;
+                        obj.Mcate = resp.hits.hits[j]._source.Mcate;
+                        obj.McateNm = resp.hits.hits[j]._source.McateNm;
+                        obj.mdId = resp.hits.hits[j]._source.mdId;
+                        obj.mdNm = resp.hits.hits[j]._source.mdNm;
+                        obj.count = tmp_array[i].doc_count;
+                        result.data.result.push(obj);
+                        p_count++;
+                        break;
+                    }
+                }
+            }
+            if( scroll_sum < resp.hits.total && p_count < tmp_array.length){
+                client.scroll({
+                    scrollId : resp._scroll_id,
+                    scroll: "10s"
+                }, getMoreUntilEnd);
+            } else {
+                result.data.result = result.data.result.sort( function(a, b){
+                    return a.count > b.count ? -1 : a.count < b.count ? 1 : 0;  // 상품 건수별 정렬
+                });
+                result.status.code = "10";
+                result.status.message = "OK"
+                res.send(result);
+            }
         }
-    }, function(err){
-        if(err){
-            logger.error("list_by_product ", err);
-        }
-        var result = common.getResult("99", "ERROR", "list_by_product");
-        res.send(result);
-        
     });
 });
 
