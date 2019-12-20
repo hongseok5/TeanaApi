@@ -59,10 +59,11 @@ let kwe_option = {
   method : "POST",
   body : {
       mode : "kma",
-      t_vec : "wv_mobile_1",
+      t_vec : "wv_stt_2",
       text : null,
       in_text : true,
-      combine_xs : true
+      combine_xs : true,
+      extract_verb : false  // default
   },
   json : true
 }
@@ -81,7 +82,7 @@ let cat_option = {
   uri : 'http://localhost:12800/txt_to_doc',
   method : "POST",
   body : {
-      t_col : "cl_common_1211",
+      t_col : "cl_common_1212",
       text : null,
       mode : 'kma',
       combine_xs : true

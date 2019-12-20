@@ -540,8 +540,9 @@ router.post("/relation", function(req, res){
         method : "POST",
         body : {
             keyword : [],
-            t_vec : "wv_common_1203",
-            size : 10
+            t_vec : "wv_stt_2",
+            size : 10,
+            extract_verb : true
         },
         json : true
     }
