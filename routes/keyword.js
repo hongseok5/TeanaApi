@@ -584,6 +584,75 @@ router.post("/relation", function(req, res){
     }
 });
 
+router.post("/relation2", function(req, res){
+    logger.info("Router for");
+    if(!common.getEmpty(req.body.start_dt)){
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    }
+    if(!common.getEmpty(req.body.end_dt)){
+    	var result = common.getResult("40", "OK", "There is no required end_dt");
+    	res.send(result);
+    }
+    
+    var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
+    var index = common.getIndex(req.body.channel);
+    var interval = req.body.interval || "1D";
+    
+    if(common.getEmpty(req.body.keyword)){
+        var nest_obj = {
+            nested : {
+                path : "keyword_count",
+                query : {
+                    term : {
+                        "keyword_count.keyword" : req.body.keyword
+                    }
+                }
+            }
+        }
+        body.query.bool.filter.push(nest_obj);
+    }else{
+    	var result = common.getResult("40", "OK", "There is no required keyword");
+    	res.send(result);
+    }
+    body.aggs.keyword_top = {
+       	nested: {
+            path: "keyword_count"
+        },
+        aggs: {
+           aggs_name: {
+        	   terms: {
+        		   field: "keyword_count.keyword",
+        		   size : "20"
+               }
+            }
+        }
+    }
+    
+    client.search({
+        index,
+        body
+    }).then(function(resp){
+        var result = common.getResult("10", "OK", "relation2");
+        result.data.result = [];
+        var z = 0;
+        for(i in resp.aggregations.keyword_top.aggs_name.buckets){
+        	z = parseInt(z)+1;
+   			var obj = {
+           		no : z,
+           		word : resp.aggregations.keyword_top.aggs_name.buckets[i].key,
+           		count : resp.aggregations.keyword_top.aggs_name.buckets[i].doc_count
+           	}
+   			result.data.result.push(obj);
+        }
+        res.send(result);
+    }, function(err){
+		logger.error("issue_top_keyword", err);
+        var result = common.getResult("99", "ERROR", "relation2");
+        res.send(result);
+    });
+});
+
 router.post("/issue/top", function(req, res){
 	logger.info("Router for IF_DMA_00108");
     if(!common.getEmpty(req.body.start_dt)){
