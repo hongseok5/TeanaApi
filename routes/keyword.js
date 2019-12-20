@@ -637,13 +637,15 @@ router.post("/relation2", function(req, res){
         result.data.result = [];
         var z = 0;
         for(i in resp.aggregations.keyword_top.aggs_name.buckets){
-        	z = parseInt(z)+1;
-   			var obj = {
-           		no : z,
-           		word : resp.aggregations.keyword_top.aggs_name.buckets[i].key,
-           		count : resp.aggregations.keyword_top.aggs_name.buckets[i].doc_count
-           	}
-   			result.data.result.push(obj);
+        	if(resp.aggregations.keyword_top.aggs_name.buckets[i].key != req.body.keyword){
+        		z = parseInt(z)+1;
+       			var obj = {
+               		no : z,
+               		word : resp.aggregations.keyword_top.aggs_name.buckets[i].key,
+               		count : resp.aggregations.keyword_top.aggs_name.buckets[i].doc_count
+               	}
+       			result.data.result.push(obj);
+        	}
         }
         res.send(result);
     }, function(err){
