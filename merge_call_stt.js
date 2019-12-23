@@ -163,32 +163,38 @@ function mergeTalk( dataR, dataT  ){
      
     merged_data.keyword_count = tmp_karr;
     let cate_obj = {};
-    for( i in values[1].output ){
-      let obj = {};
-      obj.category = values[1].output[i].id.substr(0, values[1].output[i].id.indexOf('_'));
-      obj.score = values[1].output[i].similarity;
-      if( obj.category in cate_obj){
-        cate_obj[obj.category] += obj.score;
-      } else {
-        cate_obj[obj.category] = obj.score;
-      }
-    }
-    tmp_arr = Object.keys(cate_obj);
-    let max = 0;
-    let max_key = null;
-    for( i in tmp_arr){
-      if( cate_obj[tmp_arr[i]] > max ){
-        max = cate_obj[tmp_arr[i]]; 
-        max_key = tmp_arr[i];
-      }
-    }
-    if( parseInt(max_key) === 0 || values[1].output.length === 0){
-      merged_data.analysisCate = 21;
+    if((Array.isArray(values[1].output) && values[1].output.length === 0) || values[1].output === undefined){
+      merged_data.analysisCate = "0000000021";
+      merged_data.analysisCateNm = common.getCategory(21);
     } else {
-      merged_data.analysisCate = max_key;
+      for( i in values[1].output ){
+        let obj = {};
+        obj.category = values[1].output[i].id.substr(0, values[1].output[i].id.indexOf('_'));
+        obj.score = values[1].output[i].similarity;
+        if( obj.category in cate_obj){
+          cate_obj[obj.category] += obj.score;
+        } else {
+          cate_obj[obj.category] = obj.score;
+        }
+      }
+      tmp_arr = Object.keys(cate_obj);
+      let max = 0;
+      let max_key = null;
+      for( i in tmp_arr){
+        if( cate_obj[tmp_arr[i]] > max ){
+          max = cate_obj[tmp_arr[i]]; 
+          max_key = tmp_arr[i];
+        }
+      }
+      if( parseInt(max) === 0 ){
+        merged_data.analysisCate = "0000000021";
+        merged_data.analysisCateNm = common.getCategory(21);
+      } else {
+        merged_data.analysisCate = max_key;
+        merged_data.analysisCateNm = common.getCategory(Number(max_key));
+      }
     }
     
-    merged_data.analysisCateNm = common.getCategory(Number(max_key));
     merged_data.negative_word = [];
     merged_data.positive_word = [];
     merged_data.neutral_word = [];
