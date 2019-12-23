@@ -100,7 +100,7 @@ function getData(){
 					        	connection.release();
 					            throw err;
 					        }else{
-					        	logger.info("if_dma_00004_Db_Query_callSQLquery ifID: " + filedata.startTime + "-" + filedata.extension);
+					        	logger.info("if_dma_00004_Db_Query_callSQLquery ifID: " + filedata.startTime + "-" + filedata.agentId);
 							}
 					        connection.commit(function(err){
 					            if(err){
