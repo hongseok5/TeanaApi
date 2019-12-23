@@ -182,7 +182,7 @@ function mergeTalk( dataR, dataT  ){
         max_key = tmp_arr[i];
       }
     }
-    if( parseInt(max_key) === 0){
+    if( parseInt(max_key) === 0 || values[1].output.length === 0){
       merged_data.analysisCate = 21;
     } else {
       merged_data.analysisCate = max_key;
