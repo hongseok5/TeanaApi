@@ -70,6 +70,7 @@ var io = schedule.scheduleJob('*/30 * * * * *', function(){
 
 							console.log('file pool.getConnection');
 							var querystring  = "select nct.counsel_type_id, (select current_val from nx_sequence where sequence_id = 'CALL_SET_SEQ'  limit 1) as seq from nx_counsel_type_mapping nct, nx_emp ne where nct.dept_id = ne.dept_id and ne.cti_id = ? limit 1";
+							var updateSequence  = "update nx_sequence set current_val = ? where sequence_id = 'CALL_SET_SEQ'";
 							connection.query(querystring, [ filedata.agentId ], function(err, rows, fields) {
 								console.log('db querystring');
 								if (!err){
@@ -77,6 +78,23 @@ var io = schedule.scheduleJob('*/30 * * * * *', function(){
 								    	counsetltypeid = rows[i].counsel_type_id; //resultId에 해당하는 부분만 가져옴
 								    	callsetseq = rows[i].seq; //resultId에 해당하는 부분만 가져옴
 								    }
+									var updateCnt = parseInt(callsetseq)+1;
+									connection.query(updateSequence, [ updateCnt ], function (err, rows) {
+					    	    		if(err){
+					    	    			logger.error("if_uanalzyer_Db_Query_updateCurrent", err);
+							    	    }else{
+							    	    	logger.info("if_uanalzyer_Db_Query_updateCurrent", err);
+										}
+							    	    connection.commit(function(err){
+							    	        if(err){
+							    	        	connection.rollback(function(err){
+							    	            	logger.error("if_uanalzyer_Db_Query_updateCurrent_rollback", err);
+							    	            });
+							    	        } else {
+							    	            console.log("Updated successfully!");
+							    	        }
+							    	    });
+							    	});
 									if(counsetltypeid != null || counsetltypeid != ""){
 										var filedataset = filedata.timeNtalk.replace(/[0-9]/g, "");
 										param = { "id" : counsetltypeid,
