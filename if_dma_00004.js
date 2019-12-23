@@ -85,6 +85,7 @@ function getData(){
 	    var send_data = {};
 	    send_data.params = [];
 	    !fs.existsSync(config.sent_save_path) && fs.mkdirSync(config.sent_save_path);
+	    !fs.existsSync(config.sent_smry_path) && fs.mkdirSync(config.sent_smry_path);
 	    var z = 0;
 	    pool.getConnection(function(err, connection){
 	    	fs.readdir(config.send_smry_path, function(err, filelist){
@@ -112,7 +113,7 @@ function getData(){
 					        });
 					        z = parseInt(z)+1;
 					        send_data.sendTime = dateFormat(new Date(), "yyyymmddHHMMss");
-				        	fs.rename(config.send_smry_path+file, config.sent_save_path+send_data.sendTime+z, callback);
+				        	fs.rename(config.send_smry_path+file, config.sent_smry_path+file, callback);
 					    });
 					});
 	    		});
