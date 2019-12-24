@@ -149,8 +149,10 @@ function getData(){
         	            	data = JSON.parse(data);
         	            	if(data.code == "10"){
         	            		fs.rename(config.send_save_path+file, config.sent_save_path+file, callback);
+								logger.info("if_dma_00004 file send success ifID: " + filedata.startTime + "-" + filedata.agentId);
         	            	}else if(data.code == "99"){
         	            		fs.rename(config.send_save_path+file, config.send_error_path+file, callback);
+								logger.info("if_dma_00004 file send failed ifID: " + + filedata.startTime + "-" + filedata.agentId);
         	            	}
         	            }).catch(function (err){
         	            	logger.error(err);
