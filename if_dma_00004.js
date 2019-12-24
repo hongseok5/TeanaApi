@@ -81,7 +81,7 @@ var options2 = {
 
 function getData(){
     var path = config.send_save_path;
-    var sj = schedule.scheduleJob('30 30 * * * *', function(){
+    var sj = schedule.scheduleJob('30 * * * * *', function(){
 	    var send_data = {};
 	    send_data.params = [];
 	    !fs.existsSync(config.sent_save_path) && fs.mkdirSync(config.sent_save_path);
@@ -100,7 +100,7 @@ function getData(){
 					        	connection.release();
 					            throw err;
 					        }else{
-					        	logger.info("if_dma_00004_Db_Query_callSQLquery", err);
+					        	logger.info("if_dma_00004_Db_Query_callSQLquery ifID: " + filedata.startTime + "-" + filedata.agentId);
 							}
 					        connection.commit(function(err){
 					            if(err){
@@ -111,8 +111,8 @@ function getData(){
 					                console.log("Updated successfully!");
 					            }
 					        });
-					        z = parseInt(z)+1;
-					        send_data.sendTime = dateFormat(new Date(), "yyyymmddHHMMss");
+					        //z = parseInt(z)+1;
+					        //send_data.sendTime = dateFormat(new Date(), "yyyymmddHHMMss");
 				        	fs.rename(config.send_smry_path+file, config.sent_smry_path+file, callback);
 					    });
 					});
@@ -123,8 +123,8 @@ function getData(){
 	    });
     });  
     sj.invoke();
-    var sj2 = schedule.scheduleJob('30 30 * * * *', function(){
-    	!fs.existsSync(config.send_move_path) && fs.mkdirSync(config.send_move_path);
+    var sj2 = schedule.scheduleJob('20 * * * * *', function(){
+    	!fs.existsSync(config.sent_save_path) && fs.mkdirSync(config.sent_save_path);
     	!fs.existsSync(config.send_error_path) && fs.mkdirSync(config.send_error_path);
         var z = 0;
         fs.readdir(config.send_save_path, function(err, filelist){
@@ -148,9 +148,11 @@ function getData(){
         	            	z = parseInt(z)+1;
         	            	data = JSON.parse(data);
         	            	if(data.code == "10"){
-        	            		fs.rename(config.send_save_path+file, config.send_move_path+send_data.sendTime+z, callback);
+        	            		fs.rename(config.send_save_path+file, config.sent_save_path+file, callback);
+								logger.info("if_dma_00004 file send success ifID: " + filedata.startTime + "-" + filedata.agentId);
         	            	}else if(data.code == "99"){
-        	            		fs.rename(config.send_save_path+file, config.send_error_path+send_data.sendTime+z, callback);
+        	            		fs.rename(config.send_save_path+file, config.send_error_path+file, callback);
+								logger.info("if_dma_00004 file send failed ifID: " + + filedata.startTime + "-" + filedata.agentId);
         	            	}
         	            }).catch(function (err){
         	            	logger.error(err);
