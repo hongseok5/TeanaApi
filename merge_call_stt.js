@@ -163,7 +163,7 @@ function mergeTalk( dataR, dataT  ){
      
     merged_data.keyword_count = tmp_karr;
     let cate_obj = {};
-    if((Array.isArray(values[1].output) && values[1].output.length === 0) || values[1].output === undefined){
+    if( values[1].output === undefined || (Array.isArray(values[1].output) && values[1].output.length === 0)  ){
       merged_data.analysisCate = "0000000021";
       merged_data.analysisCateNm = common.getCategory(21);
     } else {
