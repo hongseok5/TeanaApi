@@ -81,7 +81,7 @@ var options2 = {
 
 function getData(){
     var path = config.send_save_path;
-    var sj = schedule.scheduleJob('30 30 * * * *', function(){
+    var sj = schedule.scheduleJob('30 * * * * *', function(){
 	    var send_data = {};
 	    send_data.params = [];
 	    !fs.existsSync(config.sent_save_path) && fs.mkdirSync(config.sent_save_path);
@@ -123,7 +123,7 @@ function getData(){
 	    });
     });  
     sj.invoke();
-    var sj2 = schedule.scheduleJob('30 30 * * * *', function(){
+    var sj2 = schedule.scheduleJob('20 * * * * *', function(){
     	!fs.existsSync(config.sent_save_path) && fs.mkdirSync(config.sent_save_path);
     	!fs.existsSync(config.send_error_path) && fs.mkdirSync(config.send_error_path);
         var z = 0;
