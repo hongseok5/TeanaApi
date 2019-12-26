@@ -158,9 +158,9 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										    	            	var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.agentId ], function (err, rows) {
 												    	    		if(err){
 												    	    			fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
-														    	    	logger.error("if_uanalzyer_Db_Query_callSQL bchm2", err);
+														    	    	logger.error("if_uanalzyer_Db_Query_callSQL", err);
 														    	    }else{
-														    	    	logger.info("if_uanalzyer_Db_Query_callSQL bchm3", err);
+														    	    	logger.info("if_uanalzyer_Db_Query_callSQL", err);
 																	}
 														    	    connection.commit(function(err){
 														    	        if(err){

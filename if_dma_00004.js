@@ -83,7 +83,7 @@ function getData(){
     var path = config.send_save_path;
     var sj = schedule.scheduleJob('30 * * * * *', function(){
 	    var send_data = {};
-	    send_data.params = [];
+	    send_data.param = [];
 	    !fs.existsSync(config.sent_save_path) && fs.mkdirSync(config.sent_save_path);
 	    !fs.existsSync(config.sent_smry_path) && fs.mkdirSync(config.sent_smry_path);
 	    var z = 0;
@@ -132,9 +132,9 @@ function getData(){
         		fs.readFile(config.send_save_path+file , 'utf-8' , function(err , filedata){
         			if(err) { return callerror(err); }
         			var send_data = {};
-        	        send_data.params = [];
+        	        send_data.param = [];
         	        filedata = JSON.parse(filedata);
-        			send_data.params.push(filedata);
+        			send_data.param.push(filedata);
         			send_data.sendTime = dateFormat(new Date(), "yyyymmddHHMMss");
         			rp(options1)
         	        .then(function (body) {
