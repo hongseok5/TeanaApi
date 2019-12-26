@@ -28,14 +28,14 @@ var logger = winston.loggers.get("if_dma_00004");
 
 var options1 = {
     method: 'POST',
-    uri: 'https://ssgtv--devlje.my.salesforce.com/services/oauth2/token',
+    uri: 'https://ssgtv--partsb.my.salesforce.com/services/oauth2/token',
     form: {
         // Like <input type="text" name="name">
         grant_type:"password",
-        client_id:"3MVG9iLRabl2Tf4g2XAyYuODanLCeqa3uTma9Ax4ACprTeO5AqZXk6KHnXSDDyn52l7Pukc96mULKLAGGKiOJ",
-        client_secret:"CAA1104F28306FDAF134CA7B711B48F3879EC229AE9A403175028625316605C7",
-        username : "ifuser@shinsegae.com.partsb2",
-        password : "ifpartsb1234"
+        client_id:"3MVG9Se4BnchkASkQ7erk2gSAZhcOZsQ5dA_fiSayiTrS84FO_EeCoBTENS8jia3BJLTybfrf0qM6NrpX2ycV",
+        client_secret:"D75E3D5A9951A4DA476781732F620E8605D1F99FD56BE829C7B6C55D9E99F4B2",
+        username : "ifuser@shinsegae.com.partsb",
+        password : "demo123!"
     },
     headers: {},
     timeout: 5000
@@ -43,7 +43,7 @@ var options1 = {
 
 var options2 = {
     method: 'POST',
-    uri: 'https://ssgtv--partsb2.my.salesforce.com/services/apexrest/IF_STCS_DMA_00004',
+    uri: 'https://ssgtv--partsb.my.salesforce.com/services/apexrest/IF_STCS_DMA_00004',
     headers: {
         "Authorization" : null,
         "Content-Type" : "application/json",
@@ -69,7 +69,7 @@ var options1 = {
 
 var options2 = {
     method: 'POST',
-    uri: 'https://ssgtv.my.salesforce.com/services/apexrest/IF_STCS_DMA_00003',
+    uri: 'https://ssgtv.my.salesforce.com/services/apexrest/IF_STCS_DMA_00004',
     headers: {
         Authorization : null,
         "Content-Type" : "application/json",
