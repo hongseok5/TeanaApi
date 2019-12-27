@@ -94,31 +94,31 @@ function getData(){
 	        			if(err) { return callerror(err); }
 	        			try{
 	        				filedata = JSON.parse(filedata);
+		        			var querystring  = "update ua_call set category1 = lpad(?, 10, '0'), summary = ? where start_time = ? and extension = ?";
+		        			
+		        			var callSQLquery = connection.query(querystring, [ filedata.category, filedata.summary, filedata.startTime, filedata.extension ], function (err, rows) {
+		        				if(err){
+						        	connection.release();
+						            throw err;
+						        }else{
+						        	logger.info("if_dma_00004_Db_Query_callSQLquery ifID: " + filedata.startTime + "-" + filedata.agentId);
+								}
+						        connection.commit(function(err){
+						            if(err){
+						                connection.rollback(function(err){
+						                    throw err;
+						                });
+						            } else {
+						                console.log("Updated successfully!");
+						            }
+						        });
+						        //z = parseInt(z)+1;
+						        //send_data.sendTime = dateFormat(new Date(), "yyyymmddHHMMss");
+					        	fs.rename(config.send_smry_path+file, config.sent_smry_path+file, callback);
+						    });
 	        			}catch(e){
 	        				logger.error(e);
 	        			}
-	        			var querystring  = "update ua_call set category1 = lpad(?, 10, '0'), summary = ? where start_time = ? and extension = ?";
-	        			
-	        			var callSQLquery = connection.query(querystring, [ filedata.category, filedata.summary, filedata.startTime, filedata.extension ], function (err, rows) {
-	        				if(err){
-					        	connection.release();
-					            throw err;
-					        }else{
-					        	logger.info("if_dma_00004_Db_Query_callSQLquery ifID: " + filedata.startTime + "-" + filedata.agentId);
-							}
-					        connection.commit(function(err){
-					            if(err){
-					                connection.rollback(function(err){
-					                    throw err;
-					                });
-					            } else {
-					                console.log("Updated successfully!");
-					            }
-					        });
-					        //z = parseInt(z)+1;
-					        //send_data.sendTime = dateFormat(new Date(), "yyyymmddHHMMss");
-				        	fs.rename(config.send_smry_path+file, config.sent_smry_path+file, callback);
-					    });
 					});
 	    		});
 	    		
@@ -140,47 +140,39 @@ function getData(){
         	        send_data.param = [];
         	        try{
         	        	filedata = JSON.parse(filedata);
+        	        
+	        			send_data.param.push(filedata);
+	        			send_data.sendTime = dateFormat(new Date(), "yyyymmddHHMMss");
+	        			rp(options1)
+	        	        .then(function (body) {
+	        	            var token = JSON.parse(body);
+	        	            options2.headers.Authorization = "OAuth " + token.access_token;
+	        	            req_body = JSON.stringify(send_data);
+	            	        console.log(req_body);
+	        	            options2.body = req_body;
+	        	            
+	        	            rp(options2).then(function ( data ){
+	        	            	z = parseInt(z)+1;
+	        	            	data = JSON.parse(data);
+	                	        if(data.code == "10"){
+	        	            		fs.rename(config.send_save_path+file, config.sent_save_path+file, callback);
+									logger.info("if_dma_00004 file send success ifID: " + filedata.startTime + "-" + filedata.agentId);
+	        	            	}else if(data.code == "99"){
+	        	            		fs.rename(config.send_save_path+file, config.send_error_path+file, callback);
+									logger.info("if_dma_00004 file send failed ifID: " + + filedata.startTime + "-" + filedata.agentId);
+	        	            	}
+	        	            }).catch(function (err){
+	        	            	logger.error(err);
+	        	            });
+	        	        })
+	        	        .catch(function (err) {
+	        	        	logger.error(err);
+	        	        });
         	        }catch(e){
         	        	logger.error(e);
         	        }
-        			send_data.param.push(filedata);
-        			send_data.sendTime = dateFormat(new Date(), "yyyymmddHHMMss");
-        			rp(options1)
-        	        .then(function (body) {
-        	            var token = JSON.parse(body);
-        	            options2.headers.Authorization = "OAuth " + token.access_token;
-        	            try{
-        	            	req_body = JSON.stringify(send_data);
-            	        }catch(e){
-            	        	logger.error(e);
-            	        }
-        	            console.log(req_body);
-        	            options2.body = req_body;
-        	            
-        	            rp(options2).then(function ( data ){
-        	            	z = parseInt(z)+1;
-        	            	try{
-        	            		data = JSON.parse(data);
-                	        }catch(e){
-                	        	logger.error(e);
-                	        }
-        	            	if(data.code == "10"){
-        	            		fs.rename(config.send_save_path+file, config.sent_save_path+file, callback);
-								logger.info("if_dma_00004 file send success ifID: " + filedata.startTime + "-" + filedata.agentId);
-        	            	}else if(data.code == "99"){
-        	            		fs.rename(config.send_save_path+file, config.send_error_path+file, callback);
-								logger.info("if_dma_00004 file send failed ifID: " + + filedata.startTime + "-" + filedata.agentId);
-        	            	}
-        	            }).catch(function (err){
-        	            	logger.error(err);
-        	            });
-        	        })
-        	        .catch(function (err) {
-        	        	logger.error(err);
-        	        });
-        			
-				});
-    		});
+        		});
+			});
     	});
         
     });  
