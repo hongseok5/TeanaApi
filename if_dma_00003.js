@@ -66,112 +66,141 @@ var options2 = {
 //var channel_codes = ["01", "02", "03", "04"];
 
 var sj01 = schedule.scheduleJob('30 30 * * * *', function(){
-    console.log("sj01 start");
-    var now = dateFormat(new Date(), "yyyymmddHHMMss");
-    param = { "standardTime": now , "channel" : "01" , clientId : "daeunextier", clientPw : "3B604775904A5C7535E2670F28"};
-    options2.body = JSON.stringify(param);
-    rp(options2)
-    .then(function ( data ){
-    	data = JSON.parse(data);
-    	if(data.status.code == "10"){
-    		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
-        	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
-        	var filecontext = data.data.result.data_list;
-            fs.writeFile(filename, filecontext, "utf8", function(err) {
-            	logger.info("error file : " + err);
-            });
-        }else{
-        	logger.info(data);
-        }
-        console.log(data);
-    }).catch(function (err){
-    	logger.info("error sj01 : " + err);
+	rp(options1)
+    .then( function(body) {
+    	var token = JSON.parse(body);
+        options2.headers.Authorization = "OAuth " + token.access_token;
+        console.log("sj01 start");
+        var now = dateFormat(new Date(), "yyyymmddHHMMss");
+        param = { "standardTime": now , "channel" : "01" , clientId : "daeunextier", clientPw : "3B604775904A5C7535E2670F28"};
+        options2.body = JSON.stringify(param);
+        rp(options2)
+        .then(function ( data ){
+        	data = JSON.parse(data);
+        	if(data.status.code == "10"){
+        		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
+            	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
+            	var filecontext = data.data.result.data_list;
+                fs.writeFile(filename, filecontext, "utf8", function(err) {
+                	logger.info("error file : " + err);
+                });
+            }else{
+            	logger.info(data);
+            }
+            console.log(data);
+        }).catch(function (err){
+        	logger.info("error sj01 : " + err);
+        });
+    })
+    .catch(function (err) {
+        console.error("error 1 : " + err);
     });
+	
 });    
 var sj02 = schedule.scheduleJob('20 30 * * * *', function(){
-    console.log("sj02 start");
-    var now = dateFormat(new Date(), "yyyymmddHHMMss");
-    param = { "standardTime": now , "channel" : "02" , clientId : "daeunextier", clientPw : "3B604775904A5C7535E2670F28"};  
-    options2.body = JSON.stringify(param);
-    rp(options2)
-    .then(function ( data ){
-    	data = JSON.parse(data);
-    	if(data.status.code == "10"){
-    		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
-        	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
-        	var filecontext = data.data.result.data_list;
-            fs.writeFile(filename, filecontext, "utf8", function(err) {
-            	logger.info("error file : " + err);
-            });
-        }else{
-        	logger.info(data);
-        }
-        console.log(data);
-    }).catch(function (err){
-    	logger.info("error sj02 : " + err);
+	rp(options1)
+    .then( function(body) {
+    	var token = JSON.parse(body);
+        options2.headers.Authorization = "OAuth " + token.access_token;
+        console.log("sj02 start");
+        var now = dateFormat(new Date(), "yyyymmddHHMMss");
+        param = { "standardTime": now , "channel" : "02" , clientId : "daeunextier", clientPw : "3B604775904A5C7535E2670F28"};  
+        options2.body = JSON.stringify(param);
+        rp(options2)
+        .then(function ( data ){
+        	data = JSON.parse(data);
+        	if(data.status.code == "10"){
+        		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
+            	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
+            	var filecontext = data.data.result.data_list;
+                fs.writeFile(filename, filecontext, "utf8", function(err) {
+                	logger.info("error file : " + err);
+                });
+            }else{
+            	logger.info(data);
+            }
+            console.log(data);
+        }).catch(function (err){
+        	logger.info("error sj02 : " + err);
+        });
+    })
+    .catch(function (err) {
+        console.error("error 1 : " + err);
     });
+	
 });    
 var sj03 = schedule.scheduleJob('10 30 * * * *', function(){
-    console.log("sj03 start");
-    var now = dateFormat(new Date(), "yyyymmddHHMMss");
-    param = { "standardTime": now , "channel" : "03" , clientId : "daeunextier", clientPw : "3B604775904A5C7535E2670F28"};
-    options2.body = JSON.stringify(param);
-    rp(options2)
-    .then(function ( data ){
-    	data = JSON.parse(data);
-    	if(data.status.code == "10"){
-    		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
-        	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
-        	var filecontext = data.data.result.data_list;
-            fs.writeFile(filename, filecontext, "utf8", function(err) {
-            	logger.info("error file : " + err);
-            });
-        }else{
-        	logger.info(data);
-        }
-        console.log(data);
-    }).catch(function (err){
-    	logger.info("error sj03 : " + err);
+	rp(options1)
+    .then( function(body) {
+    	var token = JSON.parse(body);
+        options2.headers.Authorization = "OAuth " + token.access_token;
+        console.log("sj03 start");
+        var now = dateFormat(new Date(), "yyyymmddHHMMss");
+        param = { "standardTime": now , "channel" : "03" , clientId : "daeunextier", clientPw : "3B604775904A5C7535E2670F28"};
+        options2.body = JSON.stringify(param);
+        rp(options2)
+        .then(function ( data ){
+        	data = JSON.parse(data);
+        	if(data.status.code == "10"){
+        		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
+            	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
+            	var filecontext = data.data.result.data_list;
+                fs.writeFile(filename, filecontext, "utf8", function(err) {
+                	logger.info("error file : " + err);
+                });
+            }else{
+            	logger.info(data);
+            }
+            console.log(data);
+        }).catch(function (err){
+        	logger.info("error sj03 : " + err);
+        });
+    })
+    .catch(function (err) {
+        console.error("error 1 : " + err);
     });
+    
 });    
 var sj04 = schedule.scheduleJob('0 30 * * * *', function(){
-    console.log("sj04 start");
-    var now = dateFormat(new Date(), "yyyymmddHHMMss");
-    param = { "standardTime": now , "channel" : "04" , clientId : "daeunextier", clientPw : "3B604775904A5C7535E2670F28"};
-    options2.body = JSON.stringify(param);
-    rp(options2)
-    .then(function ( data ){
-        data = JSON.parse(data);
-        if(data.status.code == "10"){
-        	!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
-        	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
-        	var filecontext = data.data.result.data_list;
-            fs.writeFile(filename, filecontext, "utf8", function(err) {
-            	logger.info("error file : " + err);
-            });
-        }else{
-        	logger.info(data);
-        }
-        console.log(data);
-    }).catch(function (err){
-    	logger.info("error sj04 : " + err);
-    });
-});    
-function getData(){
     rp(options1)
     .then( function(body) {
 
         var token = JSON.parse(body);
         options2.headers.Authorization = "OAuth " + token.access_token;
-        sj01.invoke();
-        sj02.invoke();
-        sj03.invoke();
-        sj04.invoke();
+        console.log("sj04 start");
+        var now = dateFormat(new Date(), "yyyymmddHHMMss");
+        param = { "standardTime": now , "channel" : "04" , clientId : "daeunextier", clientPw : "3B604775904A5C7535E2670F28"};
+        options2.body = JSON.stringify(param);
+        rp(options2)
+        .then(function ( data ){
+            data = JSON.parse(data);
+            if(data.status.code == "10"){
+            	!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
+            	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
+            	var filecontext = data.data.result.data_list;
+                fs.writeFile(filename, filecontext, "utf8", function(err) {
+                	logger.info("error file : " + err);
+                });
+            }else{
+            	logger.info(data);
+            }
+            console.log(data);
+        }).catch(function (err){
+        	logger.info("error sj04 : " + err);
+        });
         
     })
     .catch(function (err) {
         console.error("error 1 : " + err);
     });
+    
+});    
+function getData(){
+    sj01.invoke();
+    sj02.invoke();
+    sj03.invoke();
+    sj04.invoke();
+    
 }
 
 getData();

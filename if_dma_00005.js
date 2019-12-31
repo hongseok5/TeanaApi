@@ -47,21 +47,28 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 	logger.info("if_dma_00005 start");
 	
 	!fs.existsSync(config.backup_path_bak) && fs.mkdirSync(config.backup_path_bak);
+	rp(options1)
+    .then( function(body) {
+
+        var token = JSON.parse(body);
+        options2.headers.Authorization = "OAuth " + token.access_token;
+        var now = dateFormat(new Date(), "yyyymmddHHMMss");
+        param = { "standardTime": now , "channel" : "01" , clientId : "daeunextier", clientPw : "3B604775904A5C7535E2670F28"};
+        options2.body = JSON.stringify(param);
+        rp(options2).then(function ( data ){
+        	for(i in data.data.result.data_list){
+        		if(data.data.result.data_list[i].duration > tempsecond){
+        			var filename = config.backup_path_bak+"\\"+now+"_"+i+"-T";
+                	var filecontext = data.data.result.data_list[i];
+                	fs.writeFile(filename, filecontext, "utf8", function(err) {
+                    	logger.info("error file : " + err);
+                    });
+        		}
+        	}
+        });
+        
+    })
 	
-	var now = dateFormat(new Date(), "yyyymmddHHMMss");
-    param = { "standardTime": now , "channel" : "01" , clientId : "daeunextier", clientPw : "3B604775904A5C7535E2670F28"};
-    options2.body = JSON.stringify(param);
-    rp(options2).then(function ( data ){
-    	for(i in data.data.result.data_list){
-    		if(data.data.result.data_list[i].duration > tempsecond){
-    			var filename = config.backup_path_bak+"\\"+now+"_"+i+"-T";
-            	var filecontext = data.data.result.data_list[i];
-            	fs.writeFile(filename, filecontext, "utf8", function(err) {
-                	logger.info("error file : " + err);
-                });
-    		}
-    	}
-    });
 	
 	logger.info("if_uanalzyer_End");
 }); 
@@ -75,15 +82,8 @@ function callerror(err){
 }
 
 function getData(){
-	rp(options1)
-    .then( function(body) {
-
-        var token = JSON.parse(body);
-        options2.headers.Authorization = "OAuth " + token.access_token;
-        io.invoke();
-        
-    })
-	
+	io.invoke();
+    
 }
 getData();
 
