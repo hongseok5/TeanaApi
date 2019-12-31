@@ -2,6 +2,8 @@ const rp = require('request-promise');
 const schedule = require('node-schedule');
 const dateFormat = require('dateformat');
 const winston = require('winston');
+//기준 초
+const tempsecond = 60;
 var fs = require('fs');
 var approot = require('app-root-path');
 var config = require(approot + '/config/config');
@@ -11,8 +13,8 @@ var crypto = require(approot + '/lib/crypto');
 /*******************************************************************************
  * 로그 설정.
  ******************************************************************************/
-winston.loggers.add("if_uanalzyer", winstonConfig.createLoggerConfig("if_uanalzyer"));
-var logger = winston.loggers.get("if_uanalzyer");
+winston.loggers.add("if_dma_00005", winstonConfig.createLoggerConfig("if_dma_00005"));
+var logger = winston.loggers.get("if_dma_00005");
 
 var options2 = {
     method: 'POST',
@@ -36,11 +38,13 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
     options2.body = JSON.stringify(param);
     rp(options2).then(function ( data ){
     	for(i in data.data.result.data_list){
-    		var filename = config.backup_path_bak+"\\"+now+"_"+i+"-T.JSON";
-        	var filecontext = data.data.result.data_list[i];
-        	fs.writeFile(filename, filecontext, "utf8", function(err) {
-            	logger.info("error file : " + err);
-            });
+    		if(data.data.result.data_list[i].duration > tempsecond){
+    			var filename = config.backup_path_bak+"\\"+now+"_"+i+"-T.JSON";
+            	var filecontext = data.data.result.data_list[i];
+            	fs.writeFile(filename, filecontext, "utf8", function(err) {
+                	logger.info("error file : " + err);
+                });
+    		}
     	}
     });
 	
