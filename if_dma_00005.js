@@ -16,6 +16,21 @@ var crypto = require(approot + '/lib/crypto');
 winston.loggers.add("if_dma_00005", winstonConfig.createLoggerConfig("if_dma_00005"));
 var logger = winston.loggers.get("if_dma_00005");
 
+var options1 = {
+    method: 'POST',
+    uri: 'https://ssgtv--devlje.my.salesforce.com/services/oauth2/token',
+    form: {
+        // Like <input type="text" name="name">
+        grant_type:"password",
+        client_id:"3MVG9iLRabl2Tf4g2XAyYuODanLCeqa3uTma9Ax4ACprTeO5AqZXk6KHnXSDDyn52l7Pukc96mULKLAGGKiOJ",
+        client_secret:"CAA1104F28306FDAF134CA7B711B48F3879EC229AE9A403175028625316605C7",
+        username : "ifuser@shinsegae.com.partsb2",
+        password : "ifpartsb1234"
+    },
+    headers: {},
+    timeout: 5000
+};
+
 var options2 = {
     method: 'POST',
     uri: 'https://ssgtv--partsb2.my.salesforce.com/services/apexrest/IF_STCS_DMA_00005',
@@ -39,7 +54,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
     rp(options2).then(function ( data ){
     	for(i in data.data.result.data_list){
     		if(data.data.result.data_list[i].duration > tempsecond){
-    			var filename = config.backup_path_bak+"\\"+now+"_"+i+"-T.JSON";
+    			var filename = config.backup_path_bak+"\\"+now+"_"+i+"-T";
             	var filecontext = data.data.result.data_list[i];
             	fs.writeFile(filename, filecontext, "utf8", function(err) {
                 	logger.info("error file : " + err);
@@ -60,7 +75,15 @@ function callerror(err){
 }
 
 function getData(){
-	io.invoke();
+	rp(options1)
+    .then( function(body) {
+
+        var token = JSON.parse(body);
+        options2.headers.Authorization = "OAuth " + token.access_token;
+        io.invoke();
+        
+    })
+	
 }
 getData();
 
