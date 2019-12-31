@@ -14,7 +14,7 @@ winston.loggers.add("if_evaluation", winstonConfig.createLoggerConfig("if_evalua
 var logger = winston.loggers.get("if_evaluation");
 const mariadb = require('mysql');
 const conn = {
-    host : '10.253.42.121',
+    host : '10.253.42.184',
     user : 'ssgtv',
     password : 'af6676387824a0ee9bbae73e3da0671e',
     database : 'ssgtv',
@@ -28,7 +28,7 @@ var pool = mariadb.createPool(conn);
 
 var options = {
     method: 'POST',
-    uri: 'http://10.253.42.122:12800/voc/evaluation/_sync',
+    uri: 'http://10.253.42.185:12800/voc/evaluation/_sync',
     headers: {
         Authorization : null,
         "content-type" : "application/json"
