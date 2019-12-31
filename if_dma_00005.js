@@ -36,7 +36,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
     options2.body = JSON.stringify(param);
     rp(options2).then(function ( data ){
     	for(i in data.data.result.data_list){
-    		var filename = config.backup_path_bak+"\\"+now+i+"-T.JSON";
+    		var filename = config.backup_path_bak+"\\"+now+"_"+i+"-T.JSON";
         	var filecontext = data.data.result.data_list[i];
         	fs.writeFile(filename, filecontext, "utf8", function(err) {
             	logger.info("error file : " + err);
