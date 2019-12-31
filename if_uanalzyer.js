@@ -67,10 +67,11 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										 +"from nx_dept nd, nx_emp ne "
 										 +"where nd.dept_id = ne.dept_id "
 										 +"and nd.est_yn = 'Y' "
+										 +"and nd.direction = ? "
 										 +"and ne.cti_id = ? ";
 						var querystring2  = "select talk_content from ua_talk  where start_time=? and extension = ? and trans_type = 'T' "; 
 						var updateSequence  = "update nx_sequence set current_val = ? where sequence_id = 'CALL_SET_SEQ'";
-						connection.query(querystring, [ filedata.inCate,filedata.ctiId ], function(err, rows, fields) {
+						connection.query(querystring, [ filedata.inCate,filedata.direction,filedata.ctiId ], function(err, rows, fields) {
 							console.log('db querystring');
 							if (!err){
 								for(var i=0; i<rows.length;i++){
