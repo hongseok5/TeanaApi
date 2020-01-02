@@ -148,11 +148,10 @@ function mergeTalk( dataR, dataT  ){
   dataT.timeNtalkT = dataT.timeNtalkT.replace(/\t/g, ':');
   let merged_data = mergejson(dataR,dataT);
   merged_data.timeNtalk = merged_talk.replace( /20\d{12}/g , "");
-  // 키워드 및 긍,부정어 추출시 고객의 대화로만 추출
-   
-  kwe_option.body.text = dataR.timeNtalkR;
-  pnn_option.body.text = dataR.timeNtalkR;
-  cat_option.body.text = merged_data.timeNtalk;  
+  
+  kwe_option.body.text = merged_data.timeNtalk;  // 키워드 추출시 고객&상담원 대화로 추출
+  pnn_option.body.text = dataR.timeNtalkR;       // 긍,부정어 추출시 고객의 대화로만 추출
+  cat_option.body.text = merged_data.timeNtalk;  // 카테고리 분류
 
   Promise.all([rp(kwe_option), rp(cat_option),rp(pnn_option)]).then(function(values){
     tmp_karr = [];
