@@ -58,11 +58,10 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 						filedata = JSON.parse(filedata);
 						var counsetltypeid = "";
 						var callsetseq = "";
-						var extension = "";
 						console.log('file pool.getConnection');
 						var querystring  = "select case when nd.est_target_yn = 'Y' " 
 										 + "then (select counsel_type_id from nx_counsel_type_mapping nctm where nctm.dept_id = nd.dept_id) "
-										 +"else (select counsel_type_id from nx_counsel_type_mapping nctm where nctm.call_type_id = ?) end as counsel_type_id, ne.extension, "
+										 +"else (select counsel_type_id from nx_counsel_type_mapping nctm where nctm.call_type_id = ?) end as counsel_type_id, "
 										 +"(select current_val from nx_sequence where sequence_id = 'CALL_SET_SEQ'  limit 1) as seq "
 										 +"from nx_dept nd, nx_emp ne "
 										 +"where nd.dept_id = ne.dept_id "
@@ -77,7 +76,6 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 								for(var i=0; i<rows.length;i++){
 							    	counsetltypeid = rows[i].counsel_type_id; //resultId에 해당하는 부분만 가져옴
 							    	callsetseq = rows[i].seq; //resultId에 해당하는 부분만 가져옴
-							    	extension = row[i].extension
 							    }
 								var updateCnt = parseInt(callsetseq)+1;
 								connection.query(updateSequence, [ updateCnt ], function (err, rows) {
@@ -97,7 +95,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 						    	    });
 						    	});
 								if(counsetltypeid != null || counsetltypeid != ""){
-									connection.query(querystring2, [ filedata.startTime,extension ], function(err, rows, fields) {
+									connection.query(querystring2, [ filedata.startTime,filedata.extension ], function(err, rows, fields) {
 										var context_text = "";
 										for(z in rows){
 											context_text = context_text+rows[i].talk_content;
@@ -122,7 +120,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 									    	data = JSON.parse(data);
 									    	console.log('db data.matches'+data.matches.length);
 									    	/*if(data.matches.length == 0){
-									    		var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, extension, filedata.ctiId ], function (err, rows) {
+									    		var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.ctiId ], function (err, rows) {
 								    	    		if(err){
 								    	    			logger.error("if_uanalzyer_Db_Query_db callSQLquery", err);
 										    	    }else{
@@ -151,7 +149,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 									    		var lev3itempoint = extrarr[3].substring(extrarr[3].lastIndexOf("=")+1, extrarr[3].length);
 									    		var itemtypecd = extrarr[4].substring(extrarr[4].lastIndexOf("=")+1, extrarr[4].length);
 									    		var checkrow = data.matches.length-1;
-									    		var inserEstDtlquery = connection.query(inserEstDtlHisSQL, [ callsetseq, filedata.startTime, extension, data.id, counselitemid3, counselitemid4, lev3itempoint, lev4itempoint, data.matches[i].frequency, itemtypecd, filedata.ctiId ], function (err, rows) {
+									    		var inserEstDtlquery = connection.query(inserEstDtlHisSQL, [ callsetseq, filedata.startTime, filedata.extension, data.id, counselitemid3, counselitemid4, lev3itempoint, lev4itempoint, data.matches[i].frequency, itemtypecd, filedata.ctiId ], function (err, rows) {
 									    			console.log('db callsetseq');
 									    			if(err){
 									    				fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
@@ -170,7 +168,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 											    	        } else {
 											    	            console.log("Updated successfully!");
 											    	            if(i == checkrow){
-											    	            	var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, extension, filedata.ctiId ], function (err, rows) {
+											    	            	var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.ctiId ], function (err, rows) {
 													    	    		if(err){
 													    	    			fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
 															    	    	logger.error("if_uanalzyer_Db_Query_callSQL", err);
