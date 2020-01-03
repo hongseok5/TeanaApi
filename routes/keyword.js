@@ -644,7 +644,7 @@ router.post("/relation2", function(req, res){
         		z = parseInt(z)+1;
        			var obj = {
                		no : z,
-               		word : resp.aggregations.keyword_top.aggs_name.buckets[i].key,
+               		keyword : resp.aggregations.keyword_top.aggs_name.buckets[i].key,
                		count : resp.aggregations.keyword_top.aggs_name.buckets[i].doc_count
                	}
        			result.data.result.push(obj);
