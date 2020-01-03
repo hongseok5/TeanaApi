@@ -98,7 +98,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 									connection.query(querystring2, [ filedata.startTime,filedata.extension ], function(err, rows, fields) {
 										var context_text = "";
 										for(z in rows){
-											context_text = context_text+rows[z].talk_content;
+											context_text = context_text+"\n\t"+rows[z].talk_content;
 										}
 										var filedataset = context_text.replace(/[0-9]/g, "");
 										param = { "id" : counsetltypeid,
