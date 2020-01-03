@@ -46,7 +46,7 @@ var options2 = {
 var io = schedule.scheduleJob('0 30 3 * * *', function(){
 	logger.info("if_dma_00005 start");
 	
-	!fs.existsSync(config.backup_path_bak) && fs.mkdirSync(config.backup_path_bak);
+	!fs.existsSync(config.backup_path) && fs.mkdirSync(config.backup_path);
 	rp(options1)
     .then( function(body) {
 
@@ -58,7 +58,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
         rp(options2).then(function ( data ){
         	for(i in data.data.result.data_list){
         		if(data.data.result.data_list[i].duration > tempsecond){
-        			var filename = config.backup_path_bak+"\\"+now+"_"+i+"-T";
+        			var filename = config.backup_path+"\\"+now+"_"+i+"-T";
                 	var filecontext = data.data.result.data_list[i];
                 	fs.writeFile(filename, filecontext, "utf8", function(err) {
                     	logger.info("error file : " + err);
@@ -69,16 +69,11 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
         
     })
 	
-	
-	logger.info("if_uanalzyer_End");
+	logger.info("if_dma_00005_End");
 }); 
 
-function callback(){
-	console.log("file remove susscces");
-}
-
 function callerror(err){
-	logger.error("if_uanalzyer_file_error", err);
+	logger.error("if_dma_00005_file_error", err);
 }
 
 function getData(){
