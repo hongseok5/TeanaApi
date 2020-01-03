@@ -58,7 +58,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
         rp(options2).then(function ( data ){
         	for(i in data.data.result.data_list){
         		if(data.data.result.data_list[i].duration > tempsecond){
-        			var filename = config.backup_path+"\\"+now+"_"+i+"-T";
+        			var filename = config.backup_path+"\\"+data.data.result.data_list[i].startTime+"-"+data.data.result.data_list[i].ctiId+"-T";
                 	var filecontext = data.data.result.data_list[i];
                 	fs.writeFile(filename, filecontext, "utf8", function(err) {
                     	logger.info("error file : " + err);
@@ -72,13 +72,8 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 	logger.info("if_dma_00005_End");
 }); 
 
-function callerror(err){
-	logger.error("if_dma_00005_file_error", err);
-}
-
 function getData(){
 	io.invoke();
-    
 }
 getData();
 
