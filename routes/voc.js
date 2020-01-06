@@ -30,6 +30,10 @@ router.post("/search", function(req, res){
     var index = common.getIndex(req.body.channel);
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
         body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
+    if(common.getEmpty(req.body.category1Nm))
+        body.query.bool.filter.push({ term : { category1Nm : req.body.category1Nm }});
+    if(common.getEmpty(req.body.category2Nm))
+        body.query.bool.filter.push({ term : { category2Nm : req.body.category2Nm }});
     if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
     if(common.getEmpty(req.body.productCode))
