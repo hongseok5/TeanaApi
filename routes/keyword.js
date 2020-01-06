@@ -598,6 +598,9 @@ router.post("/relation2", function(req, res){
     var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var index = common.getIndex(req.body.channel);
     var interval = req.body.interval || "1D";
+	
+	if(common.getEmpty(req.body.category) && req.body.category != "ALL")
+        body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
     
     if(common.getEmpty(req.body.keyword)){
         var nest_obj = {
@@ -641,7 +644,7 @@ router.post("/relation2", function(req, res){
         		z = parseInt(z)+1;
        			var obj = {
                		no : z,
-               		word : resp.aggregations.keyword_top.aggs_name.buckets[i].key,
+               		keyword : resp.aggregations.keyword_top.aggs_name.buckets[i].key,
                		count : resp.aggregations.keyword_top.aggs_name.buckets[i].doc_count
                	}
        			result.data.result.push(obj);
