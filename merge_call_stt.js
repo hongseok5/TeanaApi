@@ -14,7 +14,7 @@ var logger = winston.loggers.get("merge");
 
 const mysql = require('mysql');
 const conn = {
-    host : '10.253.42.184', // 개발
+    host : '10.253.42.121', // 개발
     user : 'ssgtv',
     password : 'ssgtv0930',
     database : 'ssgtv',
@@ -44,8 +44,8 @@ schedule.scheduleJob('0 0 * * * *', function(){
       logger.info("query result at " + dateformat(new Date(),'yyyy-mm-dd HH:MM:ss') + " : "  + JSON.stringify(rows));
       for( i in rows ){
         fs.appendFile('/app/TeAna/TeAnaTextAnalytics-1.2.0/dic/stopword.txt', '\n' +  rows[i].keyword, function(err){ 
-        if(err) throw err;
-        logger.info("stopword" + rows[i].keyword + " writed");
+          if(err) throw err;
+          logger.info("stopword" + rows[i].keyword + " writed");
         });
       }
       connection.release();
@@ -82,10 +82,11 @@ let cat_option = {
   uri : 'http://localhost:12800/txt_to_doc',
   method : "POST",
   body : {
-      t_col : "cl_common_1212",
+      t_col : "cl_call_0106",
       text : null,
       mode : 'kma',
-      combine_xs : true
+      combine_xs : true,
+      size : 20
   },
   json : true
 }
@@ -166,6 +167,17 @@ function mergeTalk( dataR, dataT  ){
       merged_data.analysisCate = "0000000021";
       merged_data.analysisCateNm = common.getCategory(21);
     } else {
+      if(values[1].output[0].similarity >= 0.8){
+        values[1].output = values[1].output.filter((v)=>{
+          return v.similarity >= 0.8
+        });
+      } else {
+        let max_sim = values[1].output[0].similarity;
+        values[1].output = values[1].output.filter((v) => {
+          return v.similarity == max_sim  
+        });
+      }
+
       for( i in values[1].output ){
         let obj = {};
         obj.category = values[1].output[i].id.substr(0, values[1].output[i].id.indexOf('_'));
@@ -238,7 +250,7 @@ function mergeTalk( dataR, dataT  ){
     file_sending.channel = "00";
     file_sending.category = merged_data.analysisCate;
     file_sending.summary = 
-    `${convertDateFormat(merged_data.startTime)}에 ${merged_data.agentNm} 상담원이 ${merged_data.analysisCateNm} 으로 상담을 ${convertDuration(merged_data.duration)} 동안 진행하였습니다.` 
+    `${convertDateFormat(merged_data.startTime)}에 ${merged_data.agentNm} 상담원이 ${merged_data.analysisCateNm} (으)로 상담을 ${convertDuration(merged_data.duration)} 동안 진행하였습니다.` 
     + putKeyword(merged_data.keyword_count);
 
     
