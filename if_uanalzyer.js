@@ -77,7 +77,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 									fs.rename(config.backup_path+file, config.backup_path_bak+file, callback);
 				    			 	logger.info("if_uanalzyer_Db_Query_db counsel_type_id_null_"+file);
 								}else{
-									for(var i=0; i<rows.length;i++){
+									for(var i in rows){
 								    	counsetltypeid = rows[i].counsel_type_id; //resultId에 해당하는 부분만 가져옴
 								    	callsetseq = rows[i].seq; //resultId에 해당하는 부분만 가져옴
 								    }

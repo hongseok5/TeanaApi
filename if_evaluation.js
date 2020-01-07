@@ -124,7 +124,7 @@ var iu = schedule.scheduleJob('0 20 9 * * *', function(){
 									  "use": true,
 									  "expressions": []
 									};
-							for(var i=0; i<rows.length; i++){
+							for(var i in rows){
 						    	if(i == 0){
 						    		param1.id = rows[i].counsel_type_id;
 						    		param1.extradata = "name="+rows[i].title+",counselitemid="+rows[i].lev1_counsel_item_id;
