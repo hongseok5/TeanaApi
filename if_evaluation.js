@@ -114,7 +114,7 @@ var iu = schedule.scheduleJob('0 20 9 * * *', function(){
 		connection.query(typequerystring, function(typeerr, typerows, typefields) {
 			
 			//console.log('bchm 2');
-			for(var k=0;  k<typerows.length; k++){
+			for(var k in typerows){
 				if (!typeerr){
 					connection.query(querystring, [typerows[k].counsel_type_id], function(err, rows, fields) {
 						if (!err){
@@ -124,6 +124,7 @@ var iu = schedule.scheduleJob('0 20 9 * * *', function(){
 									  "use": true,
 									  "expressions": []
 									};
+							
 							for(var i in rows){
 						    	if(i == 0){
 						    		param1.id = rows[i].counsel_type_id;
@@ -148,6 +149,7 @@ var iu = schedule.scheduleJob('0 20 9 * * *', function(){
 						    					"use": true
 						    		         };
 						    			param2.synonyms.push(param3);
+						    			
 						    		}else{
 						    			param1.expressions.push(param2);
 						    			param2 = {
@@ -161,9 +163,12 @@ var iu = schedule.scheduleJob('0 20 9 * * *', function(){
 						    			param2.extradata = "level4="+rows[i].lev4_item_point+",counselitemid3="+rows[i].lev3_counsel_item_id+",counselitemid4="+rows[i].lev4_counsel_item_id+",level3="+rows[i].lev3_item_point+",item_type_cd="+rows[i].item_type_cd;
 							    		var senteval = rows[i].sentence.replace(/OOO/gi, "${NAME}");
 							    		param2.expression = senteval.replace(/ /gi, "");
-							    		
 						    		}
+						    		
 						    	}
+						    	if(i == rows.length-1){
+					    			param1.expressions.push(param2);
+					    		}
 						    	
 						    }
 							
