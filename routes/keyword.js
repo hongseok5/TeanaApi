@@ -72,6 +72,9 @@ router.post("/top", function(req, res){
     body.query.bool.must = [
         { bool : { should } }
     ];
+    body.query.bool.must_not =  [
+        { "match": { "category1": "" } }
+    ];
     body.query.bool.should = should;
     body.aggs.aggs_top_keyword = {
         nested : {
@@ -618,6 +621,9 @@ router.post("/relation2", function(req, res){
     	var result = common.getResult("40", "OK", "There is no required keyword");
     	res.send(result);
     }
+    body.query.bool.must_not =  [
+        { "match": { "category1": "" } }
+    ];
     body.aggs.keyword_top = {
        	nested: {
             path: "keyword_count"
