@@ -14,7 +14,7 @@ var logger = winston.loggers.get("merge");
 
 const mysql = require('mysql');
 const conn = {
-    host : '10.253.42.121', // 개발
+    host : '10.253.42.121', //운영
     user : 'ssgtv',
     password : 'ssgtv0930',
     database : 'ssgtv',
@@ -162,14 +162,16 @@ function mergeTalk( dataR, dataT  ){
     //merged_data.keyword_count = tmp_karr.filter( function(v){ return stop_words.indexOf( v.keyword ) == -1 });
      
     merged_data.keyword_count = tmp_karr;
+
+    // category
     let cate_obj = {};
     if( values[1].output === undefined || (Array.isArray(values[1].output) && values[1].output.length === 0)  ){
       merged_data.analysisCate = "0000000021";
       merged_data.analysisCateNm = common.getCategory(21);
     } else {
-      if(values[1].output[0].similarity >= 0.8){
+      if(values[1].output[0].similarity >= 0.9){
         values[1].output = values[1].output.filter((v)=>{
-          return v.similarity >= 0.8
+          return v.similarity >= 0.9
         });
       } else {
         let max_sim = values[1].output[0].similarity;
@@ -197,7 +199,7 @@ function mergeTalk( dataR, dataT  ){
           max_key = tmp_arr[i];
         }
       }
-      if( parseInt(max) === 0 ){
+      if( parseFloat(max) === 0 ){
         merged_data.analysisCate = "0000000021";
         merged_data.analysisCateNm = common.getCategory(21);
       } else {
