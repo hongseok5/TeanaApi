@@ -79,11 +79,13 @@ var sj01 = schedule.scheduleJob('30 30 * * * *', function(){
         	data = JSON.parse(data);
         	if(data.status.code == "10"){
         		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
-            	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
-            	var filecontext = data.data.result.data_list;
-                fs.writeFile(filename, filecontext, "utf8", function(err) {
-                	logger.info("error file : " + err);
-                });
+        		for(i in data.data.result.data_list){
+        			var filename = config.channel_save_path+data.data.channel+"\\"+data.data.result.data_list[i].no+".JSON";
+                	var filecontext = data.data.result.data_list[i];
+                    fs.writeFile(filename, filecontext, "utf8", function(err) {
+                    	logger.info("error file : " + err);
+                    });
+        		}
             }else{
             	logger.info(data);
             }
@@ -111,11 +113,13 @@ var sj02 = schedule.scheduleJob('20 30 * * * *', function(){
         	data = JSON.parse(data);
         	if(data.status.code == "10"){
         		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
-            	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
-            	var filecontext = data.data.result.data_list;
-                fs.writeFile(filename, filecontext, "utf8", function(err) {
-                	logger.info("error file : " + err);
-                });
+        		for(i in data.data.result.data_list){
+        			var filename = config.channel_save_path+data.data.channel+"\\"+data.data.result.data_list[i].no+".JSON";
+                	var filecontext = data.data.result.data_list[i];
+                    fs.writeFile(filename, filecontext, "utf8", function(err) {
+                    	logger.info("error file : " + err);
+                    });
+        		}
             }else{
             	logger.info(data);
             }
@@ -143,11 +147,13 @@ var sj03 = schedule.scheduleJob('10 30 * * * *', function(){
         	data = JSON.parse(data);
         	if(data.status.code == "10"){
         		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
-            	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
-            	var filecontext = data.data.result.data_list;
-                fs.writeFile(filename, filecontext, "utf8", function(err) {
-                	logger.info("error file : " + err);
-                });
+        		for(i in data.data.result.data_list){
+        			var filename = config.channel_save_path+data.data.channel+"\\"+data.data.result.data_list[i].no+".JSON";
+                	var filecontext = data.data.result.data_list[i];
+                    fs.writeFile(filename, filecontext, "utf8", function(err) {
+                    	logger.info("error file : " + err);
+                    });
+        		}
             }else{
             	logger.info(data);
             }
@@ -176,11 +182,13 @@ var sj04 = schedule.scheduleJob('0 30 * * * *', function(){
             data = JSON.parse(data);
             if(data.status.code == "10"){
             	!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
-            	var filename = config.channel_save_path+data.data.channel+"\\"+now+".JSON";
-            	var filecontext = data.data.result.data_list;
-                fs.writeFile(filename, filecontext, "utf8", function(err) {
-                	logger.info("error file : " + err);
-                });
+            	for(i in data.data.result.data_list){
+        			var filename = config.channel_save_path+data.data.channel+"\\"+data.data.result.data_list[i].no+".JSON";
+                	var filecontext = data.data.result.data_list[i];
+                    fs.writeFile(filename, filecontext, "utf8", function(err) {
+                    	logger.info("error file : " + err);
+                    });
+        		}
             }else{
             	logger.info(data);
             }
