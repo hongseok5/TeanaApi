@@ -626,7 +626,7 @@ router.post("/relation2", function(req, res){
            aggs_name: {
         	   terms: {
         		   field: "keyword_count.keyword",
-        		   size : "20"
+        		   size : "21"
                }
             }
         }

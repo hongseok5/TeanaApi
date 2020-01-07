@@ -123,7 +123,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										    	console.log('db data'+data);
 										    	data = JSON.parse(data);
 										    	console.log('db data.matches'+data.matches.length);
-										    	/*if(data.matches.length == 0){
+										    	if(data.matches.length == 0){
 										    		var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.ctiId ], function (err, rows) {
 									    	    		if(err){
 									    	    			logger.error("if_uanalzyer_Db_Query_db callSQLquery", err);
@@ -142,7 +142,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 											    	    // bchm 파일 이관
 											    	    //fs.rename(config.backup_path+file, config.backup_path_bak+file, callback);
 											    	});
-										    	}*/
+										    	}
 										    	var checklev3item = "";
 										    	for(i in data.matches){
 										    		console.log('db data.matches');
