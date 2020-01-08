@@ -317,28 +317,60 @@ router.post("/hot/count", function(req, res){
             });
             
             // 키갑 비교 이중 포문
+            /*
+            if(Array.isArray(resp.aggregations.rt_hot_keyword.buckets[0].keyword_count.aggs_name.buckets) && resp.aggregations.rt_hot_keyword.buckets[0].keyword_count.aggs_name.buckets.length > 0){
+                let
+            } else {
+
+            }
+            */
             let current_words = resp.aggregations.rt_hot_keyword.buckets[0].keyword_count.aggs_name.buckets;
             let before_words = resp.aggregations.rt_hot_keyword.buckets[1].keyword_count.aggs_name.buckets;
-            
-            for( i in current_words ){
-                for( j in before_words ){
-                    if( current_words[i].key === before_words[j].key){
-                        current_words[i].before_count = before_words[j].doc_count;
-                        current_words[i].gap = current_words[i].doc_count - before_words[j].doc_count;
-                        current_words[i].updown = common.getUpdownRate(before_words[j].doc_count, current_words[i].doc_count );
-                        break;
-
+            if(Array.isArray(current_words) && current_words.length > 0){
+                // 현재 시간대에 키워드들이 있고
+                for( i in current_words ){
+                    if( Array.isArray(before_words) && before_words.length > 0){
+                        // 전 시간대에도 있는 경우 
+                        for( j in before_words ){
+                            if( current_words[i].key === before_words[j].key){
+                                current_words[i].before_count = before_words[j].doc_count;
+                                current_words[i].gap = current_words[i].doc_count - before_words[j].doc_count;
+                                current_words[i].updown = common.getUpdownRate(before_words[j].doc_count, current_words[i].doc_count );
+                                break;
+        
+                            } else {
+                                current_words[i].before_count = 0;
+                                current_words[i].gap = current_words[i].doc_count;
+                                current_words[i].updown = "new";
+                            }
+                        }
                     } else {
+                        // 전 시간대에 키워드들이 없는 경우
                         current_words[i].before_count = 0;
                         current_words[i].gap = current_words[i].doc_count;
                         current_words[i].updown = "new";
                     }
                 }
+            } else {
+                // 현재 시간대에 키워드들이 없고
+                if( Array.isArray(before_words) && before_words.length > 0 ){
+                    // 전 시간대에 키워드들이 있는 경우
+                    current_words = before_words;
+                    for(i in current_words){
+                        current_words[i].before_count = current_words[i].doc_count;
+                        current_words[i].doc_count = 0;
+                        current_words[i].gap = current_words[i].doc_count - current_words[i].before_count;
+                        current_words[i].updown = common.getUpdownRate(current_words[i].before_count, current_words[i].doc_count );
+                    }
+
+                } 
             }
+
             // gap 순으로 정렬
             current_words = current_words.sort( function(a, b){
                 return a.gap > b.gap ? -1 : a.gap < b.gap ? 1 : 0;
             });
+            
             if( current_words.length > size ){
                 current_words = current_words.slice(0, size);
             }
