@@ -43,17 +43,17 @@ var options1 = {
 var io = schedule.scheduleJob('0 30 3 * * *', function(){
 	logger.info("if_uanalzyer_Start");
 	
-	!fs.existsSync(config.backup_path_bak) && fs.mkdirSync(config.backup_path_bak);
-	!fs.existsSync(config.backup_path_error) && fs.mkdirSync(config.backup_path_error);
+	!fs.existsSync(config.file_ready_bak) && fs.mkdirSync(config.file_ready_bak);
+	!fs.existsSync(config.file_ready_error) && fs.mkdirSync(config.file_ready_error);
 	
 	pool.getConnection(function(err, connection){
-		fs.readdir(config.backup_path, function(err, filelist){
+		fs.readdir(config.file_ready, function(err, filelist){
 			console.log('file readdir'); 
 			if(err) { return callerror(err); }
 			filelist.forEach(function(file) {
 				console.log('file forEach');
 				if(file.substring(file.lastIndexOf("-"),file.length) == '-T'){
-					fs.readFile(config.backup_path+file , 'utf-8' , function(err , filedata){
+					fs.readFile(config.file_ready+file , 'utf-8' , function(err , filedata){
 						if(err) { return callerror(err); }
 						filedata = JSON.parse(filedata);
 						var counsetltypeid = "";
@@ -74,7 +74,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 							console.log('db querystring');
 							if (!err){
 								if(rows[0].counsel_type_id == null){
-									fs.rename(config.backup_path+file, config.backup_path_bak+file, callback);
+									fs.rename(config.file_ready+file, config.file_ready_bak+file, callback);
 				    			 	logger.info("if_uanalzyer_Db_Query_db counsel_type_id_null_"+file);
 								}else{
 									for(var i in rows){
@@ -140,7 +140,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 											    	        }
 											    	    });
 											    	    // bchm 파일 이관
-											    	    //fs.rename(config.backup_path+file, config.backup_path_bak+file, callback);
+											    	    //fs.rename(config.file_ready+file, config.file_ready_bak+file, callback);
 											    	});
 										    	}
 										    	var checklev3item = "";
@@ -156,7 +156,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										    		var inserEstDtlquery = connection.query(inserEstDtlHisSQL, [ callsetseq, filedata.startTime, filedata.extension, data.id, counselitemid3, counselitemid4, lev3itempoint, lev4itempoint, data.matches[i].frequency, itemtypecd, filedata.ctiId ], function (err, rows) {
 										    			console.log('db callsetseq');
 										    			if(err){
-										    				fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
+										    				fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
 										    			 	logger.error("if_uanalzyer_Db_Query_db callsetseq", err);
 											    	    }else{
 											    	    	logger.info("if_uanalzyer_Db_Query_inserEstDtltQL", err);
@@ -165,7 +165,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										    				checklev3item = lev3itempoint;
 										    				connection.commit(function(err){
 												    	        if(err){
-												    	        	fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
+												    	        	fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
 												    	            connection.rollback(function(err){
 												    	            	logger.error("if_uanalzyer_Db_Query_db callsetseq_rollback", err);
 												    	            });
@@ -174,14 +174,14 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 												    	            if(i == checkrow){
 												    	            	var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.ctiId ], function (err, rows) {
 														    	    		if(err){
-														    	    			fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
+														    	    			fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
 																    	    	logger.error("if_uanalzyer_Db_Query_callSQL", err);
 																    	    }else{
 																    	    	logger.info("if_uanalzyer_Db_Query_callSQL", err);
 																			}
 																    	    connection.commit(function(err){
 																    	        if(err){
-																    	        	fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
+																    	        	fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
 																    	            connection.rollback(function(err){
 																    	            	logger.error("if_uanalzyer_Db_Query_callSQL_rollback", err);
 																    	            });
@@ -190,7 +190,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 																    	        }
 																    	    });
 																    	    //bchm 파일 이관
-																    	    //fs.rename(config.backup_path+file, config.backup_path_bak+file, callback);
+																    	    //fs.rename(config.file_ready+file, config.file_ready_bak+file, callback);
 																    	});
 														    	    }
 												    	        }
@@ -199,18 +199,18 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 											    	});
 										    	}
 											}).catch(function (err){
-												fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
+												fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
 												logger.error("if_uanalzyer_/voc/evaluation/_match", err);
 										    });
 										});
 									}else{
-										fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
+										fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
 										logger.error("if_uanalzyer_COUNSEL_TYPE_ID_null", err);
 									}
 								}
 							}
 							else{
-								fs.rename(config.backup_path+file, config.backup_path_error+file, callback);
+								fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
 								logger.error("if_uanalzyer_Db_Query_2", err);
 							}
 								
@@ -220,7 +220,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 					});
 				}else{
 					if(file.substring(file.lastIndexOf("-"),file.length) == '-R'){
-						fs.rename(config.backup_path+file, config.backup_path_bak+file, callback);
+						fs.rename(config.file_ready+file, config.file_ready_bak+file, callback);
 					}
 				}
 		    });

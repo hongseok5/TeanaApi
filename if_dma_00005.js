@@ -47,7 +47,7 @@ var options2 = {
 var io = schedule.scheduleJob('0 30 3 * * *', function(){
 	logger.info("if_dma_00005 start");
 	
-	!fs.existsSync(config.backup_path) && fs.mkdirSync(config.backup_path);
+	!fs.existsSync(config.file_ready) && fs.mkdirSync(config.file_ready);
 	rp(options1)
     .then( function(body) {
 
@@ -61,7 +61,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
         	console.log('data = '+JSON.stringify(data));
         	for(i in data.data.result.data_list){
         		if(data.data.result.data_list[i].duration > tempsecond){
-        			var filename = config.backup_path+"\\"+data.data.result.data_list[i].startTime+"-"+data.data.result.data_list[i].ctiId+"-T";
+        			var filename = config.file_ready+"\\"+data.data.result.data_list[i].startTime+"-"+data.data.result.data_list[i].ctiId+"-T";
                 	var filecontext = JSON.stringify(data.data.result.data_list[i]);
                 	fs.writeFile(filename, filecontext, "utf8", function(err) {
                     	logger.info("file write : " +filecontext);
