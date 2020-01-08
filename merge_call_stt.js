@@ -173,7 +173,9 @@ function mergeTalk( dataR, dataT  ){
         values[1].output = values[1].output.filter((v)=>{
           return v.similarity >= 0.9
         });
-      } else {
+      } else if( values[1].output[0].similarity < 0.7 ){
+        values[1].output = values[1].output.slice(0,1)  // 유사도 max 값이 너무 낮을 경우 배열 length를 1로 가져가서 line 204에서 기타유형으로 분류        
+      } else { 
         let max_sim = values[1].output[0].similarity;
         values[1].output = values[1].output.filter((v) => {
           return v.similarity == max_sim  
@@ -199,9 +201,9 @@ function mergeTalk( dataR, dataT  ){
           max_key = tmp_arr[i];
         }
       }
-      if( parseFloat(max) === 0 ){
+      if( parseFloat(max) < 0.7 ){
         merged_data.analysisCate = "0000000021";
-        merged_data.analysisCateNm = common.getCategory(21);
+        merged_data.analysisCateNm = common.getCategory(21);        
       } else {
         merged_data.analysisCate = max_key;
         merged_data.analysisCateNm = common.getCategory(Number(max_key));
