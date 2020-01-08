@@ -25,7 +25,7 @@ router.post("/search", function(req, res){
     }
     let size = req.body.size || 10;
     let from = req.body.from || 1;
-    var source = ["extension","casenumber","endTime","duration","company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId", "content", "reContent", "category2Nm", "category1Nm"];
+    var source = ["extension","caseNumber","endTime","duration","company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId", "content", "reContent", "category2Nm", "category1Nm"];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from, source);
     var index = common.getIndex(req.body.channel);
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
@@ -75,7 +75,7 @@ router.post("/search", function(req, res){
         for(i in test){
         	var obj = {
         		extension : test[i][1]._source.extension,
-        		casenumber : common.convertEmpty(test[i][1]._source.casenumber),
+        		casenumber : common.convertEmpty(test[i][1]._source.caseNumber),
         		callDt : common.convertDate(test[i][1]._source.startTime.slice(0,8)),
         		startDtm : common.convertDtm(test[i][1]._source.startTime),
         		endDtm : common.convertDtm(test[i][1]._source.endTime),
