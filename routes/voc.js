@@ -25,15 +25,11 @@ router.post("/search", function(req, res){
     }
     let size = req.body.size || 10;
     let from = req.body.from || 1;
-    var source = ["extension","casenumber","endTime","duration","company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId", "content", "reContent"];
+    var source = ["extension","casenumber","endTime","duration","company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId", "content", "reContent", "category2Nm", "category1Nm"];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from, source);
     var index = common.getIndex(req.body.channel);
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
         body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
-    if(common.getEmpty(req.body.category1Nm))
-        body.query.bool.filter.push({ term : { category1Nm : req.body.category1Nm }});
-    if(common.getEmpty(req.body.category2Nm))
-        body.query.bool.filter.push({ term : { category2Nm : req.body.category2Nm }});
     if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
     if(common.getEmpty(req.body.productCode))
@@ -72,7 +68,7 @@ router.post("/search", function(req, res){
         index ,
         body 
     }).then(function(resp){
-    	var result = common.getResult( "10", "OK", "channel_statistics");
+    	var result = common.getResult( "10", "OK", "voc_search");
     	result.data.count = resp.hits.total;
         result.data.result = [];
         test = Object.entries(resp.hits.hits);
@@ -88,6 +84,8 @@ router.post("/search", function(req, res){
         		companyNm : common.convertEmpty(test[i][1]._source.companyNm),
         		productCode : common.convertEmpty(test[i][1]._source.productCode),
         		productNm : common.convertEmpty(test[i][1]._source.productNm),
+        		category1Nm : common.convertEmpty(test[i][1]._source.category1Nm),
+        		category2Nm : common.convertEmpty(test[i][1]._source.category2Nm),
         		Mcate : test[i][1]._source.Mcate,
         		McateNm : test[i][1]._source.McateNm,
         		mdId : test[i][1]._source.mdId,
