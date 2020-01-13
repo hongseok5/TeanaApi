@@ -30,10 +30,12 @@ router.post("/top", function(req, res){
     if(!common.getEmpty(req.body.start_dt)){
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
+    	return;
     }
     if(!common.getEmpty(req.body.end_dt)){
     	var result = common.getResult("40", "OK", "There is no required end_dt");
     	res.send(result);
+    	return;
     }
     let size = req.body.size || 10;
     let from = req.body.from || 1;
@@ -129,10 +131,12 @@ router.post("/top/statistics", function(req, res){
     if(!common.getEmpty(req.body.start_dt)){
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
+    	return;
     }
     if(!common.getEmpty(req.body.end_dt)){
     	var result = common.getResult("40", "OK", "There is no required end_dt");
     	res.send(result);
+    	return;
     }
     var keyword = [];
     var interval = req.body.interval || "1D";
@@ -616,18 +620,21 @@ router.post("/relation", function(req, res){
     }else{
     	let result = common.getResult("40", "OK", "There is no required keyword");
     	res.send(result);
+    	return;
     }
 });
 
 router.post("/relation2", function(req, res){
-    logger.info("Router for");
+    logger.info("Router for IF_DMA_00105");
     if(!common.getEmpty(req.body.start_dt)){
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
+    	return;
     }
     if(!common.getEmpty(req.body.end_dt)){
     	var result = common.getResult("40", "OK", "There is no required end_dt");
     	res.send(result);
+    	return;
     }
     
     var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
@@ -652,6 +659,7 @@ router.post("/relation2", function(req, res){
     }else{
     	var result = common.getResult("40", "OK", "There is no required keyword");
     	res.send(result);
+    	return;
     }
     body.query.bool.must_not =  [
         { "match": { "category1": "" } }
@@ -669,7 +677,7 @@ router.post("/relation2", function(req, res){
             }
         }
     }
-    
+     
     client.search({
         index,
         body
@@ -701,10 +709,12 @@ router.post("/issue/top", function(req, res){
     if(!common.getEmpty(req.body.start_dt)){
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
+    	return;
     }
     if(!common.getEmpty(req.body.end_dt)){
     	var result = common.getResult("40", "OK", "There is no required end_dt");
     	res.send(result);
+    	return;
     }
     var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var index = common.getIndex(req.body.channel);
@@ -729,6 +739,7 @@ router.post("/issue/top", function(req, res){
     }else{
     	var result = common.getResult("40", "OK", "There is no required keyword");
     	res.send(result);
+    	return;
     }
 
     body.aggs.keyword_top = {
@@ -780,10 +791,12 @@ router.post("/issue", function(req, res){
     if(!common.getEmpty(req.body.start_dt)){
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
+    	return;
     }
     if(!common.getEmpty(req.body.end_dt)){
     	var result = common.getResult("40", "OK", "There is no required end_dt");
     	res.send(result);
+    	return;
     }
     var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var index = common.getIndex(req.body.channel);
@@ -808,6 +821,7 @@ router.post("/issue", function(req, res){
     }else{
     	var result = common.getResult("40", "OK", "There is no required keyword");
     	res.send(result);
+    	return;
     }
 
     body.aggs.keyword_hist = {
@@ -853,10 +867,12 @@ router.post("/issue/statistics", function(req, res){
     if(!common.getEmpty(req.body.start_dt)){
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
+    	return;
     }
     if(!common.getEmpty(req.body.end_dt)){
     	var result = common.getResult("40", "OK", "There is no required end_dt");
     	res.send(result);
+    	return;
     }
     var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var index = common.getIndex(req.body.channel);
@@ -879,6 +895,7 @@ router.post("/issue/statistics", function(req, res){
     }else{
     	var result = common.getResult("40", "OK", "There is no required keyword");
     	res.send(result);
+    	return;
     }
 
     body.aggs = {

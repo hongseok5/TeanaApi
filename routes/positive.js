@@ -18,10 +18,12 @@ router.post("/statistics", function(req, res){
     if(!common.getEmpty(req.body.start_dt)){
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
+    	return;
     }
     if(!common.getEmpty(req.body.end_dt)){
     	var result = common.getResult("40", "OK", "There is no required end_dt");
     	res.send(result);
+    	return;
     }
     // 긍,부정어 추이
     // let interval = req.body.interval || undefined;  
@@ -149,10 +151,12 @@ router.post("/count", function(req, res){
     if(!common.getEmpty(req.body.start_dt)){
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
+    	return;
     }
     if(!common.getEmpty(req.body.end_dt)){
     	var result = common.getResult("40", "OK", "There is no required end_dt");
     	res.send(result);
+    	return;
     }
     // 긍,부정어 현황
     // neg, pos, neu 3개 필드만 sum 해서 비유을 구하는지?
@@ -275,10 +279,12 @@ router.post("/keyword", function(req, res){
     if(!common.getEmpty(req.body.start_dt)){
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
+    	return;
     }
     if(!common.getEmpty(req.body.end_dt)){
     	var result = common.getResult("40", "OK", "There is no required end_dt");
     	res.send(result);
+    	return;
     }
     // 긍,부정어 현황
     // neg, pos, neu 3개 필드만 sum 해서 비유을 구하는지?
@@ -333,10 +339,12 @@ router.post("/keyword", function(req, res){
     	}else{
     		var result = common.getResult("40", "OK", "There is no required start_dt");
         	res.send(result);
+        	return;
     	}
     }else{
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
+    	return;
     }
 
     var index = common.getIndex(req.body.channel);

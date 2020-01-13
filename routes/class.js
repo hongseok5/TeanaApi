@@ -18,10 +18,12 @@ router.post("/count", function(req, res){
     if(!common.getEmpty(req.body.start_dt)){
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
+    	return;
     }
     if(!common.getEmpty(req.body.end_dt)){
     	var result = common.getResult("40", "OK", "There is no required end_dt");
     	res.send(result);
+    	return;
     }
     let size = req.body.size || 0;  // 통계쿼리는 버킷만
     let from = req.body.from || 1;
@@ -115,10 +117,12 @@ router.post("/statistics", function(req, res){
     if(!common.getEmpty(req.body.start_dt)){
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
+    	return;
     }
     if(!common.getEmpty(req.body.end_dt)){
     	var result = common.getResult("40", "OK", "There is no required end_dt");
     	res.send(result);
+    	return;
     }
     let should = [];
     var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());

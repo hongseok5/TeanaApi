@@ -19,10 +19,12 @@ router.post("/count", function(req, res){
     if(!common.getEmpty(req.body.start_dt)){
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
+    	return;
     }
     if(!common.getEmpty(req.body.end_dt)){
     	var result = common.getResult("40", "OK", "There is no required end_dt");
     	res.send(result);
+    	return;
     }
     var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var index = common.getIndex(req.body.channel);
@@ -109,10 +111,12 @@ router.post("/statistics", function(req, res){
     if(!common.getEmpty(req.body.start_dt)){
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
+    	return;
     }
     if(!common.getEmpty(req.body.end_dt)){
     	var result = common.getResult("40", "OK", "There is no required end_dt");
     	res.send(result);
+    	return;
     }
     var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var index = common.getIndex(req.body.channel);
