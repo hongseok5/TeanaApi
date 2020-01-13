@@ -64,7 +64,11 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
         			var filename = config.file_ready+"\\"+data.data.result.data_list[i].startTime+"-"+data.data.result.data_list[i].ctiId+"-T";
                 	var filecontext = JSON.stringify(data.data.result.data_list[i]);
                 	fs.writeFile(filename, filecontext, "utf8", function(err) {
-                    	logger.info("file write : " +filecontext);
+                		if(err){
+                			logger.error("file write error : " +err);
+                		}else{
+                			logger.info("file write : " +filecontext);
+                		}
                     });
         		}
         	}
