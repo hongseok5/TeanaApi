@@ -86,11 +86,10 @@ var sj01 = schedule.scheduleJob('30 30 * * * *', function(){
                 	var filecontext = JSON.stringify(data.data.result.data_list[i]);
                 	console.log("bchm 01 filename = "+filename);
                 	console.log("bchm 01 filecontext = "+filecontext);
+                	logger.info("file write : " +filecontext);
                     fs.writeFile(filename, filecontext, "utf8", function(err) {
                     	if(err){
                 			logger.error("file write error : " +err);
-                		}else{
-                			logger.info("file write : " +filecontext);
                 		}
                     });
         		}
@@ -128,11 +127,10 @@ var sj02 = schedule.scheduleJob('20 30 * * * *', function(){
         			var filecontext = JSON.stringify(data.data.result.data_list[i]);
         			console.log("bchm 02 filename = "+filename);
                 	console.log("bchm 02 filecontext = "+filecontext);
+                	logger.info("file write : " +filecontext);
                     fs.writeFile(filename, filecontext, "utf8", function(err) {
                     	if(err){
                 			logger.error("file write error : " +err);
-                		}else{
-                			logger.info("file write : " +filecontext);
                 		}
                     });
         		}
@@ -170,11 +168,10 @@ var sj03 = schedule.scheduleJob('10 30 * * * *', function(){
         			var filecontext = JSON.stringify(data.data.result.data_list[i]);
         			console.log("bchm 03 filename = "+filename);
                 	console.log("bchm 03 filecontext = "+filecontext);
+                	logger.info("file write : " +filecontext);
                     fs.writeFile(filename, filecontext, "utf8", function(err) {
                     	if(err){
                 			logger.error("file write error : " +err);
-                		}else{
-                			logger.info("file write : " +filecontext);
                 		}
                     });
         		}
@@ -213,11 +210,10 @@ var sj04 = schedule.scheduleJob('0 30 * * * *', function(){
         			var filecontext = JSON.stringify(data.data.result.data_list[i]);
         			console.log("bchm 04 filename = "+filename);
                 	console.log("bchm 04 filecontext = "+filecontext);
+                	logger.info("file write : " +filecontext);
                     fs.writeFile(filename, filecontext, "utf8", function(err) {
                     	if(err){
                 			logger.error("file write error : " +err);
-                		}else{
-                			logger.info("file write : " +filecontext);
                 		}
                     });
         		}
@@ -257,11 +253,10 @@ var sj05 = schedule.scheduleJob('0 30 * * * *', function(){
         			var filecontext = JSON.stringify(data.data.result.data_list[i]);
         			console.log("bchm 05 filename = "+filename);
                 	console.log("bchm 05 filecontext = "+filecontext);
+                	logger.info("file write : " +filecontext);
                     fs.writeFile(filename, filecontext, "utf8", function(err) {
                     	if(err){
                 			logger.error("file write error : " +err);
-                		}else{
-                			logger.info("file write : " +filecontext);
                 		}
                     });
         		}
@@ -301,11 +296,10 @@ var sj06 = schedule.scheduleJob('0 30 * * * *', function(){
         			var filecontext = JSON.stringify(data.data.result.data_list[i]);
         			console.log("bchm 06 filename = "+filename);
                 	console.log("bchm 06 filecontext = "+filecontext);
+                	logger.info("file write : " +filecontext);
                     fs.writeFile(filename, filecontext, "utf8", function(err) {
                     	if(err){
                 			logger.error("file write error : " +err);
-                		}else{
-                			logger.info("file write : " +filecontext);
                 		}
                     });
         		}

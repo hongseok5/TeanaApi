@@ -57,7 +57,9 @@ router.post('/call', (req, res) => {
 			  reasonCate2Nm : req.body.reasonCate2Nm,
 			  caseId : req.body.caseId,
 			  caseNumber : req.body.caseNumber,
-			  customerNumber : req.body.customerNumber
+			  customerNumber : req.body.customerNumber,
+			  status : req.body.status,
+			  reasonDescription : req.body.reasonDescription 
 			},
 		  doc_as_upsert: true
 		}
