@@ -12,6 +12,19 @@ var productfile = "product.json";
  ******************************************************************************/
 winston.loggers.add("migration", winstonConfig.createLoggerConfig("migration"));
 var logger = winston.loggers.get("migration");
+var productData = {};
+
+fs.readFile(config.migration+productfile , 'utf-8' , function(err , filedset){
+		if(err) { return callerror(err); }
+		try{
+			
+			productData = JSON.parse(filedset);
+//			console.log('bchm productData = '+JSON.stringify(productData)); 
+		}catch(e){
+			logger.error(e);
+		}
+});
+
 
 function getData(){
 	logger.info("migration_start");
@@ -24,7 +37,7 @@ function getData(){
         			if(err) { return callerror(err); }
         			try{
         				filedata = JSON.parse(filedata);
-        				console.log('bchm filedata = '+JSON.stringify(filedata)); 
+//        				console.log('bchm filedata = '+JSON.stringify(filedata)); 
         				
         				for(i in filedata){
         					pushData(filedata[i]);
@@ -50,32 +63,22 @@ var ms = 0;
 async function pushData( filedata ){
     ms += 200;
     await sleep(ms);
-	
-    fs.readFile(config.migration+productfile , 'utf-8' , function(err , filedset){
-		if(err) { return callerror(err); }
-		try{
-			
-			filedset = JSON.parse(filedset);
-			console.log('bchm filedset = '+JSON.stringify(filedset)); 
-			
-			for(i in filedset){
-				if(filedata.productCode = filedset[i].productCode){
-					filedata.productNm = filedset[i].productNm;
-					filedata.Mcate = filedset[i].Mcate;
-					filedata.McateNm = filedset[i].McateNm;
-					filedata.company = filedset[i].company;
-					filedata.companyNm = filedset[i].companyNm;
-					filedata.mdId = filedset[i].mdId;
-					filedata.mdNm = filedset[i].mdNm;
-					filedata.PCate = filedset[i].PCate;
-					filedata.PCateNm = filedset[i].PCateNm;
-					break;
-				}
-			}
-		}catch(e){
-			logger.error(e);
+
+	for(i in productData){
+		if(filedata.productCode == productData[i].productCode){
+			filedata.productNm = productData[i].productNm;
+			filedata.Mcate = productData[i].Mcate;
+			filedata.McateNm = productData[i].McateNm;
+			filedata.company = productData[i].company;
+			filedata.companyNm = productData[i].companyNm;
+			filedata.mdId = productData[i].mdId;
+			filedata.mdNm = productData[i].mdNm;
+			filedata.PCate = productData[i].PCate;
+			filedata.PCateNm = productData[i].PCateNm;
+			logger.info("matching product code :" + filedata.productCode);
+			break;
 		}
-	});
+	}
     
 	var document = {
 		index : 'call_'+filedata.ifId.slice(0,6),
@@ -120,7 +123,7 @@ async function pushData( filedata ){
 	};
 
 	client.update(document).then(function(resp) {
-		console.log('update');
+//		console.log('update');
 		logger.info("update success : " + document.id); 
 	}, function(err){
 			logger.error("update failed : " + document.id);
