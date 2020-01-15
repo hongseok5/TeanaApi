@@ -23,21 +23,22 @@ function getData(){
 	!fs.existsSync(config.migration) && fs.mkdirSync(config.migration);
 	fs.readdir(config.migration, function(err, filelist){
     	filelist.forEach(function(file) {
-    		fs.readFile(config.migration+file , 'utf-8' , function(err , filedata){
-    			if(err) { return callerror(err); }
-    			try{
-
-    				filedata = JSON.parse(filedata);
-    				console.log('bchm filedata = '+JSON.stringify(filedata)); 
-    				
-    				for(i in filedata){
-    					pushData(filedata[i]);
+    		if(file.toString() != "product.json"){
+    			fs.readFile(config.migration+file , 'utf-8' , function(err , filedata){
+        			if(err) { return callerror(err); }
+        			try{
+        				filedata = JSON.parse(filedata);
+        				console.log('bchm filedata = '+JSON.stringify(filedata)); 
+        				
+        				for(i in filedata){
+        					pushData(filedata[i]);
+            			}
+        			}catch(e){
+        				logger.error(e);
         			}
-    			}catch(e){
-    				logger.error(e);
-    			}
-			});
-		});
+    			});
+    		}
+    	});
 		
 	});
 	
@@ -54,6 +55,40 @@ async function pushData( filedata ){
     ms += 200;
     await sleep(ms);
 	
+    fs.readdir(config.migration, function(err, filelist){
+    	filelist.forEach(function(file) {
+    		if(file == "product.json"){
+				console.log('bchm file = '+file); 
+				fs.readFile(config.migration+file , 'utf-8' , function(err , filedset){
+	    			if(err) { return callerror(err); }
+	    			try{
+	    				
+	    				filedset = JSON.parse(filedset);
+	    				console.log('bchm filedset = '+JSON.stringify(filedset)); 
+	    				
+	    				for(i in filedset){
+	    					if(filedata.productCode = filedset[i].productCode){
+	    						filedata.productNm = filedset[i].productNm;
+	    						filedata.Mcate = filedset[i].Mcate;
+	    						filedata.McateNm = filedset[i].McateNm;
+	    						filedata.company = filedset[i].company;
+	    						filedata.companyNm = filedset[i].companyNm;
+	    						filedata.mdId = filedset[i].mdId;
+	    						filedata.mdNm = filedset[i].mdNm;
+	    						filedata.PCate = filedset[i].PCate;
+	    						filedata.PCateNm = filedset[i].PCateNm;
+	    					}
+	        			}
+	    			}catch(e){
+	    				logger.error(e);
+	    			}
+				});
+			}
+    		
+		});
+		
+	});
+    
 	var document = {
 		index : 'call_'+filedata.ifId.slice(0,6),
 		type : "doc",
