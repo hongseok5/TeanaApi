@@ -12,7 +12,7 @@ const winstonConfig = require(approot + '/lib/logger');
  ************************************************************/
 winston.loggers.add("if_dma_00003", winstonConfig.createLoggerConfig("if_dma_00003"));
 var logger = winston.loggers.get("if_dma_00003");
-//개발
+/*//개발
 var options1 = {
 	method: 'POST',
 	uri: 'https://ssgtv--partsb.my.salesforce.com/services/oauth2/token',
@@ -36,33 +36,33 @@ var options2 = {
     },
     timeout: 10000,
     body : ""
+};*/
+//운영
+var options1 = {
+    method: 'POST',
+    uri: 'https://ssgtv.my.salesforce.com/services/oauth2/token',
+    form: {
+        // Like <input type="text" name="name">
+        grant_type:"password",
+        client_id:"3MVG9G9pzCUSkzZtVB4GJTSLCTQkd603oOXC8D_P3pSbY7HDNQiqwXGhC2nWLBshnTVLtA2Xb585GhATB82XY",
+        client_secret:"3462DFDEA0ED1EE5358C67EFE599CF7976D1662B93A51AE6F5C91D27CCD904D1",
+        username : "ifuser@shinsegae.com",
+        password : "demo123!"
+    },
+    headers: {},
+    timeout: 5000
 };
-/*//운영
-	var options1 = {
-	    method: 'POST',
-	    uri: 'https://ssgtv.my.salesforce.com/services/oauth2/token',
-	    form: {
-	        // Like <input type="text" name="name">
-	        grant_type:"password",
-	        client_id:"3MVG9G9pzCUSkzZtVB4GJTSLCTQkd603oOXC8D_P3pSbY7HDNQiqwXGhC2nWLBshnTVLtA2Xb585GhATB82XY",
-	        client_secret:"3462DFDEA0ED1EE5358C67EFE599CF7976D1662B93A51AE6F5C91D27CCD904D1",
-	        username : "ifuser@shinsegae.com",
-	        password : "demo123!"
-	    },
-	    headers: {},
-	    timeout: 5000
-	};
 
-	var options2 = {
-	    method: 'POST',
-	    uri: 'https://ssgtv.my.salesforce.com/services/apexrest/IF_STCS_DMA_00003',
-	    headers: {
-	        Authorization : null
-	    },
-	    timeout: 10000,
-	    body : ""
-	};
-*/
+var options2 = {
+    method: 'POST',
+    uri: 'https://ssgtv.my.salesforce.com/services/apexrest/IF_STCS_DMA_00004',
+    headers: {
+        Authorization : null,
+        "Content-Type" : "application/json",
+    },
+    timeout: 10000,
+    body : ""
+};
 //var channel_codes = ["01", "02", "03", "04"];
 
 var sj01 = schedule.scheduleJob('30 30 * * * *', function(){
@@ -84,8 +84,8 @@ var sj01 = schedule.scheduleJob('30 30 * * * *', function(){
         		for(i in data.data.result.data_list){
         			var filename = config.channel_save_path+data.data.channel+"\\"+data.data.result.data_list[i].no+".JSON";
                 	var filecontext = JSON.stringify(data.data.result.data_list[i]);
-                	console.log("bchm 01 filename = "+filename);
-                	console.log("bchm 01 filecontext = "+filecontext);
+                	/*console.log("bchm 01 filename = "+filename);
+                	console.log("bchm 01 filecontext = "+filecontext);*/
                 	logger.info("file write : " +filecontext);
                     fs.writeFile(filename, filecontext, "utf8", function(err) {
                     	if(err){
@@ -125,8 +125,8 @@ var sj02 = schedule.scheduleJob('20 30 * * * *', function(){
         		for(i in data.data.result.data_list){
         			var filename = config.channel_save_path+data.data.channel+"\\"+data.data.result.data_list[i].no+".JSON";
         			var filecontext = JSON.stringify(data.data.result.data_list[i]);
-        			console.log("bchm 02 filename = "+filename);
-                	console.log("bchm 02 filecontext = "+filecontext);
+        			/*console.log("bchm 02 filename = "+filename);
+                	console.log("bchm 02 filecontext = "+filecontext);*/
                 	logger.info("file write : " +filecontext);
                     fs.writeFile(filename, filecontext, "utf8", function(err) {
                     	if(err){
@@ -166,8 +166,8 @@ var sj03 = schedule.scheduleJob('10 30 * * * *', function(){
         		for(i in data.data.result.data_list){
         			var filename = config.channel_save_path+data.data.channel+"\\"+data.data.result.data_list[i].no+".JSON";
         			var filecontext = JSON.stringify(data.data.result.data_list[i]);
-        			console.log("bchm 03 filename = "+filename);
-                	console.log("bchm 03 filecontext = "+filecontext);
+        			/*console.log("bchm 03 filename = "+filename);
+                	console.log("bchm 03 filecontext = "+filecontext);*/
                 	logger.info("file write : " +filecontext);
                     fs.writeFile(filename, filecontext, "utf8", function(err) {
                     	if(err){
@@ -208,8 +208,8 @@ var sj04 = schedule.scheduleJob('0 30 * * * *', function(){
         		for(i in data.data.result.data_list){
         			var filename = config.channel_save_path+data.data.channel+"\\"+data.data.result.data_list[i].no+".JSON";
         			var filecontext = JSON.stringify(data.data.result.data_list[i]);
-        			console.log("bchm 04 filename = "+filename);
-                	console.log("bchm 04 filecontext = "+filecontext);
+        			/*console.log("bchm 04 filename = "+filename);
+                	console.log("bchm 04 filecontext = "+filecontext);*/
                 	logger.info("file write : " +filecontext);
                     fs.writeFile(filename, filecontext, "utf8", function(err) {
                     	if(err){
@@ -251,8 +251,8 @@ var sj05 = schedule.scheduleJob('0 30 * * * *', function(){
         		for(i in data.data.result.data_list){
         			var filename = config.channel_save_path+data.data.channel+"\\"+data.data.result.data_list[i].no+".JSON";
         			var filecontext = JSON.stringify(data.data.result.data_list[i]);
-        			console.log("bchm 05 filename = "+filename);
-                	console.log("bchm 05 filecontext = "+filecontext);
+        			/*console.log("bchm 05 filename = "+filename);
+                	console.log("bchm 05 filecontext = "+filecontext);*/
                 	logger.info("file write : " +filecontext);
                     fs.writeFile(filename, filecontext, "utf8", function(err) {
                     	if(err){
@@ -294,8 +294,8 @@ var sj06 = schedule.scheduleJob('0 30 * * * *', function(){
         		for(i in data.data.result.data_list){
         			var filename = config.channel_save_path+data.data.channel+"\\"+data.data.result.data_list[i].no+".JSON";
         			var filecontext = JSON.stringify(data.data.result.data_list[i]);
-        			console.log("bchm 06 filename = "+filename);
-                	console.log("bchm 06 filecontext = "+filecontext);
+        			/*console.log("bchm 06 filename = "+filename);
+                	console.log("bchm 06 filecontext = "+filecontext);*/
                 	logger.info("file write : " +filecontext);
                     fs.writeFile(filename, filecontext, "utf8", function(err) {
                     	if(err){

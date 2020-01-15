@@ -16,7 +16,7 @@ var crypto = require(approot + '/lib/crypto');
 winston.loggers.add("if_dma_00005", winstonConfig.createLoggerConfig("if_dma_00005"));
 var logger = winston.loggers.get("if_dma_00005");
 
-
+/*//개발
 var options1 = {
     method: 'POST',
     uri: 'https://ssgtv--partsb.my.salesforce.com/services/oauth2/token',
@@ -41,8 +41,33 @@ var options2 = {
     },
     timeout: 10000,
     body : ""
+};*/
+//운영
+var options1 = {
+    method: 'POST',
+    uri: 'https://ssgtv.my.salesforce.com/services/oauth2/token',
+    form: {
+        // Like <input type="text" name="name">
+        grant_type:"password",
+        client_id:"3MVG9G9pzCUSkzZtVB4GJTSLCTQkd603oOXC8D_P3pSbY7HDNQiqwXGhC2nWLBshnTVLtA2Xb585GhATB82XY",
+        client_secret:"3462DFDEA0ED1EE5358C67EFE599CF7976D1662B93A51AE6F5C91D27CCD904D1",
+        username : "ifuser@shinsegae.com",
+        password : "demo123!"
+    },
+    headers: {},
+    timeout: 5000
 };
 
+var options2 = {
+    method: 'POST',
+    uri: 'https://ssgtv.my.salesforce.com/services/apexrest/IF_STCS_DMA_00004',
+    headers: {
+        Authorization : null,
+        "Content-Type" : "application/json",
+    },
+    timeout: 10000,
+    body : ""
+};
 
 var io = schedule.scheduleJob('0 30 3 * * *', function(){
 	logger.info("if_dma_00005 start");
