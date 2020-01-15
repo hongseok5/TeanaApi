@@ -11,7 +11,6 @@ function sleep(ms){
 	    setTimeout(resolve, ms);
 	  })
 	}
-var ms = 200;
 /*******************************************************************************
  * 로그 설정.
  ******************************************************************************/
@@ -52,7 +51,7 @@ function sleep(ms){
 }
 var ms = 0;
 async function pushData( filedata ){
-    ms += 1000;
+    ms += 200;
     await sleep(ms);
 	
 	var document = {
