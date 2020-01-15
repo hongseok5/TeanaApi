@@ -6,11 +6,7 @@ var fs = require('fs');
 var approot = require('app-root-path');
 var config = require(approot + '/config/config');
 const winstonConfig = require(approot + '/lib/logger');
-function sleep(ms){
-	  return new Promise( resolve => {
-	    setTimeout(resolve, ms);
-	  })
-	}
+var productfile = "product.json";
 /*******************************************************************************
  * 로그 설정.
  ******************************************************************************/
@@ -23,7 +19,7 @@ function getData(){
 	!fs.existsSync(config.migration) && fs.mkdirSync(config.migration);
 	fs.readdir(config.migration, function(err, filelist){
     	filelist.forEach(function(file) {
-    		if(file.toString() != "product.json"){
+    		if(file.toString() != productfile){
     			fs.readFile(config.migration+file , 'utf-8' , function(err , filedata){
         			if(err) { return callerror(err); }
         			try{
@@ -55,38 +51,30 @@ async function pushData( filedata ){
     ms += 200;
     await sleep(ms);
 	
-    fs.readdir(config.migration, function(err, filelist){
-    	filelist.forEach(function(file) {
-    		if(file == "product.json"){
-				console.log('bchm file = '+file); 
-				fs.readFile(config.migration+file , 'utf-8' , function(err , filedset){
-	    			if(err) { return callerror(err); }
-	    			try{
-	    				
-	    				filedset = JSON.parse(filedset);
-	    				console.log('bchm filedset = '+JSON.stringify(filedset)); 
-	    				
-	    				for(i in filedset){
-	    					if(filedata.productCode = filedset[i].productCode){
-	    						filedata.productNm = filedset[i].productNm;
-	    						filedata.Mcate = filedset[i].Mcate;
-	    						filedata.McateNm = filedset[i].McateNm;
-	    						filedata.company = filedset[i].company;
-	    						filedata.companyNm = filedset[i].companyNm;
-	    						filedata.mdId = filedset[i].mdId;
-	    						filedata.mdNm = filedset[i].mdNm;
-	    						filedata.PCate = filedset[i].PCate;
-	    						filedata.PCateNm = filedset[i].PCateNm;
-	    					}
-	        			}
-	    			}catch(e){
-	    				logger.error(e);
-	    			}
-				});
+    fs.readFile(config.migration+productfile , 'utf-8' , function(err , filedset){
+		if(err) { return callerror(err); }
+		try{
+			
+			filedset = JSON.parse(filedset);
+			console.log('bchm filedset = '+JSON.stringify(filedset)); 
+			
+			for(i in filedset){
+				if(filedata.productCode = filedset[i].productCode){
+					filedata.productNm = filedset[i].productNm;
+					filedata.Mcate = filedset[i].Mcate;
+					filedata.McateNm = filedset[i].McateNm;
+					filedata.company = filedset[i].company;
+					filedata.companyNm = filedset[i].companyNm;
+					filedata.mdId = filedset[i].mdId;
+					filedata.mdNm = filedset[i].mdNm;
+					filedata.PCate = filedset[i].PCate;
+					filedata.PCateNm = filedset[i].PCateNm;
+					break;
+				}
 			}
-    		
-		});
-		
+		}catch(e){
+			logger.error(e);
+		}
 	});
     
 	var document = {
