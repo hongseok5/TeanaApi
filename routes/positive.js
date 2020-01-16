@@ -436,7 +436,7 @@ router.post("/wordcloud", function(req, res){
 	            count : {
 	            	terms : {
 	                    field : "neutral_word.word",
-	                    size : 100
+	                    size : 50
 	                }
 	            }
 	        }
@@ -449,14 +449,14 @@ router.post("/wordcloud", function(req, res){
 	            count : {
 	            	terms : {
 	                    field : "positive_word.word",
-	                    size : 100
+	                    size : 50
 	                }
 	            }
 	        }
         };
     
     var index = common.getIndex(req.body.channel);
-
+    
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
         body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
     if(common.getEmpty(req.body.age) && req.body.age != "ALL")
@@ -497,24 +497,33 @@ router.post("/wordcloud", function(req, res){
         result.data.result = [] ;
     	test = Object.entries(resp.aggregations.neutral.count.buckets);
     	test2 = Object.entries(resp.aggregations.positive.count.buckets);
+    	var obj2 = new Array();
+    	var z=0;
     	for(i in test){
     		var obj = {
     			key : test[i][1].key,	
         		count : test[i][1].doc_count
     		}
-    		result.data.result.push(obj);
+    		obj2[z] = obj;
+    		z++;
         }
     	for(j in test2){
     		var obj = {
         		key : test2[i][1].key,	
             	count : test2[i][1].doc_count
         	}
-    		result.data.result.push(obj);
+    		obj2[z] = obj;
+    		z++;
     	}
-    	result.data.result.sort( function(a, b){
+    	obj2.sort( function(a, b){
             return a.count > b.count ? -1 : a.count < b.count ? 1 : 0;
         });
     	
+    	for(k in obj2){
+    		if(k < 50){
+    			result.data.result.push(obj2[k]);
+    		}
+    	}
     	res.send(result);
 
     }, function(err){
