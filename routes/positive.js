@@ -436,7 +436,7 @@ router.post("/wordcloud", function(req, res){
 	            count : {
 	            	terms : {
 	                    field : "neutral_word.word",
-	                    size : 50
+	                    size : 100
 	                }
 	            }
 	        }
@@ -449,7 +449,7 @@ router.post("/wordcloud", function(req, res){
 	            count : {
 	            	terms : {
 	                    field : "positive_word.word",
-	                    size : 50
+	                    size : 100
 	                }
 	            }
 	        }
@@ -509,8 +509,8 @@ router.post("/wordcloud", function(req, res){
         }
     	for(j in test2){
     		var obj = {
-        		key : test2[i][1].key,	
-            	count : test2[i][1].doc_count
+        		key : test2[j][1].key,	
+            	count : test2[j][1].doc_count
         	}
     		obj2[z] = obj;
     		z++;
@@ -522,7 +522,9 @@ router.post("/wordcloud", function(req, res){
     	for(k in obj2){
     		if(k < 50){
     			result.data.result.push(obj2[k]);
-    		}
+    		}else if(k > 50) {
+				break;
+			}
     	}
     	res.send(result);
 
