@@ -96,7 +96,9 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
                     });
         		}
         	}
-        });
+        }, function(err){
+			logger.error("error ", err);
+		});
         
     })
 	
