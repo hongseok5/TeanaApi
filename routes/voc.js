@@ -67,7 +67,7 @@ router.post("/search", function(req, res){
 	}
 	
 	body.sort = {
-        "start_time" : "desc" // 파라미터로 받아서 정렬하기 
+        "startTime" : "desc" // 파라미터로 받아서 정렬하기 
     }
         
     client.search({
