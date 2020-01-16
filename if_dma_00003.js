@@ -55,7 +55,7 @@ var options1 = {
 
 var options2 = {
     method: 'POST',
-    uri: 'https://ssgtv.my.salesforce.com/services/apexrest/IF_STCS_DMA_00004',
+    uri: 'https://ssgtv.my.salesforce.com/services/apexrest/IF_STCS_DMA_00003',
     headers: {
         Authorization : null,
         "Content-Type" : "application/json",
