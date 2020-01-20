@@ -114,7 +114,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										    options1.body = JSON.stringify(param);
 										    rp(options1).then(function ( data ){
 										    	console.log('db rp(options1)');
-										    	var callSQL = "call call_counsel_set(?, ?, ?, ?)";
+										    	var callSQL = "call call_counsel_set(?, ?, ?, ?, ?)";
 										    	var inserEstDtlHisSQL = "  insert into nx_counsel_item_his (call_set_seq, start_time, extension, counsel_type_id, emp_id  "
 														    		+", dept_id, lev3_counsel_item_id, lev4_counsel_item_id, lev3_item_point, lev4_item_point "
 														    		+", item_count, item_type_cd, reg_id, reg_ip, reg_dtm, mod_id, mod_ip, mod_dtm) "
@@ -124,7 +124,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										    	data = JSON.parse(data);
 										    	console.log('db data.matches'+data.matches.length);
 										    	if(data.matches.length == 0){
-										    		var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.ctiId ], function (err, rows) {
+										    		var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.ctiId, counsetltypeid ], function (err, rows) {
 									    	    		if(err){
 									    	    			logger.error("if_uanalzyer_Db_Query_db callSQLquery", err);
 											    	    }else{
