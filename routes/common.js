@@ -1,4 +1,5 @@
 var moment = require('moment');
+var os = require('os');
 
 var common = {
 
@@ -321,9 +322,16 @@ var common = {
 		}else{
 			return value;
 		}
-	}
-
-  
+	},
+	
+    getsep : function(){
+    	console.log(os.platform());
+    	if(os.platform().substring(0,3) == "win"){
+    		return "\\";
+    	}else{
+    		return "/";
+    	}
+    }
 };
 
 
