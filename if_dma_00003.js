@@ -83,7 +83,7 @@ var sj01 = schedule.scheduleJob('30 30 * * * *', function(){
         		!fs.existsSync(config.channel_save_path) && fs.mkdirSync(config.channel_save_path);
         		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
         		for(i in data.data.result.data_list){
-        			var filename = config.channel_save_path+data.data.channel+common.getsep+data.data.result.data_list[i].no+".JSON";
+        			var filename = config.channel_save_path+data.data.channel+common.getsep()+data.data.result.data_list[i].no+".JSON";
         			var filecontext = JSON.stringify(data.data.result.data_list[i]);
                 	/*console.log("bchm 01 filename = "+filename);
                 	console.log("bchm 01 filecontext = "+filecontext);*/
@@ -124,7 +124,7 @@ var sj02 = schedule.scheduleJob('20 30 * * * *', function(){
         		!fs.existsSync(config.channel_save_path) && fs.mkdirSync(config.channel_save_path);
         		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
         		for(i in data.data.result.data_list){
-        			var filename = config.channel_save_path+data.data.channel+common.getsep+data.data.result.data_list[i].no+".JSON";
+        			var filename = config.channel_save_path+data.data.channel+common.getsep()+data.data.result.data_list[i].no+".JSON";
         			var filecontext = JSON.stringify(data.data.result.data_list[i]);
         			/*console.log("bchm 02 filename = "+filename);
                 	console.log("bchm 02 filecontext = "+filecontext);*/
@@ -165,7 +165,7 @@ var sj03 = schedule.scheduleJob('10 30 * * * *', function(){
         		!fs.existsSync(config.channel_save_path) && fs.mkdirSync(config.channel_save_path);
         		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
         		for(i in data.data.result.data_list){
-        			var filename = config.channel_save_path+data.data.channel+common.getsep+data.data.result.data_list[i].no+".JSON";
+        			var filename = config.channel_save_path+data.data.channel+common.getsep()+data.data.result.data_list[i].no+".JSON";
         			var filecontext = JSON.stringify(data.data.result.data_list[i]);
         			/*console.log("bchm 03 filename = "+filename);
                 	console.log("bchm 03 filecontext = "+filecontext);*/
@@ -207,7 +207,7 @@ var sj04 = schedule.scheduleJob('0 30 * * * *', function(){
         		!fs.existsSync(config.channel_save_path) && fs.mkdirSync(config.channel_save_path);
         		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
         		for(i in data.data.result.data_list){
-        			var filename = config.channel_save_path+data.data.channel+common.getsep+data.data.result.data_list[i].no+".JSON";
+        			var filename = config.channel_save_path+data.data.channel+common.getsep()+data.data.result.data_list[i].no+".JSON";
         			var filecontext = JSON.stringify(data.data.result.data_list[i]);
         			/*console.log("bchm 04 filename = "+filename);
                 	console.log("bchm 04 filecontext = "+filecontext);*/
@@ -250,7 +250,7 @@ var sj05 = schedule.scheduleJob('0 30 * * * *', function(){
         		!fs.existsSync(config.channel_save_path) && fs.mkdirSync(config.channel_save_path);
         		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
         		for(i in data.data.result.data_list){
-        			var filename = config.channel_save_path+data.data.channel+common.getsep+data.data.result.data_list[i].no+".JSON";
+        			var filename = config.channel_save_path+data.data.channel+common.getsep()+data.data.result.data_list[i].no+".JSON";
         			var filecontext = JSON.stringify(data.data.result.data_list[i]);
         			/*console.log("bchm 05 filename = "+filename);
                 	console.log("bchm 05 filecontext = "+filecontext);*/
@@ -293,7 +293,7 @@ var sj06 = schedule.scheduleJob('0 30 * * * *', function(){
         		!fs.existsSync(config.channel_save_path) && fs.mkdirSync(config.channel_save_path);
         		!fs.existsSync(config.channel_save_path+data.data.channel) && fs.mkdirSync(config.channel_save_path+data.data.channel);
         		for(i in data.data.result.data_list){
-        			var filename = config.channel_save_path+data.data.channel+common.getsep+data.data.result.data_list[i].no+".JSON";
+        			var filename = config.channel_save_path+data.data.channel+common.getsep()+data.data.result.data_list[i].no+".JSON";
         			var filecontext = JSON.stringify(data.data.result.data_list[i]);
         			/*console.log("bchm 06 filename = "+filename);
                 	console.log("bchm 06 filecontext = "+filecontext);*/

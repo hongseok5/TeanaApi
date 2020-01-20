@@ -325,8 +325,7 @@ var common = {
 	},
 	
     getsep : function(){
-    	console.log(os.platform());
-    	if(os.platform().substring(0,3) == "win"){
+    	if(os.platform().toLowerCase().substring(0,3) == "win"){
     		return "\\";
     	}else{
     		return "/";
