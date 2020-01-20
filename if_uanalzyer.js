@@ -140,7 +140,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 											    	        }
 											    	    });
 											    	    // bchm 파일 이관
-											    	    //fs.rename(config.file_ready+file, config.file_ready_bak+file, callback);
+											    	    fs.rename(config.file_ready+file, config.file_ready_bak+file, callback);
 											    	});
 										    	}
 										    	var checklev3item = "";
@@ -190,7 +190,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 																    	        }
 																    	    });
 																    	    //bchm 파일 이관
-																    	    //fs.rename(config.file_ready+file, config.file_ready_bak+file, callback);
+																    	    fs.rename(config.file_ready+file, config.file_ready_bak+file, callback);
 																    	});
 														    	    }
 												    	        }
