@@ -81,24 +81,27 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 								    	counsetltypeid = rows[i].counsel_type_id; //resultId에 해당하는 부분만 가져옴
 								    	callsetseq = rows[i].seq; //resultId에 해당하는 부분만 가져옴
 								    }
-									var updateCnt = parseInt(callsetseq)+1;
-									connection.query(updateSequence, [ updateCnt ], function (err, rows) {
-					    	    		if(err){
-					    	    			logger.error("if_uanalzyer_Db_Query_updateCurrent", err);
-							    	    }else{
-							    	    	logger.info("if_uanalzyer_Db_Query_updateCurrent", err);
-										}
-							    	    connection.commit(function(err){
-							    	        if(err){
-							    	        	connection.rollback(function(err){
-							    	            	logger.error("if_uanalzyer_Db_Query_updateCurrent_rollback", err);
-							    	            });
-							    	        } else {
-							    	            console.log("Updated successfully!");
-							    	        }
-							    	    });
-							    	});
-									if(counsetltypeid != null || counsetltypeid != ""){
+									if(callsetseq != null && callsetseq != "" && callsetseq != undefined){
+										var updateCnt = parseInt(callsetseq)+1;
+										connection.query(updateSequence, [ updateCnt ], function (err, rows) {
+						    	    		if(err){
+						    	    			logger.error("if_uanalzyer_Db_Query_updateCurrent", err);
+								    	    }else{
+								    	    	logger.info("if_uanalzyer_Db_Query_updateCurrent", err);
+											}
+								    	    connection.commit(function(err){
+								    	        if(err){
+								    	        	connection.rollback(function(err){
+								    	            	logger.error("if_uanalzyer_Db_Query_updateCurrent_rollback", err);
+								    	            });
+								    	        } else {
+								    	            console.log("Updated successfully!");
+								    	        }
+								    	    });
+								    	});
+									}
+									
+									if(counsetltypeid != null && counsetltypeid != "" && counsetltypeid != undefined){
 										connection.query(querystring2, [ filedata.startTime,filedata.extension ], function(err, rows, fields) {
 											var context_text = "";
 											for(z in rows){
@@ -128,7 +131,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 									    	    		if(err){
 									    	    			logger.error("if_uanalzyer_Db_Query_db callSQLquery", err);
 											    	    }else{
-											    	    	logger.info("if_uanalzyer_Db_Query_callSQL bchm1", err);
+											    	    	logger.info("if_uanalzyer_Db_Query_callSQL", err);
 														}
 											    	    connection.commit(function(err){
 											    	        if(err){
