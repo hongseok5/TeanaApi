@@ -15,7 +15,7 @@ winston.loggers.add("if_uanalzyer", winstonConfig.createLoggerConfig("if_uanalzy
 var logger = winston.loggers.get("if_uanalzyer");
 const mariadb = require('mysql');
 const conn = {
-    host : '10.253.42.184',
+    host : '10.253.42.121',
     user : 'ssgtv',
     password : 'af6676387824a0ee9bbae73e3da0671e',
     database : 'ssgtv',
@@ -29,7 +29,7 @@ var pool = mariadb.createPool(conn);
 
 var options1 = {
 	method: 'POST',
-	uri: 'http://10.253.42.185:12800/voc/evaluation/_match',
+	uri: 'http://10.253.42.122:12800/voc/evaluation/_match',
 	headers: {
 	    Authorization : null,
 	    "content-type" : "application/json"
@@ -73,7 +73,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 						connection.query(querystring, [ filedata.inCate,filedata.direction,filedata.ctiId ], function(err, rows, fields) {
 							console.log('db querystring');
 							if (!err){
-								if(rows[0].counsel_type_id == null){
+								if(rows == null){
 									fs.rename(config.file_ready+file, config.file_ready_bak+file, callback);
 				    			 	logger.info("if_uanalzyer_Db_Query_db counsel_type_id_null_"+file);
 								}else{
@@ -81,24 +81,27 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 								    	counsetltypeid = rows[i].counsel_type_id; //resultId에 해당하는 부분만 가져옴
 								    	callsetseq = rows[i].seq; //resultId에 해당하는 부분만 가져옴
 								    }
-									var updateCnt = parseInt(callsetseq)+1;
-									connection.query(updateSequence, [ updateCnt ], function (err, rows) {
-					    	    		if(err){
-					    	    			logger.error("if_uanalzyer_Db_Query_updateCurrent", err);
-							    	    }else{
-							    	    	logger.info("if_uanalzyer_Db_Query_updateCurrent", err);
-										}
-							    	    connection.commit(function(err){
-							    	        if(err){
-							    	        	connection.rollback(function(err){
-							    	            	logger.error("if_uanalzyer_Db_Query_updateCurrent_rollback", err);
-							    	            });
-							    	        } else {
-							    	            console.log("Updated successfully!");
-							    	        }
-							    	    });
-							    	});
-									if(counsetltypeid != null || counsetltypeid != ""){
+									if(callsetseq != null && callsetseq != "" && callsetseq != undefined){
+										var updateCnt = parseInt(callsetseq)+1;
+										connection.query(updateSequence, [ updateCnt ], function (err, rows) {
+						    	    		if(err){
+						    	    			logger.error("if_uanalzyer_Db_Query_updateCurrent", err);
+								    	    }else{
+								    	    	logger.info("if_uanalzyer_Db_Query_updateCurrent", err);
+											}
+								    	    connection.commit(function(err){
+								    	        if(err){
+								    	        	connection.rollback(function(err){
+								    	            	logger.error("if_uanalzyer_Db_Query_updateCurrent_rollback", err);
+								    	            });
+								    	        } else {
+								    	            console.log("Updated successfully!");
+								    	        }
+								    	    });
+								    	});
+									}
+									
+									if(counsetltypeid != null && counsetltypeid != "" && counsetltypeid != undefined){
 										connection.query(querystring2, [ filedata.startTime,filedata.extension ], function(err, rows, fields) {
 											var context_text = "";
 											for(z in rows){
@@ -114,7 +117,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										    options1.body = JSON.stringify(param);
 										    rp(options1).then(function ( data ){
 										    	console.log('db rp(options1)');
-										    	var callSQL = "call call_counsel_set(?, ?, ?, ?)";
+										    	var callSQL = "call call_counsel_set(?, ?, ?, ?, ?)";
 										    	var inserEstDtlHisSQL = "  insert into nx_counsel_item_his (call_set_seq, start_time, extension, counsel_type_id, emp_id  "
 														    		+", dept_id, lev3_counsel_item_id, lev4_counsel_item_id, lev3_item_point, lev4_item_point "
 														    		+", item_count, item_type_cd, reg_id, reg_ip, reg_dtm, mod_id, mod_ip, mod_dtm) "
@@ -124,11 +127,11 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										    	data = JSON.parse(data);
 										    	console.log('db data.matches'+data.matches.length);
 										    	if(data.matches.length == 0){
-										    		var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.ctiId ], function (err, rows) {
+										    		var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.ctiId, counsetltypeid ], function (err, rows) {
 									    	    		if(err){
 									    	    			logger.error("if_uanalzyer_Db_Query_db callSQLquery", err);
 											    	    }else{
-											    	    	logger.info("if_uanalzyer_Db_Query_callSQL bchm1", err);
+											    	    	logger.info("if_uanalzyer_Db_Query_callSQL", err);
 														}
 											    	    connection.commit(function(err){
 											    	        if(err){
@@ -140,7 +143,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 											    	        }
 											    	    });
 											    	    // bchm 파일 이관
-											    	    //fs.rename(config.file_ready+file, config.file_ready_bak+file, callback);
+											    	    fs.rename(config.file_ready+file, config.file_ready_bak+file, callback);
 											    	});
 										    	}
 										    	var checklev3item = "";
@@ -172,7 +175,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 												    	        } else {
 												    	            console.log("Updated successfully!");
 												    	            if(i == checkrow){
-												    	            	var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.ctiId ], function (err, rows) {
+												    	            	var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.ctiId, counsetltypeid ], function (err, rows) {
 														    	    		if(err){
 														    	    			fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
 																    	    	logger.error("if_uanalzyer_Db_Query_callSQL", err);
@@ -190,7 +193,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 																    	        }
 																    	    });
 																    	    //bchm 파일 이관
-																    	    //fs.rename(config.file_ready+file, config.file_ready_bak+file, callback);
+																    	    fs.rename(config.file_ready+file, config.file_ready_bak+file, callback);
 																    	});
 														    	    }
 												    	        }

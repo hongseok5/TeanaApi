@@ -60,7 +60,7 @@ var options1 = {
 
 var options2 = {
     method: 'POST',
-    uri: 'https://ssgtv.my.salesforce.com/services/apexrest/IF_STCS_DMA_00004',
+    uri: 'https://ssgtv.my.salesforce.com/services/apexrest/IF_STCS_DMA_00005',
     headers: {
         Authorization : null,
         "Content-Type" : "application/json",
@@ -86,7 +86,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
         	console.log('data = '+JSON.stringify(data));
         	for(i in data.data.result.data_list){
         		if(data.data.result.data_list[i].duration > tempsecond){
-        			var filename = config.file_ready+"\\"+data.data.result.data_list[i].startTime+"-"+data.data.result.data_list[i].ctiId+"-T";
+        			var filename = config.file_ready+data.data.result.data_list[i].startTime+"-"+data.data.result.data_list[i].ctiId+"-T";
                 	var filecontext = JSON.stringify(data.data.result.data_list[i]);
 					logger.info("file write : " +filename);
                 	fs.writeFile(filename, filecontext, "utf8", function(err) {
@@ -96,7 +96,9 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
                     });
         		}
         	}
-        });
+        }, function(err){
+			logger.error("error ", err);
+		});
         
     })
 	
