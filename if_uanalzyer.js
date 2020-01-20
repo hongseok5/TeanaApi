@@ -15,7 +15,7 @@ winston.loggers.add("if_uanalzyer", winstonConfig.createLoggerConfig("if_uanalzy
 var logger = winston.loggers.get("if_uanalzyer");
 const mariadb = require('mysql');
 const conn = {
-    host : '10.253.42.184',
+    host : '10.253.42.121',
     user : 'ssgtv',
     password : 'af6676387824a0ee9bbae73e3da0671e',
     database : 'ssgtv',
@@ -29,7 +29,7 @@ var pool = mariadb.createPool(conn);
 
 var options1 = {
 	method: 'POST',
-	uri: 'http://10.253.42.185:12800/voc/evaluation/_match',
+	uri: 'http://10.253.42.122:12800/voc/evaluation/_match',
 	headers: {
 	    Authorization : null,
 	    "content-type" : "application/json"
@@ -172,7 +172,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 												    	        } else {
 												    	            console.log("Updated successfully!");
 												    	            if(i == checkrow){
-												    	            	var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.ctiId ], function (err, rows) {
+												    	            	var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.ctiId, counsetltypeid ], function (err, rows) {
 														    	    		if(err){
 														    	    			fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
 																    	    	logger.error("if_uanalzyer_Db_Query_callSQL", err);
