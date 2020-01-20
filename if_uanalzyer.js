@@ -73,7 +73,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 						connection.query(querystring, [ filedata.inCate,filedata.direction,filedata.ctiId ], function(err, rows, fields) {
 							console.log('db querystring');
 							if (!err){
-								if(rows[0].counsel_type_id == null){
+								if(rows == null){
 									fs.rename(config.file_ready+file, config.file_ready_bak+file, callback);
 				    			 	logger.info("if_uanalzyer_Db_Query_db counsel_type_id_null_"+file);
 								}else{
