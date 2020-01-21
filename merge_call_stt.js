@@ -67,6 +67,16 @@ let kwe_option = {
   },
   json : true
 }
+// 키워드추출 API2( 용언추출 )
+let kwe_option2 = {
+  uri : 'http://localhost:12800/voc/verb/_analysis',
+  method : "POST",
+  body : {
+      text : null,
+  },
+  json : true
+}
+
 // 긍부정어 추출 API
 let pnn_option = {
   uri : 'http://localhost:12800/voc/sentimental/_match',
@@ -82,7 +92,7 @@ let cat_option = {
   uri : 'http://localhost:12800/txt_to_doc',
   method : "POST",
   body : {
-      t_col : "cl_call_0106",
+      t_col : "cl_stt_live2",
       text : null,
       mode : 'kma',
       combine_xs : true,
@@ -149,39 +159,36 @@ function mergeTalk( dataR, dataT  ){
   dataT.timeNtalkT = dataT.timeNtalkT.replace(/\t/g, ':');
   let merged_data = mergejson(dataR,dataT);
   merged_data.timeNtalk = merged_talk.replace( /20\d{12}/g , "");
-  
-  kwe_option.body.text = merged_data.timeNtalk;  // 키워드 추출시 고객&상담원 대화로 추출
+  dataR.timeNtalkR = dataR.timeNtalkR.replace( /20\d{12}/g , "");
+  kwe_option2.body.text = dataR.timeNtalkR.replace( /R:/g , "");  // 키워드 추출시 고객 대화로 추출(용언 추출)
+  kwe_option.body.text = dataR.timeNtalkR.replace( /R:/g , "");  // 키워드 추출시 고객 대화로 추출
   pnn_option.body.text = dataR.timeNtalkR;       // 긍,부정어 추출시 고객의 대화로만 추출
-  cat_option.body.text = merged_data.timeNtalk;  // 카테고리 분류
+  cat_option.body.text = merged_data.timeNtalk;  // 카테고리 분류 - 고객&상담원 대화로
 
-  Promise.all([rp(kwe_option), rp(cat_option),rp(pnn_option)]).then(function(values){
-    tmp_karr = [];
-    for( i in values[0].output){
-    	tmp_karr.push(values[0].output[i]);
+  Promise.all([rp(kwe_option2), rp(cat_option),rp(pnn_option),rp(kwe_option)]).then(function(values){
+
+    merged_data.keyword_count = [];
+    for( i in values[3].output){
+    	merged_data.keyword_count.push(values[3].output[i]);
     }
-    //merged_data.keyword_count = tmp_karr.filter( function(v){ return stop_words.indexOf( v.keyword ) == -1 });
-     
-    merged_data.keyword_count = tmp_karr;
 
+    values[0].verbs = values[0].verbs.filter( v => {
+      return v.expression.substr(0, 2) !== "예 " && v.expression.substr(0, 2) !== "아 " && v.expression.substr(0, 2) !== "네 ";
+    })
+    for( i in values[0].verbs){
+      let obj = { similarity : 0 };
+      obj.keyword = values[0].verbs[i].expression
+      merged_data.keyword_count.push(obj);
+    }
     // category
     let cate_obj = {};
     if( values[1].output === undefined || (Array.isArray(values[1].output) && values[1].output.length === 0)  ){
       merged_data.analysisCate = "0000000021";
       merged_data.analysisCateNm = common.getCategory(21);
     } else {
-      if(values[1].output[0].similarity >= 0.9){
-        values[1].output = values[1].output.filter((v)=>{
-          return v.similarity >= 0.9
-        });
-      } else if( values[1].output[0].similarity < 0.7 ){
-        values[1].output = values[1].output.slice(0,1)  // 유사도 max 값이 너무 낮을 경우 배열 length를 1로 가져가서 line 204에서 기타유형으로 분류        
-      } else { 
-        let max_sim = values[1].output[0].similarity;
-        values[1].output = values[1].output.filter((v) => {
-          return v.similarity == max_sim  
-        });
+      if(values[1].output[0].similarity < 0.8 ){
+        values[1].output = values[1].output.slice(0,1)
       }
-
       for( i in values[1].output ){
         let obj = {};
         obj.category = values[1].output[i].id.substr(0, values[1].output[i].id.indexOf('_'));
@@ -201,7 +208,7 @@ function mergeTalk( dataR, dataT  ){
           max_key = tmp_arr[i];
         }
       }
-      if( parseFloat(max) < 0.7 ){
+      if( parseFloat(max) < 0.8 ){
         merged_data.analysisCate = "0000000021";
         merged_data.analysisCateNm = common.getCategory(21);        
       } else {
@@ -257,7 +264,6 @@ function mergeTalk( dataR, dataT  ){
     `${convertDateFormat(merged_data.startTime)}에 ${merged_data.agentNm} 상담원이 ${merged_data.analysisCateNm} (으)로 상담을 ${convertDuration(merged_data.duration)} 동안 진행하였습니다.` 
     + putKeyword(merged_data.keyword_count);
 
-    
     fs.writeFile( config.send_save_path + merged_data.startTime + "-" + merged_data.agentId + ".JSON" , JSON.stringify(file_sending), 'utf8', function(err){
       if(err) 
         logger.error("file write fail : " + merged_data.startTime + merged_data.agentId + err);
@@ -267,9 +273,9 @@ function mergeTalk( dataR, dataT  ){
         logger.error("file write fail : " + merged_data.startTime + merged_data.agentId + err);
     });
     fs.writeFile(config.write_path + merged_data.startTime + "-" + merged_data.agentId + ".JSON", JSON.stringify(merged_data), 'utf8', function(err) {
-      if(err) 
+      if(err){ 
         logger.error("file write fail : " + merged_data.startTime + merged_data.agentId + err);
-      else
+      } else {
           fs.rename(config.save_path + merged_data.startTime + "-" + merged_data.agentId + "-R", 
                     config.backup_path + today + '/' + merged_data.startTime + "-" + merged_data.agentId + "-R", 
                     function(err){
@@ -283,22 +289,22 @@ function mergeTalk( dataR, dataT  ){
                       if (err)
                         logger.error("file move fail : " + merged_data.startTime + merged_data.agentId + err); 
                     });
+      }
     });
   }, function(err){
     if(err)
       logger.error("TextAnalysis Server doesn't response :" + err); 
   });
-  
 };
 
 cron.schedule('*/5 * * * * *', () => {
-
-  const file_path = config.save_path;
-  let file_list = fs.readdirSync(file_path);
-  let file_list_r = file_list.filter(el => /\-R$/.test(el));
-  let count = 0;
-  let count_not_ex = 0;
-  for( i in file_list_r ){
+  try{
+   const file_path = config.save_path;
+   let file_list = fs.readdirSync(file_path);
+   let file_list_r = file_list.filter(el => /\-R$/.test(el));
+   let count = 0;
+   let count_not_ex = 0;
+   for( i in file_list_r ){
     let file_nr = file_list_r[i];
     let fn_index = file_nr.lastIndexOf('-');
     if(fs.existsSync(file_path + file_nr.substr(0, fn_index) + "-T")){
@@ -308,8 +314,11 @@ cron.schedule('*/5 * * * * *', () => {
     } else {
       count_not_ex++;
     }
-  }
+  } 
   logger.info(new Date() + "finished : " + count + " not pair : " + count_not_ex);
+  } catch(e){
+   logger.error(e);
+  }
 });
 
 cron.schedule('0 0 * * *', () => {
