@@ -208,7 +208,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										});
 									}else{
 										fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
-										logger.error("if_uanalzyer_COUNSEL_TYPE_ID_null", err);
+										logger.info("if_uanalzyer_COUNSEL_TYPE_ID_null", err);
 									}
 								}
 							}
