@@ -101,6 +101,8 @@ let cat_option = {
   json : true
 }
 
+var expt_words = ["예 ", "네 ", "그 ", "아 "]
+
 console.log("process.pid:"+process.pid);
 
 let file_merge_async = function (file_nr, file_nt){
@@ -173,7 +175,7 @@ function mergeTalk( dataR, dataT  ){
     }
 
     values[0].verbs = values[0].verbs.filter( v => {
-      return v.expression.substr(0, 2) !== "예 " && v.expression.substr(0, 2) !== "아 " && v.expression.substr(0, 2) !== "네 ";
+      return expt_words.indexOf(v.expression.substr(0, 2)) === -1 ;
     })
     for( i in values[0].verbs){
       let obj = { similarity : 0 };
