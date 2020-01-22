@@ -42,31 +42,19 @@ router.post("/search", function(req, res){
         body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
     if(common.getEmpty(req.body.mdNm))
         body.query.bool.filter.push({ term : { mdNm : req.body.mdNm }});
-    if(common.getEmpty(req.body.keyword)) {
-		var keywordcheck=true;
-		var objarr = new Array();
-    	for(p in req.body.keyword){
-			if(req.body.keyword[p] == "ALL"){
-				keywordcheck=false;
-			}else{
-				objarr[p] = req.body.keyword[p];
-			}
-		} 
-    	
-    	if(keywordcheck){
-    		var nest_obj = {
-    	            nested : {
-    	                path : "keyword_count",
-    	                query : {
-    	                    terms : {
-    	                        "keyword_count.keyword" : objarr
-    	                    }
-    	                }
-    	            }
-    	        }
-    	        body.query.bool.filter.push(nest_obj);
-    	}
-    }
+    if(common.getEmpty(req.body.keyword) && req.body.keyword != "ALL") {
+		 var nest_obj = {
+            nested : {
+                path : "keyword_count",
+                query : {
+                    term : {
+                        "keyword_count.keyword" : req.body.keyword
+                    }
+                }
+            }
+        }
+        body.query.bool.filter.push(nest_obj);
+	}
         
 	if(common.getEmpty(req.body.skeyword)) {
 		var query_stting = {
