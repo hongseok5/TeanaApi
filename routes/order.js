@@ -55,7 +55,9 @@ router.post("/statistics", function(req, res){
         } 
     }
     body.query.bool.filter.push({ term : { category2 : "zz" }});
-    
+    body.query.bool.must_not =  [
+        { "match": {"reasonCate1Nm": ""} }
+    ];
     body.query.bool.must = [
         { bool : { should } }
     ];
