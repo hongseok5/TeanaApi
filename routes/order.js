@@ -61,7 +61,7 @@ router.post("/statistics", function(req, res){
     ];
     body.aggs.aggs_class = {
         terms : {
-           field : "reasonCate1",
+           field : "reasonCate1Nm",
 		   size : 1000
         },
         aggs : {
@@ -87,7 +87,7 @@ var index = common.getIndex(req.body.channel);
         for(j in resp.aggregations.aggs_class.buckets){
         	var total = Math.ceil(parseInt(resp.aggregations.aggs_class.buckets[j].doc_count)/parseInt(z)*100);
         	var obj = {
-    		   	category1Nm : resp.aggregations.aggs_class.buckets[j].key,
+        		reasonCate1Nm : resp.aggregations.aggs_class.buckets[j].key,
     		   	count : resp.aggregations.aggs_class.buckets[j].doc_count,
     		   	rate : total,
     		   	avgTime : Math.round(resp.aggregations.aggs_class.buckets[j].avd_value.value)
