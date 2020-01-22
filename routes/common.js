@@ -286,6 +286,8 @@ var common = {
 			let min = value / 60;
 			let sec = value % 60;
 			return Math.floor(Number(min)) + "분 " + sec + "초 ";
+		} else if(value == undefined) {
+			return "";
 		} else {
 			return value + "초";
 		}

@@ -50,6 +50,8 @@ router.post("/list", function(req, res){
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.age) && req.body.age != "ALL")
     	body.query.bool.filter.push({ range : { age : { gte : Number(req.body.age), lte : Number(req.body.age) + 9}}});
+    if(req.body.orderYn == "Y" )
+        body.query.bool.filter.push({ term : { category2 : "zz" }});
     if(common.getEmpty(req.body.product)){
     	for( p in req.body.product ){
 			if(common.getEmpty(req.body.product[p].productCode)) {

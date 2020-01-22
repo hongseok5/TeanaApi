@@ -63,6 +63,8 @@ router.post("/top", function(req, res){
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
     if(common.getEmpty(req.body.vdnGrp) && req.body.vdnGrp != "ALL" )
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
+    if(req.body.orderYn == "Y" )
+        body.query.bool.filter.push({ term : { category2 : "zz" }});
     if(common.getEmpty(req.body.product)){
     	for( p in req.body.product ){
 			if(common.getEmpty(req.body.product[p].productCode) && req.body.product[p].productCode != "ALL") {
