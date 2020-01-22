@@ -48,6 +48,7 @@ app.use("/receive", require("./routes/receive"));
 app.use("/product", require("./routes/product"));
 app.use("/customer", require("./routes/customer"));
 app.use("/voc", require("./routes/voc"));
+app.use("/order", require("./routes/order"));
 
 app.get('/', (req, res) => {
     logger.info("HTTP GET /" + req.ip + Date());
@@ -105,9 +106,6 @@ function normalizePort(val) {
 function onListening() {
   var addr = server.address();
 }
-
-
-
 
 /************************************************************
  * 에러 처리...
