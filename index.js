@@ -31,7 +31,7 @@ var corsOptions = {
     origin: true,
     credentials: true
 };
-var today = "20191113";
+
 //if0003();
 //if0004();
 
