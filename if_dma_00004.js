@@ -159,7 +159,8 @@ function getData(){
 									logger.info("if_dma_00004 file send success ifID: " + filedata.startTime + "-" + filedata.agentId);
 	        	            	}else if(data.code == "99"){
 	        	            		fs.rename(config.send_save_path+file, config.send_error_path+file, callback);
-									logger.info("if_dma_00004 file send failed ifID: " + + filedata.startTime + "-" + filedata.agentId);
+									logger.info("if_dma_00004 file send failed ifID: " +  filedata.startTime + "-" + filedata.agentId);
+									logger.info("if_dma_00004 file send failed message: " + data.message);
 	        	            	}
 	        	            }).catch(function (err){
 	        	            	logger.error(err);
