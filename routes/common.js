@@ -20,7 +20,7 @@ var common = {
 			case "06":
 				return "alliance";
             default:
-                return "call_*,mobile,pc,homepage,ars,alliance";
+                return "call_*,mobile,pc,homepage,ars,chat,alliance";
         }
     },
     getIndexCode : function(code){
