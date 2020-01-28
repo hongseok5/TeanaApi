@@ -645,6 +645,32 @@ router.post("/relation2", function(req, res){
 	
 	if(common.getEmpty(req.body.category) && req.body.category != "ALL")
         body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
+    if(common.getEmpty(req.body.companyCode))
+        body.query.bool.filter.push({ term : { company : req.body.companyCode }});
+    if(common.getEmpty(req.body.mCate) && req.body.mCate != "ALL")
+        body.query.bool.filter.push({ term : { Mcate : req.body.mCate }});
+    if(common.getEmpty(req.body.inCate) && req.body.inCate != "ALL")
+        body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
+    if(common.getEmpty(req.body.mdNm))
+        body.query.bool.filter.push({ term : { mdNm : req.body.mdNm }});
+    if(common.getEmpty(req.body.vdn) && req.body.vdn != "ALL")
+        body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
+    if(common.getEmpty(req.body.vdnGrp) && req.body.vdnGrp != "ALL")
+        body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
+    if(common.getEmpty(req.body.gender) && req.body.gender != "ALL")
+        body.query.bool.filter.push({ term : { gender : req.body.gender }});
+    if(common.getEmpty(req.body.age) && req.body.age != "ALL")
+    	body.query.bool.filter.push({ range : { age : { gte : Number(req.body.age), lte : Number(req.body.age) + 9}}});
+    if(req.body.orderYn == "Y" )
+        body.query.bool.filter.push({ term : { category2 : "zz" }});
+    if(common.getEmpty(req.body.product)){
+    	for( p in req.body.product ){
+			if(common.getEmpty(req.body.product[p].productCode)) {
+				var term_obj = { term : { productCode : req.body.product[p].productCode}};
+				should.push(term_obj);
+			}
+        } 
+    }
     
     if(common.getEmpty(req.body.keyword)){
         var nest_obj = {
