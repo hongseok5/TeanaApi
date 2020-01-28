@@ -59,6 +59,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 						var counsetltypeid = "";
 						var callsetseq = "";
 						console.log('file pool.getConnection');
+						//평가지 쿼리
 						var querystring  = "select case when nd.est_target_yn = 'Y' " 
 										 + "then (select counsel_type_id from nx_counsel_type_mapping nctm where nctm.dept_id = nd.dept_id) "
 										 +"else (select counsel_type_id from nx_counsel_type_mapping nctm where nctm.call_type_id = ?) end as counsel_type_id, "
@@ -68,7 +69,9 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										 +"and nd.est_yn = 'Y' "
 										 +"and nd.direction = ? "
 										 +"and ne.cti_id = ? ";
+						//상담내용 조회
 						var querystring2  = "select talk_content from ua_talk  where start_time=? and extension = ? and trans_type = 'T' "; 
+						//임시테이블 시퀀스 올려주는 쿼리
 						var updateSequence  = "update nx_sequence set current_val = ? where sequence_id = 'CALL_SET_SEQ'";
 						connection.query(querystring, [ filedata.inCate,filedata.direction,filedata.ctiId ], function(err, rows, fields) {
 							console.log('db querystring');
@@ -87,7 +90,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 						    	    		if(err){
 						    	    			logger.error("if_uanalzyer_Db_Query_updateCurrent = "+filedata.startTime, err);
 								    	    }else{
-								    	    	console.log("if_uanalzyer_Db_Query_updateCurrent = "+filedata.startTime, err);
+								    	    	logger.info("if_uanalzyer_Db_Query_updateCurrent = "+filedata.startTime, err);
 											}
 								    	    connection.commit(function(err){
 								    	        if(err){
@@ -115,7 +118,9 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										    options1.body = JSON.stringify(param);
 										    rp(options1).then(function ( data ){
 										    	console.log('db rp(options1)');
+										    	//프로시저 호출
 										    	var callSQL = "call call_counsel_set(?, ?, ?, ?, ?)";
+										    	//임시테이블 저장
 										    	var inserEstDtlHisSQL = "  insert into nx_counsel_item_his (call_set_seq, start_time, extension, counsel_type_id, emp_id  "
 														    		+", dept_id, lev3_counsel_item_id, lev4_counsel_item_id, lev3_item_point, lev4_item_point "
 														    		+", item_count, item_type_cd, reg_id, reg_ip, reg_dtm, mod_id, mod_ip, mod_dtm) "
@@ -129,7 +134,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 									    	    		if(err){
 									    	    			logger.error("if_uanalzyer_Db_Query_db callSQLquery = "+filedata.startTime, err);
 											    	    }else{
-											    	    	logger.info("if_uanalzyer_Db_Query_callSQL startTime=" +filedata.startTime, err);
+											    	    	logger.info("if_uanalzyer_Db_Query_callSQL", err);
 														}
 											    	    connection.commit(function(err){
 											    	        if(err){
@@ -160,7 +165,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										    				fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
 										    			 	logger.error("if_uanalzyer_Db_Query_db callsetseq = "+filedata.startTime, err);
 											    	    }else{
-											    	    	console.log("if_uanalzyer_Db_Query_inserEstDtltQL", err);
+											    	    	logger.info("if_uanalzyer_Db_Query_inserEstDtltQL", err);
 														}
 										    			if(checklev3item != lev3itempoint){
 										    				checklev3item = lev3itempoint;
@@ -176,9 +181,9 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 												    	            	var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.ctiId, counsetltypeid ], function (err, rows) {
 														    	    		if(err){
 														    	    			fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
-																    	    	logger.error("if_uanalzyer_Db_Query_callSQL = "+filedata.startTime, err);
+																    	    	logger.error("if_uanalzyer_Db_Query_callSQL", err);
 																    	    }else{
-																    	    	logger.info("if_uanalzyer_Db_Query_callSQL startTime=" +filedata.startTime, err);
+																    	    	logger.info("if_uanalzyer_Db_Query_callSQL", err);
 																			}
 																    	    connection.commit(function(err){
 																    	        if(err){
