@@ -87,7 +87,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 						    	    		if(err){
 						    	    			logger.error("if_uanalzyer_Db_Query_updateCurrent = "+filedata.startTime, err);
 								    	    }else{
-								    	    	logger.info("if_uanalzyer_Db_Query_updateCurrent = "+filedata.startTime, err);
+								    	    	console.log("if_uanalzyer_Db_Query_updateCurrent = "+filedata.startTime, err);
 											}
 								    	    connection.commit(function(err){
 								    	        if(err){
@@ -129,7 +129,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 									    	    		if(err){
 									    	    			logger.error("if_uanalzyer_Db_Query_db callSQLquery = "+filedata.startTime, err);
 											    	    }else{
-											    	    	logger.info("if_uanalzyer_Db_Query_callSQL", err);
+											    	    	logger.info("if_uanalzyer_Db_Query_callSQL startTime=" +filedata.startTime, err);
 														}
 											    	    connection.commit(function(err){
 											    	        if(err){
@@ -160,7 +160,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										    				fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
 										    			 	logger.error("if_uanalzyer_Db_Query_db callsetseq = "+filedata.startTime, err);
 											    	    }else{
-											    	    	logger.info("if_uanalzyer_Db_Query_inserEstDtltQL", err);
+											    	    	console.log("if_uanalzyer_Db_Query_inserEstDtltQL", err);
 														}
 										    			if(checklev3item != lev3itempoint){
 										    				checklev3item = lev3itempoint;
@@ -178,7 +178,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 														    	    			fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
 																    	    	logger.error("if_uanalzyer_Db_Query_callSQL = "+filedata.startTime, err);
 																    	    }else{
-																    	    	logger.info("if_uanalzyer_Db_Query_callSQL", err);
+																    	    	logger.info("if_uanalzyer_Db_Query_callSQL startTime=" +filedata.startTime, err);
 																			}
 																    	    connection.commit(function(err){
 																    	        if(err){
