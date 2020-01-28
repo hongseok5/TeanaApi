@@ -105,6 +105,7 @@ router.post('/call', (req, res) => {
 	  logger.info("caseId:" + req.body.caseId);
 	  logger.info("caseNumber:" + req.body.caseNumber);
 	  logger.info("inCateNm:" + req.body.inCateNm);	  
+	  logger.info("message:" + req.body.message);	
       
 	  result = common.getResult("40", "No ifId", "receive_call");
       res.send(result);

@@ -85,14 +85,14 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										var updateCnt = parseInt(callsetseq)+1;
 										connection.query(updateSequence, [ updateCnt ], function (err, rows) {
 						    	    		if(err){
-						    	    			logger.error("if_uanalzyer_Db_Query_updateCurrent", err);
+						    	    			logger.error("if_uanalzyer_Db_Query_updateCurrent = "+filedata.startTime, err);
 								    	    }else{
-								    	    	logger.info("if_uanalzyer_Db_Query_updateCurrent", err);
+								    	    	logger.info("if_uanalzyer_Db_Query_updateCurrent = "+filedata.startTime, err);
 											}
 								    	    connection.commit(function(err){
 								    	        if(err){
 								    	        	connection.rollback(function(err){
-								    	            	logger.error("if_uanalzyer_Db_Query_updateCurrent_rollback", err);
+								    	            	logger.error("if_uanalzyer_Db_Query_updateCurrent_rollback = "+filedata.startTime, err);
 								    	            });
 								    	        } else {
 								    	            console.log("Updated successfully!");
@@ -112,8 +112,6 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										    		  "text" : filedataset.replace(/ /gi, "")
 										    		};
 													
-											logger.debug("counsetltypeid : " +counsetltypeid);		
-													
 										    options1.body = JSON.stringify(param);
 										    rp(options1).then(function ( data ){
 										    	console.log('db rp(options1)');
@@ -129,14 +127,14 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										    	if(data.matches.length == 0){
 										    		var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.ctiId, counsetltypeid ], function (err, rows) {
 									    	    		if(err){
-									    	    			logger.error("if_uanalzyer_Db_Query_db callSQLquery", err);
+									    	    			logger.error("if_uanalzyer_Db_Query_db callSQLquery = "+filedata.startTime, err);
 											    	    }else{
 											    	    	logger.info("if_uanalzyer_Db_Query_callSQL", err);
 														}
 											    	    connection.commit(function(err){
 											    	        if(err){
 											    	            connection.rollback(function(err){
-											    	            	logger.error("if_uanalzyer_Db_Query_db callSQLquery_rollback", err);
+											    	            	logger.error("if_uanalzyer_Db_Query_db callSQLquery_rollback = "+filedata.startTime, err);
 											    	            });
 											    	        } else {
 											    	            console.log("Updated successfully!");
@@ -160,7 +158,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 										    			console.log('db callsetseq');
 										    			if(err){
 										    				fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
-										    			 	logger.error("if_uanalzyer_Db_Query_db callsetseq", err);
+										    			 	logger.error("if_uanalzyer_Db_Query_db callsetseq = "+filedata.startTime, err);
 											    	    }else{
 											    	    	logger.info("if_uanalzyer_Db_Query_inserEstDtltQL", err);
 														}
@@ -170,7 +168,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 												    	        if(err){
 												    	        	fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
 												    	            connection.rollback(function(err){
-												    	            	logger.error("if_uanalzyer_Db_Query_db callsetseq_rollback", err);
+												    	            	logger.error("if_uanalzyer_Db_Query_db callsetseq_rollback = "+filedata.startTime, err);
 												    	            });
 												    	        } else {
 												    	            console.log("Updated successfully!");
@@ -178,7 +176,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 												    	            	var callSQLquery = connection.query(callSQL, [ callsetseq, filedata.startTime, filedata.extension, filedata.ctiId, counsetltypeid ], function (err, rows) {
 														    	    		if(err){
 														    	    			fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
-																    	    	logger.error("if_uanalzyer_Db_Query_callSQL", err);
+																    	    	logger.error("if_uanalzyer_Db_Query_callSQL = "+filedata.startTime, err);
 																    	    }else{
 																    	    	logger.info("if_uanalzyer_Db_Query_callSQL", err);
 																			}
@@ -186,7 +184,7 @@ var io = schedule.scheduleJob('0 30 3 * * *', function(){
 																    	        if(err){
 																    	        	fs.rename(config.file_ready+file, config.file_ready_error+file, callback);
 																    	            connection.rollback(function(err){
-																    	            	logger.error("if_uanalzyer_Db_Query_callSQL_rollback", err);
+																    	            	logger.error("if_uanalzyer_Db_Query_callSQL_rollback = "+filedata.startTime, err);
 																    	            });
 																    	        } else {
 																    	            console.log("Updated successfully!");
