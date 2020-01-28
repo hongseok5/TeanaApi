@@ -27,7 +27,7 @@ router.post("/search", function(req, res){
     }
     let size = req.body.size || 10;
     let from = req.body.from || 1;
-    var source = ["extension","caseNumber","endTime","duration","company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId", "content", "reContent", "category2Nm", "category1Nm"];
+    var source = ["extension","caseNumber","endTime","duration","company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId", "content", "reContent", "category2Nm", "category1Nm", "agentId", "agentNm"];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from, source);
     var index = common.getIndex(req.body.channel);
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
@@ -103,7 +103,9 @@ router.post("/search", function(req, res){
         		channel : common.getIndexCode(test[i][1]._index),
         		ifId : test[i][1]._source.ifId,
 				content : test[i][1]._source.content,
-				reContent : test[i][1]._source.reContent
+				reContent : test[i][1]._source.reContent,
+				agentId : common.convertEmpty(test[i][1]._source.agentId),
+				agentNm : common.convertEmpty(test[i][1]._source.agentNm)
             }
         	result.data.result.push(obj);
         }
