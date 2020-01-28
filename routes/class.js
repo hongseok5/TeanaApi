@@ -244,7 +244,12 @@ router.post("/category", function(req, res){
     body.query.bool.must = [
         { bool : { should } }
     ];
-    
+    body.query.bool.must_not =  [
+        { "match": {"category1Nm": ""} }
+    ];
+    body.query.bool.must_not =  [
+        { "match": {"category2Nm": ""} }
+    ];
     body.aggs.aggs_class = {
         terms : {
            field : "category1Nm",
