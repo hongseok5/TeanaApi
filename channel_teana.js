@@ -216,7 +216,7 @@ var text_ana = async function(json_data){
   });
 }
 
-var sj01 = schedule.scheduleJob('0 * * * * *', function(){
+var sj01 = schedule.scheduleJob('0 35 * * * *', function(){
     logger.info("01 start")
 
     let file_list = fs.readdirSync(config.channel_save_path + "01/");
@@ -247,7 +247,7 @@ var sj01 = schedule.scheduleJob('0 * * * * *', function(){
     logger.info("01 finish");
 });
 
-var sj02 = schedule.scheduleJob('10 * * * * *', function(){
+var sj02 = schedule.scheduleJob('10 35 * * * *', function(){
     logger.info("02 start")
     let file_list = fs.readdirSync(config.channel_save_path + "02/");
     for(j in file_list){
@@ -281,7 +281,7 @@ var sj02 = schedule.scheduleJob('10 * * * * *', function(){
     logger.info("02 finish");
 });
 
-var sj03 = schedule.scheduleJob('20 * * * * *', function(){
+var sj03 = schedule.scheduleJob('20 35 * * * *', function(){
     logger.info("03 start")
     let file_list = fs.readdirSync(config.channel_save_path + "03/");
     for(j in file_list){
@@ -311,7 +311,7 @@ var sj03 = schedule.scheduleJob('20 * * * * *', function(){
     logger.info("03 finish" );
 });
 
-var sj04 = schedule.scheduleJob('30 * * * * *', function(){
+var sj04 = schedule.scheduleJob('30 35 * * * *', function(){
     logger.info("04 start")
 
     let file_list = fs.readdirSync(config.channel_save_path + "04/");
@@ -342,7 +342,7 @@ var sj04 = schedule.scheduleJob('30 * * * * *', function(){
     logger.info("04 finish");
 });
 
-var sj05 = schedule.scheduleJob('40 * * * * *', function(){
+var sj05 = schedule.scheduleJob('40 35 * * * *', function(){
     logger.info("05 start")
     let file_list = fs.readdirSync(config.channel_save_path + "05/");
     for(j in file_list){
@@ -372,7 +372,7 @@ var sj05 = schedule.scheduleJob('40 * * * * *', function(){
     logger.info("05 finish");
 });
 
-var sj06 = schedule.scheduleJob('50 * * * * *', function(){
+var sj06 = schedule.scheduleJob('50 35 * * * *', function(){
     logger.info("06 start")
     let file_list = fs.readdirSync(config.channel_save_path + "06/");
     for(j in file_list){

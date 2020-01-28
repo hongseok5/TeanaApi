@@ -31,6 +31,10 @@ if(!fs.existsSync(config.backup_path + today)){
   logger.info("day : " + today);
 } 
 
+process.on('exit', (code) => {
+	console.log(`process terminated with code : ${code} at ` + new Date());
+});
+
 schedule.scheduleJob('0 0 * * * *', function(){
   var pool = mysql.createPool(conn);
   pool.getConnection( function(err, connection){
@@ -114,7 +118,7 @@ let file_merge_async = function (file_nr, file_nt){
               if(data !== undefined){
                 resolve(JSON.parse(data));
               } else {
-                reject("error");
+                reject("error" + file_name);
               }
           });
     }).catch();
@@ -319,6 +323,7 @@ cron.schedule('*/5 * * * * *', () => {
   } 
   logger.info(new Date() + "finished : " + count + " not pair : " + count_not_ex);
   } catch(e){
+   logger.error("at line 322");
    logger.error(e);
   }
 });
