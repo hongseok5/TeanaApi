@@ -106,7 +106,7 @@ let cat_option = {
 }
 
 var expt_words = ["예 ", "네 ", "그 ", "아 "]
-
+//var expt_end_words = ["하다"]
 console.log("process.pid:"+process.pid);
 
 let file_merge_async = function (file_nr, file_nt){
@@ -180,7 +180,12 @@ function mergeTalk( dataR, dataT  ){
 
     values[0].verbs = values[0].verbs.filter( v => {
       return expt_words.indexOf(v.expression.substr(0, 2)) === -1 ;
-    })
+    });
+
+    values[0].verbs = values[0].verbs.filter( v => {
+      return v.expression.substr(v.expression.length - 2, v.expression.length) !== "하다";
+    });
+
     for( i in values[0].verbs){
       let obj = { similarity : 0 };
       obj.keyword = values[0].verbs[i].expression
