@@ -25,11 +25,10 @@ router.post('/call', (req, res) => {
         };
 	  
 	    //new Module check
-	    if(common.getEmpty(req.body.recKey)) {
-	  
+	    if(!common.getEmpty(req.body.recKey)) {			
 		    var document = {
-			//index : 'call_'+req.body.ifId.slice(0,6),
-			  index : "call_info_201911",
+			  index : 'call_'+req.body.ifId.slice(0,6),
+			//  index : "call_info_201911",
 			  type : "doc",
 			  id : req.body.ifId.replace('_','-'),
 			  body : { 
@@ -72,14 +71,14 @@ router.post('/call', (req, res) => {
 		  
 		  client.update(document).then(function(resp) {
 				var result = {
-				  ifId : req.ifId,
+				  ifId : req.body.ifId,
 				  code : "10",
 				  message : "OK"
 				}
 				res.send(result);
 			  }, function(err){
 				var result = {
-				  ifId : req.ifId,
+				  ifId : req.body.ifId,
 				  code : "99",
 				  message : "ERROR"
 				}
@@ -88,11 +87,10 @@ router.post('/call', (req, res) => {
 		  
 		} else {
 			var flag = true;
-			
 			for(i in req.body.recKey){
 				var document = {
-				//index : 'call_'+req.body.recKey[i].slice(0,6),
-				index : "call_info_201911",
+				index : 'call_'+req.body.recKey[i].slice(0,6),
+				//index : "call_info_201911",
 				type : "doc",
 				id : req.body.recKey[i].replace('_','-'),
 				body : { 
@@ -142,14 +140,14 @@ router.post('/call', (req, res) => {
 
 			if(flag) {
 				var result = {
-					ifId : req.ifId,
+					ifId : req.body.ifId,
 					code : "10",
 					message : "OK"
 				}
 				res.send(result);
 			} else {
 				var result = {
-					ifId : req.ifId,
+					ifId : req.body.ifId,
 					code : "99",
 					message : "ERROR"
 				}
