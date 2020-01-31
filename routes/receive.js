@@ -84,8 +84,7 @@ router.post('/call', (req, res) => {
 				  message : "ERROR"
 				}
 				res.send(result);
-			  });
-		  }
+			});
 		  
 		} else {
 			var flag = true;
@@ -148,7 +147,7 @@ router.post('/call', (req, res) => {
 					message : "OK"
 				}
 				res.send(result);
-			}else{
+			} else {
 				var result = {
 					ifId : req.ifId,
 					code : "99",
