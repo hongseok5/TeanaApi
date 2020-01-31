@@ -118,7 +118,7 @@ function getData(){
 								fs.rename(config.send_smry_path+file, config.sent_smry_path+file, callback);
 							});
 						}catch(e){
-							logger.error(e);
+							logger.error("DB update :" , e);
 						}
 					});
 				});
@@ -164,10 +164,10 @@ function getData(){
 									logger.info("if_dma_00004 file send failed ifID: " + filedata.startTime + "-" + filedata.agentId + " message:" + data.message);
 								}
 							}).catch(function (err){
-								logger.error(err);
+								logger.error("Salesforce options2 : " , err);
 							});
 						}catch(e){
-							logger.error(e);
+							logger.error("Salesforce : " , e);
 						}
 					});
 				});
