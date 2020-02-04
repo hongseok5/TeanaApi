@@ -24,8 +24,10 @@ router.post('/call', (req, res) => {
           ifId : req.body.ifId
         };
 	  
+	    var ntype = "1";
 	    //new Module check
-	    if(!common.getEmpty(req.body.recKey)) {			
+	    if(!common.getEmpty(req.body.recKey)) {	
+			ntype = "1";		
 		    var document = {
 			  index : 'call_'+req.body.ifId.slice(0,6),
 			//  index : "call_info_201911",
@@ -87,6 +89,7 @@ router.post('/call', (req, res) => {
 		  
 		} else {
 			var flag = true;
+			ntype = "2";
 			for(i in req.body.recKey){
 				var document = {
 				index : 'call_'+req.body.recKey[i].slice(0,6),
@@ -160,7 +163,7 @@ router.post('/call', (req, res) => {
 		var filename = config.process_save_path+req.body.ifId+".JSON";
 		var filecontext = JSON.stringify(req.body);
 		  
-		logger.info("filename: " +  filename);
+		logger.info("filename: " +  filename + " ntype:" + ntype);
 		logger.info("filecontext: " +  filecontext);
 		  
 		fs.writeFile(filename, filecontext, "utf8", function(err) {
