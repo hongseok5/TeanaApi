@@ -54,7 +54,7 @@ router.post("/list", function(req, res){
         body.query.bool.filter.push({ term : { category2 : "zz" }});
     if(common.getEmpty(req.body.product)){
     	for( p in req.body.product ){
-			if(common.getEmpty(req.body.product[p].productCode)) {
+			if(common.getEmpty(req.body.product[p].productCode) && req.body.product[p].productCode != "ALL") {
 				var term_obj = { term : { productCode : req.body.product[p].productCode}};
 				should.push(term_obj);
 			}
