@@ -72,6 +72,7 @@ router.post("/count", function(req, res){
         		var obj = {
             			key : dayList[k].key,
             	        channel : channelindex,
+						channelNm : common.getIndexNm(common.getIndexCode(channelindex)),
             	        count : 0
             		}
         			obj2[k] = obj;
@@ -153,6 +154,7 @@ router.post("/statistics", function(req, res){
         	}else{
         		var obj = {
             	   	channel : resp.aggregations.channel.buckets[j].key,
+					channelNm : common.getIndexNm(common.getIndexCode(resp.aggregations.channel.buckets[j].key)),
             	   	count : resp.aggregations.channel.buckets[j].doc_count,
             	   	rate : total,
             	}
@@ -161,6 +163,7 @@ router.post("/statistics", function(req, res){
         }
 		var objcall = {
 				channel : "call",
+				channelNm : "콜상담",
         	   	count : call,
         	   	rate : Math.ceil(parseInt(call)/parseInt(z)*100),	
 		}
