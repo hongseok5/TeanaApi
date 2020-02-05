@@ -41,6 +41,24 @@ var common = {
                 return "00";
         }
     },
+	getIndexNm : function(code) {
+		switch(code){
+            case "01":
+                return "모바일";
+            case "02":
+                return "PC";
+            case "03":
+                return "홈페이지";
+            case "04":
+				return "ARS";
+			case "05":
+				return "채팅";
+			case "06":
+				return "제휴";
+            default:
+                return "콜상담";
+        }
+	},
 	getEmpty : function (value) {
 		var rtn = false;
 		if (typeof value != 'undefined' && value) {
