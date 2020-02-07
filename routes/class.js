@@ -128,7 +128,7 @@ router.post("/statistics", function(req, res){
     var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
     let interval = req.body.interval || "week";
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
-        body.query.bool.filter.push({ term : { analysisCate : common.req.body.category }});
+        body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
     if(common.getEmpty(req.body.age) && req.body.age != "ALL")
     	body.query.bool.filter.push({ range : { age : { gte : parseInt(req.body.age), lte : parseInt(req.body.age) + 9}}});    
     if(common.getEmpty(req.body.gender) && req.body.gender != "ALL")
@@ -147,7 +147,7 @@ router.post("/statistics", function(req, res){
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
     if(common.getEmpty(req.body.product)){
     	for( p in req.body.product ){
-			if(common.getEmpty(req.body.product[p].productCode)) {
+			if(common.getEmpty(req.body.product[p].productCode) && req.body.product[p].productCode != "ALL") {
 				var term_obj = { term : { productCode : req.body.product[p].productCode}};
 				should.push(term_obj);
 			}
@@ -212,11 +212,13 @@ router.post("/category", function(req, res){
     	res.send(result);
     	return;
     }
-    let should = [];
-    var body = common.getBodyNoSize(req.body.start_dt.toString(), req.body.end_dt.toString());
-    let interval = req.body.interval || "week";
+	
+	var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
+    var should = [];
+    var index = common.getIndex(req.body.channel);
+	
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
-        body.query.bool.filter.push({ term : { analysisCate : common.req.body.category }});
+        body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
     if(common.getEmpty(req.body.age) && req.body.age != "ALL")
     	body.query.bool.filter.push({ range : { age : { gte : parseInt(req.body.age), lte : parseInt(req.body.age) + 9}}});    
     if(common.getEmpty(req.body.gender) && req.body.gender != "ALL")
@@ -235,7 +237,7 @@ router.post("/category", function(req, res){
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
     if(common.getEmpty(req.body.product)){
     	for( p in req.body.product ){
-			if(common.getEmpty(req.body.product[p].productCode)) {
+			if(common.getEmpty(req.body.product[p].productCode) && req.body.product[p].productCode != "ALL") {
 				var term_obj = { term : { productCode : req.body.product[p].productCode}};
 				should.push(term_obj);
 			}
@@ -268,7 +270,6 @@ router.post("/category", function(req, res){
         }
     }        
 
-var index = common.getIndex(req.body.channel);
     client.search({
         index,
         body 
