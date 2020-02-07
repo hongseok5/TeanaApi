@@ -79,7 +79,7 @@ router.post("/top", function(req, res){
     body.query.bool.must_not =  [
         { "match": {"category2": "zx"} }
     ];
-    body.query.bool.should = should;
+//    body.query.bool.should = should;
     body.aggs.aggs_top_keyword = {
         nested : {
             path : "keyword_count"   // field name
@@ -641,6 +641,7 @@ router.post("/relation2", function(req, res){
     
     var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var index = common.getIndex(req.body.channel);
+	var should = [];
     var interval = req.body.interval || "1D";
 	
 	if(common.getEmpty(req.body.category) && req.body.category != "ALL")
@@ -671,7 +672,7 @@ router.post("/relation2", function(req, res){
 			}
         } 
     }
-    
+    	
     if(common.getEmpty(req.body.keyword)){
         var nest_obj = {
             nested : {
@@ -689,9 +690,15 @@ router.post("/relation2", function(req, res){
     	res.send(result);
     	return;
     }
-    body.query.bool.must_not =  [
+    
+	body.query.bool.must = [
+        { bool : { should } }
+    ];
+
+	body.query.bool.must_not =  [
     	{ "match": {"category2": "zx"} }
     ];
+	
     body.aggs.keyword_top = {
        	nested: {
             path: "keyword_count"
