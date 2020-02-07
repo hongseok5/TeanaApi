@@ -63,10 +63,13 @@ let kwe_option = {
   method : "POST",
   body : {
       mode : "kma",
-      t_vec : "wv_stt_2",
+      t_vec : "wv_stt_0205",
       text : null,
       in_text : true,
-      combine_xs : true,
+      combine_xs : false,
+      size : 50,
+      ignore_duplicate : true,
+      frequency_ratio : 0.5,
       extract_verb : false  // default
   },
   json : true
@@ -96,10 +99,10 @@ let cat_option = {
   uri : 'http://localhost:12800/txt_to_doc',
   method : "POST",
   body : {
-      t_col : "cl_stt_live2",
+      t_col : "cl_stt_0206",
       text : null,
       mode : 'kma',
-      combine_xs : true,
+      combine_xs : false,
       size : 20
   },
   json : true
@@ -170,7 +173,9 @@ function mergeTalk( dataR, dataT  ){
   kwe_option.body.text = dataR.timeNtalkR.replace( /R:/g , "");  // 키워드 추출시 고객 대화로 추출
   pnn_option.body.text = dataR.timeNtalkR;       // 긍,부정어 추출시 고객의 대화로만 추출
   cat_option.body.text = merged_data.timeNtalk;  // 카테고리 분류 - 고객&상담원 대화로
-
+  
+  kwe_option.body.size = parseInt(dataR.timeNtalkR.length / 10);
+   
   Promise.all([rp(kwe_option2), rp(cat_option),rp(pnn_option),rp(kwe_option)]).then(function(values){
 
     merged_data.keyword_count = [];
@@ -183,7 +188,8 @@ function mergeTalk( dataR, dataT  ){
     });
 
     values[0].verbs = values[0].verbs.filter( v => {
-      return v.expression.substr(v.expression.length - 2, v.expression.length) !== "하다";
+
+      return !v.expression.startsWith("주문취소") && !v.expression.endsWith("하다");
     });
 
     for( i in values[0].verbs){
@@ -197,6 +203,36 @@ function mergeTalk( dataR, dataT  ){
       merged_data.analysisCate = "0000000021";
       merged_data.analysisCateNm = common.getCategory(21);
     } else {
+      values[1].output = values[1].output.filter( v => {
+        return v.similarity > 0.79
+      })
+      if(  values[1].output === undefined || (Array.isArray(values[1].output) && values[1].output.length === 0) ){
+        merged_data.analysisCate = "0000000021";
+        merged_data.analysisCateNm = common.getCategory(21);
+      } else {
+        for( i in values[1].output ){
+          let obj = {};
+          obj.category = values[1].output[i].id.substr(0, values[1].output[i].id.indexOf('_'));
+          obj.score = values[1].output[i].similarity;
+          if( obj.category in cate_obj){
+            cate_obj[obj.category] += obj.score;
+          } else {
+            cate_obj[obj.category] = obj.score;
+          }
+        }
+        tmp_arr = Object.keys(cate_obj);
+        let max = 0;
+        let max_key = null;
+        for( i in tmp_arr){
+          if( cate_obj[tmp_arr[i]] > max ){
+            max = cate_obj[tmp_arr[i]]; 
+            max_key = tmp_arr[i];
+          }
+        }
+        merged_data.analysisCate = max_key;
+        merged_data.analysisCateNm = common.getCategory(Number(max_key));
+      }
+      /*
       if(values[1].output[0].similarity < 0.8 ){
         values[1].output = values[1].output.slice(0,1)
       }
@@ -226,6 +262,7 @@ function mergeTalk( dataR, dataT  ){
         merged_data.analysisCate = max_key;
         merged_data.analysisCateNm = common.getCategory(Number(max_key));
       }
+      */
     }
     
     merged_data.negative_word = [];

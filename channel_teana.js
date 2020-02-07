@@ -11,12 +11,12 @@ const winstonConfig = require(approot + '/lib/logger');
 winston.loggers.add("channel_update", winstonConfig.createLoggerConfig("channel_update"));
 var logger = winston.loggers.get("channel_update");
 //var channel_list = ["01", "02", "03", "04", "05", "06"];
-
+var expt_words = ["곽 빛나", "주문취소"]
 var cat_option = {
     uri : 'http://localhost:12800/txt_to_doc',
     method : "POST",
     body : {
-        t_col : "cl_call_0106",
+        t_col : "cl_stt_0206",
         text : null,
         mode : "kma",
         combine_xs : true,
@@ -31,11 +31,13 @@ let kwe_option = {
     method : "POST",
     body : {
         mode : "kma",
-        t_vec : "wv_stt_2",
+        t_vec : "wv_stt_0205",
         text : null,
         in_text : true,
-        combine_xs : true,
-        extract_verb : false  // default
+        combine_xs : false,
+        extract_verb : false,  // default
+	ignore_duplicate : true,
+	frequency_ratio : 0.5
     },
     json : true
 }
@@ -122,11 +124,11 @@ var text_ana = async function(json_data){
             for( i in values[0].output ){
                 json_data.keyword_count.push(values[0].output[i]);
             }
-            /*
+            
             values[0].verbs = values[0].verbs.filter( v => {
-                return v.expression.substr(0, 2) !== "예 " && v.expression.substr(0, 2) !== "아 " && v.expression.substr(0, 2) !== "네 ";
+                return expt_words.indexOf( v.expression.substr(0, 4)) === -1 ;
             })
-            */
+            
             for( i in values[3].verbs){
                 let obj = { similarity : 0 };
                 obj.keyword = values[3].verbs[i].expression
