@@ -303,7 +303,7 @@ router.post("/keyword", function(req, res){
     		            count : {
     		            	terms : {
     		                    field : "neutral_word.word",
-    		                    size : 5
+    		                    size : 10
     		                }
     		            }
     		        }
@@ -317,7 +317,7 @@ router.post("/keyword", function(req, res){
     		            count : {
     		            	terms : {
     		                    field : "positive_word.word",
-    		                    size : 5
+    		                    size : 10
     		                }
     		            }
     		        }
@@ -331,7 +331,7 @@ router.post("/keyword", function(req, res){
     		            count : {
     		            	terms : {
     		                    field : "negative_word.word",
-    		                    size : 5
+    		                    size : 10
     		                }
     		            }
     		        }
@@ -369,7 +369,7 @@ router.post("/keyword", function(req, res){
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
     if(common.getEmpty(req.body.product)){
     	for( p in req.body.product ){
-			if(common.getEmpty(req.body.product[p].productCode)) {
+			if(common.getEmpty(req.body.product[p].productCode) && req.body.product[p].productCode != "ALL") {
 				var term_obj = { term : { productCode : req.body.product[p].productCode}};
 				should.push(term_obj);
 			}
@@ -421,39 +421,65 @@ router.post("/wordcloud", function(req, res){
     	res.send(result);
     	return;
     }
-    // 긍,부정어 현황
-    // neg, pos, neu 3개 필드만 sum 해서 비유을 구하는지?
+
     let should = [];
     var index = common.getIndex(req.body.channel);
     let from = req.body.from || 1;
     var body = common.getBody(req.body.start_dt, req.body.end_dt, 0, from);
     
-    body.aggs.neutral = {
-            nested : {
-                path : "neutral_word"
-            },
-            aggs : {
-	            count : {
-	            	terms : {
-	                    field : "neutral_word.word",
-	                    size : 100
-	                }
-	            }
-	        }
-        };
-    body.aggs.positive = {
-            nested : {
-                path : "positive_word"
-            },
-            aggs : {
-	            count : {
-	            	terms : {
-	                    field : "positive_word.word",
-	                    size : 100
-	                }
-	            }
-	        }
-        };
+	if(common.getEmpty(req.body.division)){
+		if(req.body.division == "neutral"){
+			body.aggs.neutral = {
+				nested : {
+					path : "neutral_word"
+				},
+				aggs : {
+					count : {
+						terms : {
+							field : "neutral_word.word",
+							size : 1000
+						}
+					}
+				}
+			};
+		}else if(req.body.division == "positive"){
+			body.aggs.positive = {
+				nested : {
+					path : "positive_word"
+				},
+				aggs : {
+					count : {
+						terms : {
+							field : "positive_word.word",
+							size : 1000
+						}
+					}
+				}
+			};
+		}else if(req.body.division == "negative"){
+			body.aggs.negative = {
+				nested : {
+					path : "negative_word"
+				},
+				aggs : {
+					count : {
+						terms : {
+							field : "negative_word.word",
+							size : 1000
+						}
+					}
+				}
+			};
+		}else{
+    		var result = common.getResult("40", "OK", "There is no required division");
+        	res.send(result);
+        	return;
+    	}
+    }else{
+    	var result = common.getResult("40", "OK", "There is no required division");
+    	res.send(result);
+    	return;
+    }
     
     var index = common.getIndex(req.body.channel);
     
@@ -477,7 +503,7 @@ router.post("/wordcloud", function(req, res){
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
     if(common.getEmpty(req.body.product)){
     	for( p in req.body.product ){
-			if(common.getEmpty(req.body.product[p].productCode)) {
+			if(common.getEmpty(req.body.product[p].productCode) && req.body.product[p].productCode != "ALL") {
 				var term_obj = { term : { productCode : req.body.product[p].productCode}};
 				should.push(term_obj);
 			}
@@ -495,37 +521,23 @@ router.post("/wordcloud", function(req, res){
         
         var result = common.getResult("10", "OK", "count_by_positive")
         result.data.result = [] ;
-    	test = Object.entries(resp.aggregations.neutral.count.buckets);
-    	test2 = Object.entries(resp.aggregations.positive.count.buckets);
-    	var obj2 = new Array();
-    	var z=0;
+
+		if(req.body.division == "neutral"){
+			test = Object.entries(resp.aggregations.neutral.count.buckets);
+		}else if(req.body.division == "positive"){
+			test = Object.entries(resp.aggregations.positive.count.buckets);
+		}else if(req.body.division == "negative"){
+			test = Object.entries(resp.aggregations.negative.count.buckets);
+		}
+
     	for(i in test){
     		var obj = {
     			key : test[i][1].key,	
         		count : test[i][1].doc_count
     		}
-    		obj2[z] = obj;
-    		z++;
+			result.data.result.push(obj);
         }
-    	for(j in test2){
-    		var obj = {
-        		key : test2[j][1].key,	
-            	count : test2[j][1].doc_count
-        	}
-    		obj2[z] = obj;
-    		z++;
-    	}
-    	obj2.sort( function(a, b){
-            return a.count > b.count ? -1 : a.count < b.count ? 1 : 0;
-        });
     	
-    	for(k in obj2){
-    		if(k < 50){
-    			result.data.result.push(obj2[k]);
-    		}else if(k > 50) {
-				break;
-			}
-    	}
     	res.send(result);
 
     }, function(err){
@@ -535,5 +547,116 @@ router.post("/wordcloud", function(req, res){
     });
 });
 
+router.post("/class", function(req, res){
+    logger.info("Router for ");
+    if(!common.getEmpty(req.body.start_dt)){
+    	var result = common.getResult("40", "OK", "There is no required start_dt");
+    	res.send(result);
+    	return;
+    }
+    if(!common.getEmpty(req.body.end_dt)){
+    	var result = common.getResult("40", "OK", "There is no required end_dt");
+    	res.send(result);
+    	return;
+    }
+    // 긍,부정어 현황
+    // neg, pos, neu 3개 필드만 sum 해서 비유을 구하는지?
+    let should = [];
+    var index = common.getIndex(req.body.channel);
+    let from = req.body.from || 1;
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, 0, from);
+	
+	body.aggs.division = {
+        terms : {
+            field : "analysisCateNm",
+            size : 10000
+        },
+        aggs : {
+            normal : {
+				nested : {
+					path : "keyword_count"
+				}
+			},
+			neutral : {
+				nested : {
+					path : "neutral_word"
+				}
+			},
+			positive : {
+				nested : {
+					path : "positive_word"
+				}
+			},			
+			negative : {
+				nested : {
+					path : "negative_word"
+				}
+			}			
+        }
+    }
+
+    var index = common.getIndex(req.body.channel);
+
+    if(common.getEmpty(req.body.category) && req.body.category != "ALL")
+        body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
+    if(common.getEmpty(req.body.age) && req.body.age != "ALL")
+    	body.query.bool.filter.push({ range : { age : { gte : parseInt(req.body.age), lte : parseInt(req.body.age) + 9}}});    
+    if(common.getEmpty(req.body.gender) && req.body.gender != "ALL")
+        body.query.bool.filter.push({ term : { gender : req.body.gender }});
+    if(common.getEmpty(req.body.companyCode))
+        body.query.bool.filter.push({ term : { company : req.body.companyCode }});
+    if(common.getEmpty(req.body.mCate)&& req.body.mCate != "ALL")
+        body.query.bool.filter.push({ term : { Mcate : req.body.mCate }});
+    if(common.getEmpty(req.body.inCate) && req.body.inCate != "ALL")
+        body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
+    if(common.getEmpty(req.body.mdNm))
+        body.query.bool.filter.push({ term : { mdNm : req.body.mdNm }});
+    if(common.getEmpty(req.body.vdn) && req.body.vdn != "ALL")
+        body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
+    if(common.getEmpty(req.body.vdnGrp) && req.body.vdnGrp != "ALL")
+        body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
+    if(common.getEmpty(req.body.product)){
+    	for( p in req.body.product ){
+			if(common.getEmpty(req.body.product[p].productCode) && req.body.product[p].productCode != "ALL") {
+				var term_obj = { term : { productCode : req.body.product[p].productCode}};
+				should.push(term_obj);
+			}
+        } 
+    }
+    body.query.bool.must = [
+        { bool : { should } }
+    ];
+
+    body.query.bool.should = [] // exist
+    client.search({
+        index,
+        body
+    }).then(function(resp){
+        
+        var result = common.getResult("10", "OK", "class_by_positive")
+        result.data.result = {} ;
+    	result.data.result.divison = [];
+    	test = Object.entries(resp.aggregations.division.buckets);
+    	
+    	for(i in test){
+    		var z = parseInt(i)+1;
+    		var obj = {
+    			key : test[i][1].key,	
+        		normal : test[i][1].normal.doc_count,
+				neutral : test[i][1].neutral.doc_count,
+				positive : test[i][1].positive.doc_count,
+				negative : test[i][1].negative.doc_count,
+        		no : z
+    		}
+    		result.data.result.divison.push(obj);
+        }
+        res.send(result);
+
+    }, function(err){
+		logger.error("count_by_positive ", err);
+        var result = common.getResult("99", "ERROR", "class_by_positive");
+        res.send(result);
+    });
+});
 
 module.exports = router;
