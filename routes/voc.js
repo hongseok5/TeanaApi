@@ -56,7 +56,12 @@ router.post("/search", function(req, res){
         body.query.bool.filter.push(nest_obj);
 	}
     if(req.body.orderYn == "Y" )
-    	body.query.bool.must_not =  [{ "match": {"category2": "zx"} }];
+        body.query.bool.filter.push({ term : { category2 : "zz" }});
+    if(common.getEmpty(req.body.category1Nm))
+        body.query.bool.filter.push({ term : { category1Nm : req.body.category1Nm }});
+    if(common.getEmpty(req.body.category2Nm))
+        body.query.bool.filter.push({ term : { category2Nm : req.body.category2Nm }});
+
         
 	if(common.getEmpty(req.body.skeyword)) {
 		var query_stting = {
