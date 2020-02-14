@@ -27,7 +27,7 @@ router.post("/search", function(req, res){
     }
     let size = req.body.size || 10;
     let from = req.body.from || 1;
-    var source = ["extension","caseNumber","endTime","duration","company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId", "content", "reContent", "category2Nm", "category1Nm", "agentId", "agentNm", "analysisCateNm", "inCateNm"];
+    var source = ["extension","caseNumber","endTime","duration","company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId", "content", "reContent", "category2Nm", "category1Nm", "agentId", "agentNm", "analysisCateNm", "inCateNm", "reasonCate1Nm", "reasonCate2Nm", "customerNumber"];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from, source);
     var index = common.getIndex(req.body.channel);
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
@@ -61,6 +61,10 @@ router.post("/search", function(req, res){
         body.query.bool.filter.push({ term : { category1Nm : req.body.category1Nm }});
     if(common.getEmpty(req.body.category2Nm))
         body.query.bool.filter.push({ term : { category2Nm : req.body.category2Nm }});
+    if(common.getEmpty(req.body.reasonCate1Nm))
+        body.query.bool.filter.push({ term : { reasonCate1Nm : req.body.reasonCate1Nm }});
+    if(common.getEmpty(req.body.reasonCate2Nm))
+        body.query.bool.filter.push({ term : { reasonCate2Nm : req.body.reasonCate2Nm }});	
 
         
 	if(common.getEmpty(req.body.skeyword)) {
@@ -113,7 +117,10 @@ router.post("/search", function(req, res){
 				agentNm : common.convertEmpty(test[i][1]._source.agentNm),
 				analysisCateNm : common.convertEmpty(test[i][1]._source.analysisCateNm),
 				inCateNm : common.convertEmpty(test[i][1]._source.inCateNm),
-				channelNm : common.getIndexNm(common.getIndexCode(test[i][1]._index))
+				channelNm : common.getIndexNm(common.getIndexCode(test[i][1]._index)),
+				reasonCate1Nm : common.convertEmpty(test[i][1]._source.reasonCate1Nm),
+				reasonCate2Nm : common.convertEmpty(test[i][1]._source.reasonCate2Nm),
+				customerNumber : common.convertEmpty(test[i][1]._source.customerNumber)
             }
         	result.data.result.push(obj);
         }
