@@ -33,6 +33,10 @@ router.post("/statistics", function(req, res){
 
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
         body.query.bool.filter.push({ term : { analysisCate : req.body.category}});
+    if(common.getEmpty(req.body.companyCode))
+        body.query.bool.filter.push({ term : { company : req.body.companyCode }});
+    if(common.getEmpty(req.body.productCode))
+        body.query.bool.filter.push({ term : { productCode : req.body.productCode }});
 	
         body.aggs.division = {
         	date_histogram : {
@@ -501,14 +505,9 @@ router.post("/wordcloud", function(req, res){
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
     if(common.getEmpty(req.body.vdnGrp) && req.body.vdnGrp != "ALL")
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
-    if(common.getEmpty(req.body.product)){
-    	for( p in req.body.product ){
-			if(common.getEmpty(req.body.product[p].productCode) && req.body.product[p].productCode != "ALL") {
-				var term_obj = { term : { productCode : req.body.product[p].productCode}};
-				should.push(term_obj);
-			}
-        } 
-    }
+    if(common.getEmpty(req.body.productCode))
+        body.query.bool.filter.push({ term : { productCode : req.body.productCode }});
+
     body.query.bool.must = [
         { bool : { should } }
     ];
@@ -615,14 +614,9 @@ router.post("/class", function(req, res){
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
     if(common.getEmpty(req.body.vdnGrp) && req.body.vdnGrp != "ALL")
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
-    if(common.getEmpty(req.body.product)){
-    	for( p in req.body.product ){
-			if(common.getEmpty(req.body.product[p].productCode) && req.body.product[p].productCode != "ALL") {
-				var term_obj = { term : { productCode : req.body.product[p].productCode}};
-				should.push(term_obj);
-			}
-        } 
-    }
+    if(common.getEmpty(req.body.productCode))
+        body.query.bool.filter.push({ term : { productCode : req.body.productCode }});
+
     body.query.bool.must = [
         { bool : { should } }
     ];
