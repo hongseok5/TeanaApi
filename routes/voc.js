@@ -111,8 +111,8 @@ router.post("/search", function(req, res){
 				extension : test[i][1]._source.extension,
         		channel : common.getIndexCode(test[i][1]._index),
         		ifId : test[i][1]._source.ifId,
-				content : test[i][1]._source.content,
-				reContent : test[i][1]._source.reContent,
+				//content : test[i][1]._source.content,
+				//reContent : test[i][1]._source.reContent,
 				agentId : common.convertEmpty(test[i][1]._source.agentId),
 				agentNm : common.convertEmpty(test[i][1]._source.agentNm),
 				analysisCateNm : common.convertEmpty(test[i][1]._source.analysisCateNm),
@@ -121,7 +121,21 @@ router.post("/search", function(req, res){
 				reasonCate1Nm : common.convertEmpty(test[i][1]._source.reasonCate1Nm),
 				reasonCate2Nm : common.convertEmpty(test[i][1]._source.reasonCate2Nm),
 				customerNumber : common.convertEmpty(test[i][1]._source.customerNumber)
-            }
+			}
+			if( test[i][1]._index == "chat" ){
+				try{
+					let chat_data = JSON.parse(test[i][1]._source.content)
+					if(Array.isArray(chat_data.content)){
+						obj.content = chat_data.content;
+					}
+				} catch(err){
+					console.log(err);
+					continue;
+				}
+			} else {
+				obj.content = test[i][1]._source.content
+				obj.reContent = test[i][1]._source.reContent
+			}
         	result.data.result.push(obj);
         }
         res.send(result);
