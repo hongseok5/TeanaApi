@@ -127,10 +127,11 @@ router.post("/search", function(req, res){
 					let chat_data = JSON.parse(test[i][1]._source.content)
 					if(Array.isArray(chat_data.content)){
 						obj.content = chat_data.content;
+					} else {
+						obj.content = [];
 					}
 				} catch(err){
-					console.log(err);
-					continue;
+					obj.content = [];
 				}
 			} else {
 				obj.content = test[i][1]._source.content
