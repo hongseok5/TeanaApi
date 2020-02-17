@@ -36,8 +36,8 @@ router.post("/search", function(req, res){
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
     if(common.getEmpty(req.body.productCode))
         body.query.bool.filter.push({ term : { productCode : req.body.productCode }});
-    if(common.getEmpty(req.body.mCate) && req.body.mCate != "ALL")
-        body.query.bool.filter.push({ term : { Mcate : req.body.mCate }});
+    if(common.getEmpty(req.body.mdCate) && req.body.mdCate != "ALL")
+        body.query.bool.filter.push({ term : { Mcate : req.body.mdCate }});
     if(common.getEmpty(req.body.inCate) && req.body.inCate != "ALL")
         body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
     if(common.getEmpty(req.body.mdNm))
