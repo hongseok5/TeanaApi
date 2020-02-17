@@ -53,8 +53,8 @@ router.post("/top", function(req, res){
     	body.query.bool.filter.push({ range : { age : { gte : parseInt(req.body.age), lte : parseInt(req.body.age) + 9}}});
     if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
-    if(common.getEmpty(req.body.mCate) && req.body.mCate != "ALL")
-        body.query.bool.filter.push({ term : { Mcate : req.body.mCate }});
+    if(common.getEmpty(req.body.mdCate) && req.body.mdCate != "ALL")
+        body.query.bool.filter.push({ term : { Mcate : req.body.mdCate }});
     if(common.getEmpty(req.body.inCate) && req.body.inCate != "ALL")
         body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
     if(common.getEmpty(req.body.mdNm))
@@ -76,9 +76,12 @@ router.post("/top", function(req, res){
     body.query.bool.must = [
         { bool : { should } }
     ];
+	
+
     body.query.bool.must_not =  [
         { "match": {"category2": "zx"} }
     ];
+	
 //    body.query.bool.should = should;
     body.aggs.aggs_top_keyword = {
         nested : {
@@ -648,8 +651,8 @@ router.post("/relation2", function(req, res){
         body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
     if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
-    if(common.getEmpty(req.body.mCate) && req.body.mCate != "ALL")
-        body.query.bool.filter.push({ term : { Mcate : req.body.mCate }});
+    if(common.getEmpty(req.body.mdCate) && req.body.mdCate != "ALL")
+        body.query.bool.filter.push({ term : { Mcate : req.body.mdCate }});
     if(common.getEmpty(req.body.inCate) && req.body.inCate != "ALL")
         body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
     if(common.getEmpty(req.body.mdNm))

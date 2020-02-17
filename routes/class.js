@@ -38,8 +38,8 @@ router.post("/count", function(req, res){
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
-    if(common.getEmpty(req.body.mCate) && req.body.mCate != "ALL")
-        body.query.bool.filter.push({ term : { Mcate : req.body.mCate }});
+    if(common.getEmpty(req.body.mdCate) && req.body.mdCate != "ALL")
+        body.query.bool.filter.push({ term : { Mcate : req.body.mdCate }});
     if(common.getEmpty(req.body.inCate) && req.body.inCate != "ALL")
         body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
     if(common.getEmpty(req.body.mdNm))
@@ -135,8 +135,8 @@ router.post("/statistics", function(req, res){
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
-    if(common.getEmpty(req.body.mCate) && req.body.mCate != "ALL")
-        body.query.bool.filter.push({ term : { Mcate : req.body.mCate }});
+    if(common.getEmpty(req.body.mdCate) && req.body.mdCate != "ALL")
+        body.query.bool.filter.push({ term : { Mcate : req.body.mdCate }});
     if(common.getEmpty(req.body.inCate) && req.body.inCate != "ALL")
         body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
     if(common.getEmpty(req.body.mdNm))
@@ -225,8 +225,8 @@ router.post("/category", function(req, res){
         body.query.bool.filter.push({ term : { gender : req.body.gender }});
     if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
-    if(common.getEmpty(req.body.mCate) && req.body.mCate != "ALL")
-        body.query.bool.filter.push({ term : { Mcate : req.body.mCate }});
+    if(common.getEmpty(req.body.mdCate) && req.body.mdCate != "ALL")
+        body.query.bool.filter.push({ term : { Mcate : req.body.mdCate }});
     if(common.getEmpty(req.body.inCate) && req.body.inCate != "ALL")
         body.query.bool.filter.push({ term : { inCate : req.body.inCate }});
     if(common.getEmpty(req.body.mdNm))
