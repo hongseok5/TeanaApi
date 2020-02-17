@@ -77,11 +77,11 @@ router.post("/top", function(req, res){
         { bool : { should } }
     ];
 	
-
+/**
     body.query.bool.must_not =  [
         { "match": {"category2": "zx"} }
     ];
-	
+*/	
 //    body.query.bool.should = should;
     body.aggs.aggs_top_keyword = {
         nested : {
@@ -698,10 +698,11 @@ router.post("/relation2", function(req, res){
         { bool : { should } }
     ];
 
+/**
 	body.query.bool.must_not =  [
     	{ "match": {"category2": "zx"} }
     ];
-	
+*/	
     body.aggs.keyword_top = {
        	nested: {
             path: "keyword_count"
