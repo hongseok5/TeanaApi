@@ -13,6 +13,8 @@ const winstonConfig = require(approot + '/lib/logger');
 winston.loggers.add("product", winstonConfig.createLoggerConfig("product"));
 var logger = winston.loggers.get("product");
 
+var productResult;
+
 router.post("/list", function(req, res){
     //logger.info("Router for IF_DMA_00501" + JSON.stringify(req.body));
     if(!common.getEmpty(req.body.start_dt)){
@@ -29,7 +31,7 @@ router.post("/list", function(req, res){
     let from = req.body.from || 1 ;
 
     var fields = [ "company", "companyNm", "productCode", "productNm", "Mcate", "McateNm", "mdId", "mdNm"];
-    var body = common.getBody(req.body.start_dt, req.body.end_dt, 10000, 1, fields);
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, 0, 1, fields);
     var index = common.getIndex(req.body.channel);
     var should = [];
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
@@ -69,7 +71,6 @@ router.post("/list", function(req, res){
     ]
 
 	body.query.bool.must_not = { "term": { "productCode": ""}};
-    body.sort = { startTime : "desc"};
     body.aggs.aggs_product = {
         terms : {
             field : "productCode",
@@ -83,18 +84,17 @@ router.post("/list", function(req, res){
     
     let tmp_array = [];
     let p_count = 0;
-    let scroll_sum = 0;
+	
     client.search({
         index,
-        body,
-        scroll : "10s"    
+        body   
     }, function getMoreUntilEnd(err, resp){
         if(err){
             result.status.code = "99";
             result.status.message = "ERROR"
             res.send(result);
         }
-        scroll_sum += resp.hits.hits.length;
+        
         if( resp.aggregations !== undefined){
             // first resp
             result.data.count = resp.aggregations.aggs_product.buckets.length;
@@ -111,72 +111,59 @@ router.post("/list", function(req, res){
                 tmp_array = resp.aggregations.aggs_product.buckets
             }
             
+			productResult = common.getResult( "10", "OK", "list_by_product");
+			productResult.data.count = resp.aggregations.aggs_product.buckets.length;
+			productResult.data.result = [];
+			
             for( i in tmp_array){
-                for( j in resp.hits.hits){
-                    if( tmp_array[i].key === resp.hits.hits[j]._source.productCode ){
-                        let obj = {};
-                        obj.company = resp.hits.hits[j]._source.company;
-                        obj.companyNm = resp.hits.hits[j]._source.companyNm;
-                        obj.productCode = resp.hits.hits[j]._source.productCode;
-                        obj.productNm = resp.hits.hits[j]._source.productNm;
-                        obj.Mcate = resp.hits.hits[j]._source.Mcate;
-                        obj.McateNm = resp.hits.hits[j]._source.McateNm;
-                        obj.mdId = resp.hits.hits[j]._source.mdId;
-                        obj.mdNm = resp.hits.hits[j]._source.mdNm;
-                        obj.count = tmp_array[i].doc_count;
-                        result.data.result.push(obj);
-                        p_count++;
-                        break;
-                    }
-                }
-            }
-            if( scroll_sum < resp.hits.total  && p_count < tmp_array.length){
-                client.scroll({
-                    scrollId : resp._scroll_id,
-                    scroll: "10s"
-                }, getMoreUntilEnd);
-            } else {
-                result.status.code = "10";
-                result.status.message = "OK"
-                res.send(result);
-            }
-        } else {
-            // scroll response
-            for( i in tmp_array){
-                for( j in resp.hits.hits){
-                    if( tmp_array[i].key === resp.hits.hits[j]._source.productCode ){
-                        let obj = {};
-                        obj.company = resp.hits.hits[j]._source.company;
-                        obj.companyNm = resp.hits.hits[j]._source.companyNm;
-                        obj.productCode = resp.hits.hits[j]._source.productCode;
-                        obj.productNm = resp.hits.hits[j]._source.productNm;
-                        obj.Mcate = resp.hits.hits[j]._source.Mcate;
-                        obj.McateNm = resp.hits.hits[j]._source.McateNm;
-                        obj.mdId = resp.hits.hits[j]._source.mdId;
-                        obj.mdNm = resp.hits.hits[j]._source.mdNm;
-                        obj.count = tmp_array[i].doc_count;
-                        result.data.result.push(obj);
-                        p_count++;
-                        break;
-                    }
-                }
-            }
-            if( scroll_sum < resp.hits.total && p_count < tmp_array.length){
-                client.scroll({
-                    scrollId : resp._scroll_id,
-                    scroll: "10s"
-                }, getMoreUntilEnd);
-            } else {
-                result.data.result = result.data.result.sort( function(a, b){
-                    return a.count > b.count ? -1 : a.count < b.count ? 1 : 0;  // 상품 건수별 정렬
-                });
-                result.status.code = "10";
-                result.status.message = "OK"
-                res.send(result);
+				searchName(tmp_array[i], req, res, tmp_array.length);			
             }
         }
     });
 });
+
+
+function searchName(keyword, req, res, rownum){
+	
+	var source = [ "company", "companyNm", "productCode", "productNm", "Mcate", "McateNm", "mdId", "mdNm"];
+    var body = common.getBody(req.body.start_dt, req.body.end_dt, 1, 0, source);
+    var index = common.getIndex(req.body.channel);
+	
+	body.query.bool.filter.push({ term : { productCode : keyword.key }})
+	
+    client.search({
+        index,
+        body
+    }).then(function(resp){
+    	test = Object.entries(resp.hits.hits);
+        for(i in test){
+        	var obj = {
+        		company : common.convertEmpty(test[i][1]._source.company),
+        		companyNm : common.convertEmpty(test[i][1]._source.companyNm),
+        		productCode : common.convertEmpty(test[i][1]._source.productCode),
+        		productNm : common.convertEmpty(test[i][1]._source.productNm),
+        		Mcate : test[i][1]._source.Mcate,
+        		McateNm : test[i][1]._source.McateNm,
+        		mdId : test[i][1]._source.mdId,
+        		mdNm : test[i][1]._source.mdNm,
+				count : keyword.doc_count
+			}
+			productResult.data.result.push(obj);
+		}
+		
+        if(productResult.data.result.length == rownum){
+			 productResult.data.result = productResult.data.result.sort( function(a, b){
+                return a.count > b.count ? -1 : a.count < b.count ? 1 : 0;
+            });
+			res.send(productResult);
+		}
+    }, function(err){
+		logger.error("list_by_product", err);
+    	productResult = common.getResult( "99", "ERROR", "list_by_product");
+    	res.send(productResult);
+    });
+}
+
 
 module.exports = router;
 
