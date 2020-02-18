@@ -226,6 +226,9 @@ router.post("/count", function(req, res){
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
     if(common.getEmpty(req.body.vdnGrp) && req.body.vdnGrp != "ALL")
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
+	if(common.getEmpty(req.body.productCode))
+        body.query.bool.filter.push({ term : { productCode : req.body.productCode }});
+
     if(common.getEmpty(req.body.product)){
     	for( p in req.body.product ){
 			if(common.getEmpty(req.body.product[p].productCode) && req.body.product[p].productCode != "ALL") {
@@ -371,6 +374,9 @@ router.post("/keyword", function(req, res){
         body.query.bool.filter.push({ term : { vdn : req.body.vdn }});
     if(common.getEmpty(req.body.vdnGrp) && req.body.vdnGrp != "ALL")
         body.query.bool.filter.push({ term : { vdnGrp : req.body.vdnGrp }});
+	if(common.getEmpty(req.body.productCode))
+        body.query.bool.filter.push({ term : { productCode : req.body.productCode }});
+
     if(common.getEmpty(req.body.product)){
     	for( p in req.body.product ){
 			if(common.getEmpty(req.body.product[p].productCode) && req.body.product[p].productCode != "ALL") {
@@ -629,7 +635,7 @@ router.post("/class", function(req, res){
         
         var result = common.getResult("10", "OK", "class_by_positive")
         result.data.result = {} ;
-    	result.data.result.divison = [];
+    	result.data.result = [];
     	test = Object.entries(resp.aggregations.division.buckets);
     	
     	for(i in test){
@@ -642,7 +648,7 @@ router.post("/class", function(req, res){
 				negative : test[i][1].negative.doc_count,
         		no : z
     		}
-    		result.data.result.divison.push(obj);
+    		result.data.result.push(obj);
         }
         res.send(result);
 
