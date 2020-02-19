@@ -130,6 +130,9 @@ function searchName(keyword, req, res, rownum){
     var index = common.getIndex(req.body.channel);
 	
 	body.query.bool.filter.push({ term : { productCode : keyword.key }})
+	body.sort = {
+        "companyNm" : "desc" // 파라미터로 받아서 정렬하기 
+    }
 	
     client.search({
         index,
