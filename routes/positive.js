@@ -37,6 +37,8 @@ router.post("/statistics", function(req, res){
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
     if(common.getEmpty(req.body.productCode))
         body.query.bool.filter.push({ term : { productCode : req.body.productCode }});
+    if(common.getEmpty(req.body.mdCate)&& req.body.mdCate != "ALL")
+        body.query.bool.filter.push({ term : { Mcate : req.body.mdCate }});
 	
         body.aggs.division = {
         	date_histogram : {
