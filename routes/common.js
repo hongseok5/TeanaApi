@@ -343,7 +343,19 @@ var common = {
 			return value;
 		}
 	},
-	
+
+	convertGender : function( code ){
+		
+		switch(code){
+			case "1":
+				return "남";
+			case "2":
+				return "여";
+			default:
+				return "";
+		}
+	},
+		
     getsep : function(){
     	if(os.platform().toLowerCase().substring(0,3) == "win"){
     		return "\\";

@@ -27,7 +27,7 @@ router.post("/search", function(req, res){
     }
     let size = req.body.size || 10;
     let from = req.body.from || 1;
-    var source = ["extension","caseNumber","endTime","duration","company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId", "content", "reContent", "category2Nm", "category1Nm", "agentId", "agentNm", "analysisCateNm", "inCateNm", "reasonCate1Nm", "reasonCate2Nm", "customerNumber"];
+    var source = ["extension","caseNumber","endTime","duration","company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId", "content", "reContent", "category2Nm", "category1Nm", "agentId", "agentNm", "analysisCateNm", "inCateNm", "reasonCate1Nm", "reasonCate2Nm", "customerNumber", "gender", "age"];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from, source);
     var index = common.getIndex(req.body.channel);
     if(common.getEmpty(req.body.category) && req.body.category != "ALL")
@@ -65,6 +65,10 @@ router.post("/search", function(req, res){
         body.query.bool.filter.push({ term : { reasonCate1Nm : req.body.reasonCate1Nm }});
     if(common.getEmpty(req.body.reasonCate2Nm))
         body.query.bool.filter.push({ term : { reasonCate2Nm : req.body.reasonCate2Nm }});	
+    if(common.getEmpty(req.body.gender) && req.body.gender != "ALL")
+        body.query.bool.filter.push({ term : { gender : req.body.gender }});
+    if(common.getEmpty(req.body.age) && req.body.age != "ALL")
+    	body.query.bool.filter.push({ range : { age : { gte : Number(req.body.age), lte : Number(req.body.age) + 9}}});
 
         
 	if(common.getEmpty(req.body.skeyword)) {
@@ -120,7 +124,9 @@ router.post("/search", function(req, res){
 				channelNm : common.getIndexNm(common.getIndexCode(test[i][1]._index)),
 				reasonCate1Nm : common.convertEmpty(test[i][1]._source.reasonCate1Nm),
 				reasonCate2Nm : common.convertEmpty(test[i][1]._source.reasonCate2Nm),
-				customerNumber : common.convertEmpty(test[i][1]._source.customerNumber)
+				customerNumber : common.convertEmpty(test[i][1]._source.customerNumber),
+				gender : common.convertGender(test[i][1]._source.gender),
+				age : common.convertEmpty(test[i][1]._source.age)
 			}
 			if( test[i][1]._index == "chat" ){
 				try{
