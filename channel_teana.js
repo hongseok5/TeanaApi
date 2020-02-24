@@ -4,7 +4,7 @@ const schedule = require('node-schedule');
 const approot = require('app-root-path');
 const config = require(approot + '/config/config');
 const common = require(approot + '/routes/common');
-
+const schedule = require('node-schedule');
 var winston = require('winston');
 const winstonConfig = require(approot + '/lib/logger');
 winston.loggers.add("channel_update", winstonConfig.createLoggerConfig("channel_update"));
@@ -67,13 +67,109 @@ let kwe_option = {
     json : true
 } 
 
+var cmap = null;
+// 수동 카테고리 -> 자동 카테고리 매핑 읽어오기
+schedule.scheduleJob('0 0 * * * *', () => {
+    fs.readFile('./category_map.txt', 'utf-8', (err, data) => {
+        if(err){
+            logger.error(err);
+        }
+        if(data !== undefined){
+            let tmp_arr = [];
+            data = data.split("\n");
+            for(i in data){
+                let arr = data[i].split(",");
+                tmp_arr.push(arr);
+            }
+            cmap = new Map(tmp_arr);
+        } 
+    });
+}).invoke();
+
+/*
+const cmap = new Map([    ["40_51","10"]
+						, ["40_52","09"]
+						, ["40_53","08"]
+						, ["40_54","05"]
+						, ["40_55","21"]
+						, ["40_56","02"]
+						, ["40_57","21"]
+						, ["40_58","09"]
+						, ["40_59","09"]
+						, ["40_60","09"]
+						, ["40_61","09"]
+						, ["40_62","08"]
+						, ["40_63","08"]
+						, ["40_64","08"]
+						, ["40_65","08"]
+						, ["40_66","05"]
+						, ["40_67","02"]
+						, ["40_68","02"]
+						, ["40_69","21"]
+						, ["40_70","12"]
+						, ["40_71","12"]
+						, ["40_72","10"]
+						, ["40_73","09"]
+						, ["40_74","15"]
+						, ["40_75","08"]
+						, ["40_76","05"]
+						, ["40_77","21"]
+						, ["40_78","10"]
+						, ["40_79","09"]
+						, ["40_80","08"]
+						, ["40_81","05"]
+						, ["40_82","15"]
+						, ["40_83","12"]
+						, ["40_84","21"]
+						, ["50_05","02"]
+						, ["50_07","02"]
+						, ["50_12","02"]
+						, ["50_09","03"]
+						, ["50_02","05"]
+						, ["50_03","08"]
+						, ["50_08","09"]
+						, ["50_06","10"]
+						, ["50_01","15"]
+						, ["50_11","17"]
+						, ["50_10","21"]
+						, ["51_02","09"]
+						, ["51_01","10"]
+						, ["52_","15"]
+						, ["53_","05"]
+						, ["54_","08"]
+                        , ["87_","08"]
+                        , ["43_","21"]
+						, ["40_01","10"]
+						, ["40_03","09"]
+						, ["40_02","10"]	
+						, ["40_04","08"]
+						, ["40_05","05"]
+						, ["40_06","21"]
+						, ["40_07","10"]
+						, ["40_08","09"]
+						, ["40_09","08"]
+						, ["40_10","05"]
+						, ["40_11","21"]
+						, ["40_12","13"]
+						, ["40_13","21"]
+						, ["40_13","21"]	
+						, ["40_31","21"]
+						, ["40_32","21"]
+						, ["40_41","21"]])
+*/
 // 1.channel 디렉토리의 파일을 하나씩 읽어서
 // 2.카테고리 유형을 파악한 후에
 // 3.제 위치 또는 다른 위치에 파일을 하나씩 쓴다
 // 4.로그스태시로 인덱싱
+
 var file_path = "/data/TeAnaApi/file/channel_finished/";
 var file_backup_path = "/data/TeAnaApi/file/channel/backup/";
-const minimum_similarity = 0.76;
+
+//var file_path = "./file_ready/"; local test
+//var file_backup_path = "./file_bak/";
+
+
+//const minimum_similarity = 0.76;
 var write_file = function(json_data, file_path, isChat){ // chat일 경우 파싱
     return new Promise( (resolve, reject) => {
         fs.writeFile( file_path , JSON.stringify(json_data), function(err){
@@ -116,11 +212,11 @@ var text_ana = async function(json_data, isChat){
         } else {
             json_data.reContent = "";
         }
-        cat_option.body.text = json_data.content + json_data.reContent;
+        //cat_option.body.text = json_data.content + json_data.reContent;
         pnn_option.body.text = json_data.content + json_data.reContent;
         kwe_option.body.text = json_data.content + json_data.reContent;
         kwe_option2.body.text = json_data.content + json_data.reContent;
-        cat_option.body.t_col = "cl_stt_0210";
+        //cat_option.body.t_col = "cl_stt_0210";
     } else {
         if(json_data.content !== undefined && json_data.content !== null) {
             cat_option.body.text = json_data.content.replace(/[R|T|"|,|\]|msg|content|type|msgTime|{|}[|:|0-9|a-z|A-Z]/g,"");
@@ -135,11 +231,10 @@ var text_ana = async function(json_data, isChat){
             kwe_option2.body.text = ""
             cat_option.body.t_col = "cl_stt_0210" // 컬렉션 따로
         }
-
     }        
     
     try{
-        Promise.all([rp(kwe_option), rp(cat_option), rp(pnn_option), rp(kwe_option2)]).then( values => {
+        Promise.all([rp(kwe_option), rp(pnn_option), rp(kwe_option2), rp(cat_option)]).then( values => {
             
             json_data.keyword_count = [];            
             if(values[0].output !== undefined && Array.isArray(values[0].output)){
@@ -150,48 +245,74 @@ var text_ana = async function(json_data, isChat){
                     json_data.keyword_count.push(values[0].output[i]);
                 }
             } 
-            if(values[3].verbs !== undefined && Array.isArray(values[3].verbs)){
-                for( i in values[3].verbs){
+            if(values[1].verbs !== undefined && Array.isArray(values[1].verbs)){
+                for( i in values[1].verbs){
                     let obj = { similarity : 0 };
-                    obj.keyword = values[3].verbs[i].expression
+                    obj.keyword = values[1].verbs[i].expression
                     json_data.keyword_count.push(obj);
                 }
             }
-            let cate_obj = {};
-            if( values[1].output === undefined || (Array.isArray(values[1].output) && values[1].output.length === 0)  ){
-              json_data.analysisCate = "0000000021";
-              json_data.analysisCateNm = common.getCategory(21);
-            } else {
-                values[1].output = values[1].output.filter( v => {
-                    return v.similarity > minimum_similarity
-                })
-                for( i in values[1].output ){
-                    let obj = {};
-                    obj.category = values[1].output[i].id.substr(0, values[1].output[i].id.indexOf('_'));
-                    obj.score = values[1].output[i].similarity;
-                    if( obj.category in cate_obj){
-                    cate_obj[obj.category] += obj.score;
-                    } else {
-                    cate_obj[obj.category] = obj.score;
-                    }
-                }
-                tmp_arr = Object.keys(cate_obj);
-                let max = 0;
-                let max_key = null;
-                for( i in tmp_arr){
-                    if( cate_obj[tmp_arr[i]] > max ){
-                    max = cate_obj[tmp_arr[i]]; 
-                    max_key = tmp_arr[i];
-                    }
-                }
-                if( parseFloat(max) < minimum_similarity ){
-                    json_data.analysisCate = "0000000021";
-                    json_data.analysisCateNm = common.getCategory(21);        
+            
+            if(isChat){
+
+                let cate_obj = {};
+                if( values[3].output === undefined || (Array.isArray(values[3].output) && values[3].output.length === 0)  ){
+                  json_data.analysisCate = "0000000021";
+                  json_data.analysisCateNm = common.getCategory(21);
                 } else {
-                    json_data.analysisCate = max_key;
-                    json_data.analysisCateNm = common.getCategory(Number(max_key));
+                    values[3].output = values[3].output.filter( v => {
+                        return v.similarity > minimum_similarity
+                    })
+                    for( i in values[3].output ){
+                        let obj = {};
+                        obj.category = values[3].output[i].id.substr(0, values[3].output[i].id.indexOf('_'));
+                        obj.score = values[3].output[i].similarity;
+                        if( obj.category in cate_obj){
+                        cate_obj[obj.category] += obj.score;
+                        } else {
+                        cate_obj[obj.category] = obj.score;
+                        }
+                    }
+                    tmp_arr = Object.keys(cate_obj);
+                    let max = 0;
+                    let max_key = null;
+                    for( i in tmp_arr){
+                        if( cate_obj[tmp_arr[i]] > max ){
+                        max = cate_obj[tmp_arr[i]]; 
+                        max_key = tmp_arr[i];
+                        }
+                    }
+                    if( parseFloat(max) < minimum_similarity ){
+                        json_data.analysisCate = "0000000021";
+                        json_data.analysisCateNm = common.getCategory(21);        
+                    } else {
+                        json_data.analysisCate = max_key;
+                        json_data.analysisCateNm = common.getCategory(Number(max_key));
+                    }
+                }
+            } else {
+                
+                if(json_data.category1 === "52"){
+                    json_data.analysisCate = "0000000015";
+                    json_data.analysisCateNm = common.getCategory(15);   
+                } else if (json_data.category1 === "53") {
+                    json_data.analysisCate = "0000000005";
+                    json_data.analysisCateNm = common.getCategory(5);   
+                } else if (json_data.category1 === "54" || json_data.category1 === "87") {
+                    json_data.analysisCate = "0000000008";
+                    json_data.analysisCateNm = common.getCategory(8);  
+                } else {
+                    if(cmap.get(json_data.category1 + "_" + json_data.category2) !== undefined){
+                        let category_code = cmap.get(json_data.category1 + "_" + json_data.category2);
+                        json_data.analysisCate = "00000000" + category_code;
+                        json_data.analysisCateNm = common.getCategory(parseInt(category_code));    
+                    } else {
+                        json_data.analysisCate = "0000000021";
+                        json_data.analysisCateNm = common.getCategory(21);    
+                    }
                 }
             }
+            
             json_data.negative_word = [];
             json_data.positive_word = [];
             json_data.neutral_word = [];
@@ -199,8 +320,8 @@ var text_ana = async function(json_data, isChat){
             // negative 추출
             tmp_array = [];
         
-            for(i in values[2].sentimental.negative.keywords){
-              tmp_array.push(values[2].sentimental.negative.keywords[i].keyword);
+            for(i in values[1].sentimental.negative.keywords){
+              tmp_array.push(values[1].sentimental.negative.keywords[i].keyword);
             }
             tmp_array = Array.from(new Set(tmp_array)); // 중복 키워드 제거 
             for( i in tmp_array ){
@@ -209,8 +330,8 @@ var text_ana = async function(json_data, isChat){
             }
             // positive 추출
             tmp_array = [];
-            for(i in values[2].sentimental.positive.keywords){
-              tmp_array.push(values[2].sentimental.positive.keywords[i].keyword)
+            for(i in values[1].sentimental.positive.keywords){
+              tmp_array.push(values[1].sentimental.positive.keywords[i].keyword)
             }
             tmp_array = Array.from(new Set(tmp_array)); // 중복 키워드 제거
             for(i in tmp_array){
@@ -220,8 +341,8 @@ var text_ana = async function(json_data, isChat){
         
             // neutral 추출
             tmp_array = [];
-            for(i in values[2].sentimental.neutral.keywords){
-              tmp_array.push(values[2].sentimental.neutral.keywords[i].keyword)
+            for(i in values[1].sentimental.neutral.keywords){
+              tmp_array.push(values[1].sentimental.neutral.keywords[i].keyword)
             }
             tmp_array = Array.from(new Set(tmp_array)); // 중복 키워드 제거
             for(i in tmp_array){
