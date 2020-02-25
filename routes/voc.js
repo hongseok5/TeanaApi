@@ -27,10 +27,38 @@ router.post("/search", function(req, res){
     }
     let size = req.body.size || 10;
     let from = req.body.from || 1;
-    var source = ["extension","caseNumber","endTime","duration","company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId", "content", "reContent", "category2Nm", "category1Nm", "agentId", "agentNm", "analysisCateNm", "inCateNm", "reasonCate1Nm", "reasonCate2Nm", "customerNumber", "gender", "age"];
+    var source = ["extension","caseNumber","endTime","duration","company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId", "content", "reContent", "category2Nm", "category1Nm", "agentId", "agentNm", "analysisCateNm", "inCateNm", "reasonCate1Nm", "reasonCate2Nm", "customerNumber", "gender", "age","direction", "dept_nm", "pre_dept_nm"];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from, source);
     var index = common.getIndex(req.body.channel);
-    if(common.getEmpty(req.body.category) && req.body.category != "ALL")
+	// 정렬 파라미터가 start_time:desc,company_name:asc 형태로 들어옴
+	var sort = req.body.sort || [{ "start_time" : "desc" }];
+	let sort_arr = [];
+	if(typeof sort === "string" ){
+		if(req.body.skeyword != null && req.body.skeyword != ""){
+			sort_arr.push("_score");
+			sort = sort.split(",");
+			for( i in sort ){
+				let k = sort[i].substr(0, sort[i].indexOf(":"));
+                let obj = {}
+                obj[k] = sort[i].substr( sort[i].indexOf(":")+1 , sort[i].length );
+                sort_arr.push(obj);
+			}			
+		} else {
+			sort = sort.split(",")
+			for( i in sort ){
+                let k = sort[i].substr(0, sort[i].indexOf(":"));
+                let obj = {}
+                obj[k] = sort[i].substr( sort[i].indexOf(":")+1 , sort[i].length );
+                sort_arr.push(obj);
+            }
+            sort_arr.push("_score");    
+		}
+	} else {
+		sort_arr = sort;
+	}
+	body.sort = sort_arr;
+
+	if(common.getEmpty(req.body.category) && req.body.category != "ALL")
         body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
     if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
@@ -80,11 +108,12 @@ router.post("/search", function(req, res){
 		};
 		body.query.bool.filter.push(query_stting);
 	}
-	
+	/*
 	body.sort = {
         "startTime" : "desc" // 파라미터로 받아서 정렬하기 
     }
-        
+    */
+	
     client.search({
         index ,
         body 
