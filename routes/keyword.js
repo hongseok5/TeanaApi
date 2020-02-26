@@ -645,6 +645,7 @@ router.post("/relation2", function(req, res){
     
     var body = common.getBodyNoSize(req.body.start_dt, req.body.end_dt);
     var index = common.getIndex(req.body.channel);
+	let size = req.body.size || 100;
 	var should = [];
     var interval = req.body.interval || "1D";
 	
@@ -712,7 +713,7 @@ router.post("/relation2", function(req, res){
            aggs_name: {
         	   terms: {
         		   field: "keyword_count.keyword",
-        		   size : "101"
+        		   size : (size+1)
                }
             }
         }
