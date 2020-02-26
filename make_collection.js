@@ -6,6 +6,17 @@ var client = new elasticsearch.Client({
   log: 'error',
   apiVersion: '6.8'
 });
+
+client.ping({
+  requestTimeout : 100
+}, function(err){
+  if (err){
+    console.log('elasticsearch connection down!');
+  } else {
+  console.log('elasticsearch connection well');
+  }
+});
+
 var resultAt = dateformat(new Date(), "yyyymmddHHMMss");
 var write_path = "C:\\Users\\hongseok5\\Downloads\\test_collection"
 var ws = fs.WriteStream(write_path + resultAt + ".json"); 
@@ -41,7 +52,7 @@ var body = {
 
 // 조회
 client.search({ index : "call_*", body }).then((resp) => {
-  if(resp.hits.hits.length > 0){
+  if( !resp.error && resp.hits.hits.length > 0){
 
     for(i in resp.hits.hits){
       // map에서 정정할 카테고리 값을 가져온다
@@ -49,6 +60,9 @@ client.search({ index : "call_*", body }).then((resp) => {
       // JBT 키를 생성한다
       resp.hits.hits[i]._source.jbt_key = resp.hits.hits[i]._source.category + "_" + ( parseInt(i) + seq_start );
       // 파일을 쓴다
+      resp.hits.hits[i]._source.talk = resp.hits.hits[i]._source.timeNtalk;
+      resp.hits.hits[i]._source.doc_id = resp.hits.hits[i]._source.ifId;
+      delete resp.hits.hits[i]._source.timeNtalk;
       ws.write(JSON.stringify(resp.hits.hits[i]._source) + "\n")
     }
 
@@ -56,4 +70,9 @@ client.search({ index : "call_*", body }).then((resp) => {
     console.log("no query result")
   }
   //ws.end();
-});
+}).catch(err => {console.log(err)});
+/*
+
+
+
+*/
