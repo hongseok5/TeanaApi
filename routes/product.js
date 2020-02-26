@@ -34,7 +34,7 @@ router.post("/list", function(req, res){
     var body = common.getBody(req.body.start_dt, req.body.end_dt, 0, 1, fields);
     var index = common.getIndex(req.body.channel);
     var should = [];
-    if(common.getEmpty(req.body.category) && req.body.category != "ALL")
+    if(common.getEmpty(req.body.category) && req.body.category != "ALL") 
         body.query.bool.filter.push({ term : { analysisCate : req.body.category }});
     if(common.getEmpty(req.body.companyCode))
         body.query.bool.filter.push({ term : { company : req.body.companyCode }});
@@ -71,6 +71,7 @@ router.post("/list", function(req, res){
     ]
 
 	body.query.bool.must_not = { "term": { "productCode": ""}};
+	var body2 = body;
     body.aggs.aggs_product = {
         terms : {
             field : "productCode",
@@ -88,51 +89,68 @@ router.post("/list", function(req, res){
           }
     }
     
+	body2.aggs.aggs_mcate = {
+        terms : {
+            field : "Mcate",
+            min_doc_count : 1,  //default, could be higher if buckets more than 10,000
+            size : 10000
+        },
+		  aggs : {
+            agg_class : {
+              filter: {
+                term: {
+                  "analysisCate": "0000000011"
+                }
+              }
+            }
+          }	
+	}
+	
     var result = common.getResult(null, null, "list_by_product");
     result.data.result = [];
     
     let tmp_array = [];
     let p_count = 0;
 	
-    client.search({
+    client.msearch({
         index,
-        body   
-    }, function getMoreUntilEnd(err, resp){
-        if(err){
-            result.status.code = "99";
-            result.status.message = "ERROR"
-            res.send(result);
-        }
-        
-        if( resp.aggregations !== undefined){
+        body : [body, body2]   
+    }).then(result => {
+
+        if( result.responses[0].aggregations !== undefined){
             // first resp
-            result.data.count = resp.aggregations.aggs_product.buckets.length;
-            if(resp.aggregations.aggs_product.buckets.length == 0){
+			var cateData = result.responses[0].aggregations.aggs_mcate.buckets;
+//			console.log("aggs_product:" + result.responses[0].aggregations.aggs_product.buckets.length);
+            if(result.responses[0].aggregations.aggs_product.buckets.length == 0){
                 result.status.code = "10";
                 result.status.message = "OK"
                 res.send(result);
                 return;
-            } else if( resp.aggregations.aggs_product.buckets.length > 10){
+            } else if( result.responses[0].aggregations.aggs_product.buckets.length > 10){
                 size = Number(size);
                 from = Number(from);
-                tmp_array = resp.aggregations.aggs_product.buckets.slice( (from-1) * size, (from-1) * size + size);  // 페이징
+                tmp_array = result.responses[0].aggregations.aggs_product.buckets.slice( (from-1) * size, (from-1) * size + size);  // 페이징
             } else {
-                tmp_array = resp.aggregations.aggs_product.buckets
+                tmp_array = result.responses[0].aggregations.aggs_product.buckets
             }
             
 			productResult = common.getResult( "10", "OK", "list_by_product");
-			productResult.data.count = resp.aggregations.aggs_product.buckets.length;
+			productResult.data.count = result.responses[0].aggregations.aggs_product.buckets.length;
 			productResult.data.result = [];
-			
+						
             for( i in tmp_array){
-				searchName(tmp_array[i], req, res, tmp_array.length);			
+				searchName(tmp_array[i], req, res, tmp_array.length, cateData);			
             }
         }
-    });
+    }).catch(error => {
+		console.log ("error ", error);
+		result.status.code = "99";
+		result.status.message = "ERROR"
+		res.send(result);
+	});
 });
 
-
-function searchName(keyword, req, res, rownum){
+function searchName(keyword, req, res, rownum, cateData){
 	
 	var source = [ "company", "companyNm", "productCode", "productNm", "Mcate", "McateNm", "mdId", "mdNm"];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, 1, 0, source);
@@ -149,6 +167,13 @@ function searchName(keyword, req, res, rownum){
     }).then(function(resp){
     	test = Object.entries(resp.hits.hits);
         for(i in test){
+			var cateRate;
+			for(j in cateData) {
+				if(test[i][1]._source.Mcate == cateData[j].key) {
+					cateRate = Math.round(cateData[j].agg_class.doc_count/cateData[j].doc_count*100)
+					break;
+				}
+			}
         	var obj = {
         		company : common.convertEmpty(test[i][1]._source.company),
         		companyNm : common.convertEmpty(test[i][1]._source.companyNm),
@@ -160,7 +185,8 @@ function searchName(keyword, req, res, rownum){
         		mdNm : test[i][1]._source.mdNm,
 				count : keyword.doc_count,
 				claimCount : keyword.agg_class.doc_count,
-				claimRate : Math.round(keyword.agg_class.doc_count/keyword.doc_count*100)
+				claimRate : Math.round(keyword.agg_class.doc_count/keyword.doc_count*100),
+				cateRate : cateRate
 			}
 			productResult.data.result.push(obj);
 		}
