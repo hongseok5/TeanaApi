@@ -197,7 +197,7 @@ router.post("/search", function(req, res){
 				customerNumber : common.convertEmpty(test[i][1]._source.customerNumber),
 				gender : common.convertGender(test[i][1]._source.gender),
 				age : common.convertEmpty(test[i][1]._source.age),
-				direction : common.convertEmpty(test[i][1]._source.direction),
+				direction : common.convertEmpty(common.convertDirection(test[i][1]._source.direction)),
 				dept_nm : common.convertEmpty(test[i][1]._source.dept_nm),
 				pre_dept_nm : common.convertEmpty(test[i][1]._source.pre_dept_nm),
 				reasonDescription : common.convertEmpty(test[i][1]._source.reasonDescription)
@@ -205,8 +205,8 @@ router.post("/search", function(req, res){
 			if( test[i][1]._index == "chat" ){
 				try{
 					let chat_data = JSON.parse(test[i][1]._source.content)
-					if(Array.isArray(chat_data.content)){
-						obj.content = chat_data.content;
+					if(Array.isArray(chat_data)){
+						obj.content = chat_data;
 					} else {
 						obj.content = [];
 					}

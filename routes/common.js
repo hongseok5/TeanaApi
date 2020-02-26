@@ -362,7 +362,17 @@ var common = {
     	}else{
     		return "/";
     	}
-    }
+	},
+	
+	convertDirection : function( value ){
+		if( value && value == "I"){
+			return 'IN';
+		} else if( value && value == "O"){
+			return 'OUT';
+		} else {
+			return '';
+		}
+	}
 };
 
 

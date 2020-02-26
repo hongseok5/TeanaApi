@@ -116,7 +116,8 @@ router.post("/top", function(req, res){
         for(var i=parseInt(resultsize); i<parseInt(fornum); i++){
         	var obj = {
     			key : test[i][1].key,	
-    			doc_count : test[i][1].doc_count,
+                doc_count : test[i][1].doc_count,
+                rate : Math.round(test[i][1].doc_count / resp.hits.total * 100) + "%",
     			no : parseInt(i) + 1
         	}
         	result.data.result.push(obj);
@@ -127,7 +128,7 @@ router.post("/top", function(req, res){
         var result = common.getResult( "99", "ERROR", "top_keyword");
         res.send(result);
     });
-});
+});     // keyword/top
 
 var topStatisticsResult;
 
