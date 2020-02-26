@@ -20,7 +20,7 @@ const conn = {
     database : 'ssgtv',
     connectionLimit : 50
 };
-
+const minimum_similarity = 0.76;
 let day = new Date().getDate();
 let month = new Date().getMonth() + 1;
 let year = new Date().getFullYear();
@@ -63,10 +63,10 @@ let kwe_option = {
   method : "POST",
   body : {
       mode : "kma",
-      t_vec : "wv_stt_0205",
+      t_vec : "wv_stt_0210",
       text : null,
       in_text : true,
-      combine_xs : false,
+      combine_xs : true,
       size : 50,
       ignore_duplicate : true,
       frequency_ratio : 0.5,
@@ -80,6 +80,8 @@ let kwe_option2 = {
   method : "POST",
   body : {
       text : null,
+      adjective : true,
+      verb : false
   },
   json : true
 }
@@ -99,17 +101,16 @@ let cat_option = {
   uri : 'http://localhost:12800/txt_to_doc',
   method : "POST",
   body : {
-      t_col : "cl_stt_0206",
+      t_col : "cl_stt_0210",
       text : null,
       mode : 'kma',
-      combine_xs : false,
-      size : 20
+      combine_xs : true,
+      size : 10
   },
   json : true
 }
 
-var expt_words = ["예 ", "네 ", "그 ", "아 "]
-//var expt_end_words = ["하다"]
+var expt_words = ["예 ", "네 ", "그 ", "아 ", "곽 ", "뭐 ", "어 ", "수 ", "그런", "제 ", "이 ", "음 ", "그거", "개 ", "이거", "그것", "저 ", "저기", "아니", "칠 ", "때 ", "팔 "];
 console.log("process.pid:"+process.pid);
 
 let file_merge_async = function (file_nr, file_nt){
@@ -169,13 +170,14 @@ function mergeTalk( dataR, dataT  ){
   let merged_data = mergejson(dataR,dataT);
   merged_data.timeNtalk = merged_talk.replace( /20\d{12}/g , "");
   dataR.timeNtalkR = dataR.timeNtalkR.replace( /20\d{12}/g , "");
+
   kwe_option2.body.text = dataR.timeNtalkR.replace( /R:/g , "");  // 키워드 추출시 고객 대화로 추출(용언 추출)
   kwe_option.body.text = dataR.timeNtalkR.replace( /R:/g , "");  // 키워드 추출시 고객 대화로 추출
   pnn_option.body.text = dataR.timeNtalkR;       // 긍,부정어 추출시 고객의 대화로만 추출
   cat_option.body.text = merged_data.timeNtalk;  // 카테고리 분류 - 고객&상담원 대화로
   
-  kwe_option.body.size = parseInt(dataR.timeNtalkR.length / 10);
-   
+  kwe_option.body.size =  parseInt( dataR.timeNtalkR.length / 10 )
+
   Promise.all([rp(kwe_option2), rp(cat_option),rp(pnn_option),rp(kwe_option)]).then(function(values){
 
     merged_data.keyword_count = [];
@@ -185,11 +187,6 @@ function mergeTalk( dataR, dataT  ){
 
     values[0].verbs = values[0].verbs.filter( v => {
       return expt_words.indexOf(v.expression.substr(0, 2)) === -1 ;
-    });
-
-    values[0].verbs = values[0].verbs.filter( v => {
-
-      return !v.expression.startsWith("주문취소") && !v.expression.endsWith("하다");
     });
 
     for( i in values[0].verbs){
@@ -204,7 +201,7 @@ function mergeTalk( dataR, dataT  ){
       merged_data.analysisCateNm = common.getCategory(21);
     } else {
       values[1].output = values[1].output.filter( v => {
-        return v.similarity > 0.79
+        return v.similarity > minimum_similarity && v.id.substr(0,10) !== "0000000004"
       })
       if(  values[1].output === undefined || (Array.isArray(values[1].output) && values[1].output.length === 0) ){
         merged_data.analysisCate = "0000000021";
@@ -232,37 +229,7 @@ function mergeTalk( dataR, dataT  ){
         merged_data.analysisCate = max_key;
         merged_data.analysisCateNm = common.getCategory(Number(max_key));
       }
-      /*
-      if(values[1].output[0].similarity < 0.8 ){
-        values[1].output = values[1].output.slice(0,1)
-      }
-      for( i in values[1].output ){
-        let obj = {};
-        obj.category = values[1].output[i].id.substr(0, values[1].output[i].id.indexOf('_'));
-        obj.score = values[1].output[i].similarity;
-        if( obj.category in cate_obj){
-          cate_obj[obj.category] += obj.score;
-        } else {
-          cate_obj[obj.category] = obj.score;
-        }
-      }
-      tmp_arr = Object.keys(cate_obj);
-      let max = 0;
-      let max_key = null;
-      for( i in tmp_arr){
-        if( cate_obj[tmp_arr[i]] > max ){
-          max = cate_obj[tmp_arr[i]]; 
-          max_key = tmp_arr[i];
-        }
-      }
-      if( parseFloat(max) < 0.8 ){
-        merged_data.analysisCate = "0000000021";
-        merged_data.analysisCateNm = common.getCategory(21);        
-      } else {
-        merged_data.analysisCate = max_key;
-        merged_data.analysisCateNm = common.getCategory(Number(max_key));
-      }
-      */
+
     }
     
     merged_data.negative_word = [];

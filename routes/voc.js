@@ -27,11 +27,52 @@ router.post("/search", function(req, res){
     }
     let size = req.body.size || 10;
     let from = req.body.from || 1;
-    var source = ["extension","caseNumber","endTime","duration","company","companyNm","productCode","productNm","Mcate","McateNm","mdId","mdNm","startTime","extension","ifId", "content", "reContent", "category2Nm", "category1Nm", "agentId", "agentNm", "analysisCateNm", "inCateNm", "reasonCate1Nm", "reasonCate2Nm", "customerNumber", "gender", "age","direction", "dept_nm", "pre_dept_nm"];
+	var source = [	  "extension"
+					, "caseNumber"
+					, "endTime"
+					, "duration"
+					, "company"
+					, "companyNm"
+					, "productCode"
+					, "productNm"
+					, "Mcate"
+					, "McateNm"
+					, "mdId"
+					, "mdNm"
+					, "startTime"
+					, "extension"
+					, "ifId"
+					, "content"
+					, "reContent"
+					, "category2Nm"
+					, "category1Nm"
+					, "agentId"
+					, "agentNm"
+					, "analysisCateNm"
+					, "inCateNm"
+					, "reasonCate1Nm"
+					, "reasonCate2Nm"
+					, "customerNumber"
+					, "gender"
+					, "age"
+					, "direction"
+					, "dept_nm"
+					, "pre_dept_nm"
+					, "det_nm"
+					, "attr_val01"
+					, "caller_num"
+					, "local_ext"
+					, "reasonDescription"
+				];
     var body = common.getBody(req.body.start_dt, req.body.end_dt, size, from, source);
     var index = common.getIndex(req.body.channel);
 	// 정렬 파라미터가 start_time:desc,company_name:asc 형태로 들어옴
-	var sort = req.body.sort || [{ "start_time" : "desc" }];
+	var sort = null;
+	if( !common.getEmpty(req.body.sort)){
+		sort =  [{ "startTime" : "desc" }];
+	} else {
+		sort = req.body.sort;
+	}
 	let sort_arr = [];
 	if(typeof sort === "string" ){
 		if(req.body.skeyword != null && req.body.skeyword != ""){
@@ -155,7 +196,11 @@ router.post("/search", function(req, res){
 				reasonCate2Nm : common.convertEmpty(test[i][1]._source.reasonCate2Nm),
 				customerNumber : common.convertEmpty(test[i][1]._source.customerNumber),
 				gender : common.convertGender(test[i][1]._source.gender),
-				age : common.convertEmpty(test[i][1]._source.age)
+				age : common.convertEmpty(test[i][1]._source.age),
+				direction : common.convertEmpty(test[i][1]._source.direction),
+				dept_nm : common.convertEmpty(test[i][1]._source.dept_nm),
+				pre_dept_nm : common.convertEmpty(test[i][1]._source.pre_dept_nm),
+				reasonDescription : common.convertEmpty(test[i][1]._source.reasonDescription)
 			}
 			if( test[i][1]._index == "chat" ){
 				try{
@@ -176,8 +221,8 @@ router.post("/search", function(req, res){
         }
         res.send(result);
     }, function(err){
-		logger.error("channel_statistics ", err);
-        var result = common.getResult( "99", "ERROR", "channel_statistics");
+		logger.error("voc_search", err);
+        var result = common.getResult( "99", "ERROR", "voc_search");
         res.send(result);
     });
 });
