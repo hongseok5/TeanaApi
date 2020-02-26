@@ -76,7 +76,16 @@ router.post("/list", function(req, res){
             field : "productCode",
             min_doc_count : 1,  //default, could be higher if buckets more than 10,000
             size : 10000
-        }
+        },
+		  aggs : {
+            agg_class : {
+              filter: {
+                term: {
+                  "analysisCate": "0000000011"
+                }
+              }
+            }
+          }
     }
     
     var result = common.getResult(null, null, "list_by_product");
@@ -149,7 +158,9 @@ function searchName(keyword, req, res, rownum){
         		McateNm : test[i][1]._source.McateNm,
         		mdId : test[i][1]._source.mdId,
         		mdNm : test[i][1]._source.mdNm,
-				count : keyword.doc_count
+				count : keyword.doc_count,
+				claimCount : keyword.agg_class.doc_count,
+				claimRate : Math.round(keyword.agg_class.doc_count/keyword.doc_count*100)
 			}
 			productResult.data.result.push(obj);
 		}
