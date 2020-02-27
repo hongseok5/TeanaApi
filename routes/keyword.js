@@ -713,7 +713,7 @@ router.post("/relation2", function(req, res){
            aggs_name: {
         	   terms: {
         		   field: "keyword_count.keyword",
-        		   size : (size+1)
+        		   size : parseInt(size)+1
                }
             }
         }
