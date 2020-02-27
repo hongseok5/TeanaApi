@@ -8,13 +8,20 @@ var client = new elasticsearch.Client({
   apiVersion: '6.8'
 });
 
+/**
+ * 상담지원시스템 > 상담분석 > 원문검색 화면에서
+ * 자동카테고리 분류가 잘못된 데이터를 맞는 카테고리로 정정하여
+ * 학습데이터로 사용할 JBT 파일을 만드는 소스
+ */
+
 var resultAt = dateformat(new Date(), "yyyymmddHHMMss");
-var write_path = "C:\\Users\\hongseok5\\Downloads\\test_collection"
+//var write_path = "C:\\Users\\hongseok5\\Downloads\\test_collection" // 로컬테스트
+var write_path = '/data/TextAnalytics_data/data/collection/cl_stt_0210/archive/jbt';  // 서버디렉토리
 var ws = fs.WriteStream(write_path + resultAt + ".json"); 
 const cmap = new Map([ 
 
-  ["00811348", "0000000008"]
-
+  ["00813574", "0000000009"]
+  // 학습시키고자 하는 케이스번호, 정확한 자동카테고리를 키,값 형태로 
 ]); 
 
 let coll_body = {
@@ -26,7 +33,7 @@ let coll_body = {
     }
   },
   size : 0
-}
+} // max 키를 구하는 쿼리
 
 var body = {
   size : 1000,
@@ -36,10 +43,10 @@ var body = {
               "ifId" ],
   query : {
     terms : {
-      caseNumber : Array.from(cmap.keys())
+      caseNumber : Array.from(cmap.keys())  
     }
   }
-}
+} // 케이스번호로 상담내용을 가져오는 쿼리
 
 client.ping({
   requestTimeout : 100
@@ -54,20 +61,22 @@ client.ping({
 
     // 기존의 컬렉션 인덱스에서 max 키 값을 가져온다.
     let no = Number(values[0].aggregations.max_key.value) + 1;
-
     if( !values[1].error && values[1].hits.hits.length > 0){
 
       for(i in values[1].hits.hits){
         // map에서 정정할 카테고리 값을 가져온다
         values[1].hits.hits[i]._source.category = cmap.get(values[1].hits.hits[i]._source.caseNumber);
-        // JBT 키를 생성한다
+        // 컬렉션 키를 생성한다
         values[1].hits.hits[i]._source.no =  parseInt(i) + no;
         values[1].hits.hits[i]._source.jbt_key = values[1].hits.hits[i]._source.category + "_" + ( parseInt(i) + no );
-        // 파일을 쓴다
+        // 필드명을 /app/TeAna/TeAnaTextAnalytics-1.2.0/config/config.yaml 에 정의된대로 바꿔준다.
         values[1].hits.hits[i]._source.talk = values[1].hits.hits[i]._source.timeNtalk;
         values[1].hits.hits[i]._source.doc_id = values[1].hits.hits[i]._source.ifId;
         delete values[1].hits.hits[i]._source.timeNtalk;
+
+        // 파일쓰기
         ws.write(JSON.stringify(values[1].hits.hits[i]._source) + "\n")
+        
         let document ={
           index : "category_collection",
           type : "doc",
@@ -75,9 +84,9 @@ client.ping({
           body : {
             doc : {
               jbt_key : values[1].hits.hits[i]._source.jbt_key, // 컬렉션 키
-              use_yn : "Y", // 사용여부
-              doc_id : values[1].hits.hits[i]._source.ifId, // 상담식별자
-              no : parseInt(i) + no,  // 시퀀스 번호
+              use_yn : "N", // 사용여부 - 실제로 doc2vec실행후 Y로 바꾼다.
+              doc_id : values[1].hits.hits[i]._source.ifId, // 상담내용 식별자
+              no : Number(i) + no,  // 시퀀스 번호
               //len : resp.hits.hits[i]._source.timeNtalk.length,
               talk : values[1].hits.hits[i]._source.talk, // 상담 텍스트
               category_code : values[1].hits.hits[i]._source.category,  //카테고리 코드
@@ -86,6 +95,7 @@ client.ping({
            doc_as_upsert : true
           }
         };
+        // ES에 insert
         client.update(document).then(resp => {
           console.log(JSON.stringify(resp))
         });
@@ -101,11 +111,7 @@ client.ping({
 
 
 
-/**
- * 상담지원시스템 > 상담분석 > 원문검색 화면에서
- * 자동카테고리 분류가 잘못된 데이터를 맞는 카테고리로 정정하여
- * 학습데이터로 사용할 JBT 파일을 만드는 소스
- */
+
 
 // caseNumber와 정정한 자동카테고리 코드를 키,값쌍으로 넣는다.
 
