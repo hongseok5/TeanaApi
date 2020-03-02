@@ -1,0 +1,29 @@
+# for reindexing
+input{
+        file{
+                path => "/data/reindexing_data/result/reindexing_20200217123630_11f.json"
+
+                # mode => "read"
+                start_position => "beginning"
+                #sincedb_path => "/dev/null"
+                # file_completed_action => "log_and_delete"
+                file_completed_log_path => "/applog/logstash/file_to_es/reindexing_insert.log"
+                #file_sort_direction => "asc"
+                #type => "json"
+                file_chunk_size => 262144
+                codec => "json"
+        }
+}
+
+output {
+        elasticsearch {
+                hosts => ["localhost:9200"]
+                index => "call_201911"
+                document_id => "%{ifId}"
+                action => "update"
+                doc_as_upsert => true
+        }
+        #stdout {
+        # codec => rubydebug
+        #}
+}

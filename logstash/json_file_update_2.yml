@@ -1,0 +1,28 @@
+input{
+        file{
+                path => "/data/TextAnalytics_data/data/collection/cl_stt_0210/archive/jbt/category_0215_negative.json"
+                #mode => "read"
+                start_position => "beginning"
+                #sincedb_path => "/dev/null"
+                file_completed_action => "log"
+                file_completed_log_path => "/applog/logstash/file_to_es/file_to_es.log"
+                #file_sort_direction => "asc"
+                #type => "json"
+                file_chunk_size => 131072
+                codec => "json"
+        }
+}
+
+
+
+
+output {
+        elasticsearch {
+                hosts => ["localhost:9200"]
+                index => "category_collection"
+                document_id => "%{jbt_key}"
+                #action => "update"
+                #doc_as_upsert => 
+             
+        }
+}

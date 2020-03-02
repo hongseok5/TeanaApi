@@ -1,0 +1,45 @@
+input{
+        file{
+                path => "/data/TeAnaApi/file/channel_finished/*.JSON"
+                mode => "read"
+                start_position => "beginning"
+                #sincedb_path => "/dev/null"
+                file_completed_action => "log_and_delete"
+                file_completed_log_path => "/applog/logstash/file_to_es/file_to_es_channel.log"
+                #file_sort_direction => "asc"
+                #type => "json"
+                file_chunk_size => 131072
+                codec => "json"
+        }
+}
+
+filter{
+ # mutate {
+   # rename => ["ifId", "indexno"]
+ # }
+
+ mutate {
+   add_field => {
+     "startTime" => "%{regDate}"
+     # "year_month" => ""
+    }
+ }
+
+ mutate {
+   remove_field => [ "@version",  "host",  "path" ]
+ } 
+ # ruby {
+  #  code => "event.set('year_month', event.get('startTime')[0..5])"
+  #} 
+}
+
+output {
+        elasticsearch {
+                hosts => ["localhost:9200"]
+                index => "%{channel}"
+                document_id => "%{caseId}"
+                #action => "update"
+                #doc_as_upsert => true
+             
+        }
+}
