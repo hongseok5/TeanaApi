@@ -69,7 +69,10 @@ router.post("/top", function(req, res){
         body.query.bool.filter.push({ term : { category1Nm : req.body.category1Nm }});
     if(common.getEmpty(req.body.category2Nm))
         body.query.bool.filter.push({ term : { category2Nm : req.body.category2Nm }});
-
+    if(common.getEmpty(req.body.category1))
+        body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
+    if(common.getEmpty(req.body.category2))
+        body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
 
     if(common.getEmpty(req.body.product)){
     	for( p in req.body.product ){
@@ -675,6 +678,10 @@ router.post("/relation2", function(req, res){
     	body.query.bool.filter.push({ range : { age : { gte : Number(req.body.age), lte : Number(req.body.age) + 9}}});
     if(req.body.orderYn == "Y" )
         body.query.bool.filter.push({ term : { category2 : "zz" }});
+    if(common.getEmpty(req.body.category1))
+        body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
+    if(common.getEmpty(req.body.category2))
+        body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
     if(common.getEmpty(req.body.category1Nm))
         body.query.bool.filter.push({ term : { category1Nm : req.body.category1Nm }});
     if(common.getEmpty(req.body.category2Nm))

@@ -270,6 +270,21 @@ router.post("/category", function(req, res){
         }
     }        
 
+    body.aggs.aggs_code = {
+        terms : {
+           field : "category1",
+		   size : 1000
+        },
+        aggs : {
+        	agg_code2 : {
+        		terms : {
+        			field : "category2",
+        			size : 1000
+        	    }
+        	}
+        }
+    } 
+
     client.search({
         index,
         body 
@@ -277,14 +292,49 @@ router.post("/category", function(req, res){
 
         var result = common.getResult("10", "OK", "category_by_class");
         result.data.result = [];
-        
+
+        if(resp.aggregations.aggs_class.buckets.length > resp.aggregations.aggs_code.buckets.length){
+            resp.aggregations.aggs_class.buckets = resp.aggregations.aggs_class.buckets.slice(0, resp.aggregations.aggs_code.buckets.length);
+        } else if(resp.aggregations.aggs_class.buckets.length < resp.aggregations.aggs_code.buckets.length){
+            resp.aggregations.aggs_code.buckets = resp.aggregations.aggs_code.buckets.slice(0, resp.aggregations.aggs_class.buckets.length);
+        } else {    
+
+        }
+
+        for(i in resp.aggregations.aggs_class.buckets, resp.aggregations.aggs_code.buckets){
+
+            resp.aggregations.aggs_class.buckets[i].code1 = resp.aggregations.aggs_code.buckets[i].key;
+            if(resp.aggregations.aggs_class.buckets[i].agg_class2.buckets.length == resp.aggregations.aggs_code.buckets[i].agg_code2.buckets.length){
+                console.log("same")
+            } else if(resp.aggregations.aggs_class.buckets[i].agg_class2.buckets.length < resp.aggregations.aggs_code.buckets[i].agg_code2.buckets.length){
+                console.log( resp.aggregations.aggs_class.key, resp.aggregations.aggs_code.key )
+                console.log(resp.aggregations.aggs_class.buckets[i].agg_class2.buckets.length )
+                console.log(resp.aggregations.aggs_code.buckets[i].agg_code2.buckets.length)
+                resp.aggregations.aggs_code.buckets[i].agg_code2.buckets = 
+                    resp.aggregations.aggs_code.buckets[i].agg_code2.buckets.slice(0, resp.aggregations.aggs_class.buckets[i].agg_class2.buckets.length);
+                console.log(resp.aggregations.aggs_code.buckets[i].agg_code2.buckets.length)
+            } else {    
+                console.log( resp.aggregations.aggs_class.buckets, resp.aggregations.aggs_code )
+                console.log(resp.aggregations.aggs_class.buckets[i].agg_class2.buckets.length )
+                console.log(resp.aggregations.aggs_code.buckets[i].agg_code2.buckets.length)
+                resp.aggregations.aggs_class.buckets[i].agg_class2.buckets = 
+                    resp.aggregations.aggs_class.buckets[i].agg_class2.buckets.slice(0, resp.aggregations.aggs_code.buckets[i].agg_code2.buckets.length);
+            }
+
+            for(j in resp.aggregations.aggs_class.buckets[i].agg_class2.buckets, resp.aggregations.aggs_code.buckets[i].agg_code2.buckets){
+                resp.aggregations.aggs_class.buckets[i].agg_class2.buckets[j].code2 = common.convertEmpty(resp.aggregations.aggs_code.buckets[i].agg_code2.buckets[j].key);
+            }
+        }
+
         var z = 0;
         for(i in resp.aggregations.aggs_class.buckets){
         	z = parseInt(z)+parseInt(resp.aggregations.aggs_class.buckets[i].doc_count);
         	for(j in resp.aggregations.aggs_class.buckets[i].agg_class2.buckets){
         		var obj = {
         		   	category1Nm : resp.aggregations.aggs_class.buckets[i].key,
-        		   	category2Nm : resp.aggregations.aggs_class.buckets[i].agg_class2.buckets[j].key,
+                    category2Nm : resp.aggregations.aggs_class.buckets[i].agg_class2.buckets[j].key,
+                    category1 : resp.aggregations.aggs_class.buckets[i].code1,
+        		   	category2 : resp.aggregations.aggs_class.buckets[i].agg_class2.buckets[j].code2,
         		   	count : resp.aggregations.aggs_class.buckets[i].agg_class2.buckets[j].doc_count,
         		   	avgTime : Math.round(resp.aggregations.aggs_class.buckets[i].agg_class2.buckets[j].avd_value.value)
         		}
@@ -293,7 +343,7 @@ router.post("/category", function(req, res){
         }
         result.data.count = z;
         res.send(result);
-
+        
     }, function(err){
 		logger.error("category_by_class ", err);
         var result = common.getResult("99", "ERROR", "category_by_class");

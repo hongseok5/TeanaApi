@@ -555,7 +555,7 @@ router.post("/wordcloud", function(req, res){
 });
 
 router.post("/class", function(req, res){
-    logger.info("Router for ");
+    logger.info("Router for per category");
     if(!common.getEmpty(req.body.start_dt)){
     	var result = common.getResult("40", "OK", "There is no required start_dt");
     	res.send(result);
