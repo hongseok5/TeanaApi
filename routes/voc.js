@@ -46,6 +46,8 @@ router.post("/search", function(req, res){
 					, "reContent"
 					, "category2Nm"
 					, "category1Nm"
+					, "category2"
+					, "category1"
 					, "agentId"
 					, "agentNm"
 					, "analysisCateNm"
@@ -75,6 +77,7 @@ router.post("/search", function(req, res){
 	}
 	let sort_arr = [];
 	if(typeof sort === "string" ){
+		//검색어가 있을 경우
 		if(req.body.skeyword != null && req.body.skeyword != ""){
 			sort_arr.push("_score");
 			sort = sort.split(",");
@@ -124,12 +127,17 @@ router.post("/search", function(req, res){
         }
         body.query.bool.filter.push(nest_obj);
 	}
+
     if(req.body.orderYn == "Y" )
         body.query.bool.filter.push({ term : { category2 : "zz" }});
     if(common.getEmpty(req.body.category1Nm))
         body.query.bool.filter.push({ term : { category1Nm : req.body.category1Nm }});
     if(common.getEmpty(req.body.category2Nm))
-        body.query.bool.filter.push({ term : { category2Nm : req.body.category2Nm }});
+		body.query.bool.filter.push({ term : { category2Nm : req.body.category2Nm }});
+	if(common.getEmpty(req.body.category1))
+        body.query.bool.filter.push({ term : { category1 : req.body.category1 }});
+    if(common.getEmpty(req.body.category2))
+        body.query.bool.filter.push({ term : { category2 : req.body.category2 }});
     if(common.getEmpty(req.body.reasonCate1Nm))
         body.query.bool.filter.push({ term : { reasonCate1Nm : req.body.reasonCate1Nm }});
     if(common.getEmpty(req.body.reasonCate2Nm))
@@ -147,13 +155,8 @@ router.post("/search", function(req, res){
 				fields: ["timeNtalk", "content", "reContent"]  // 검색어가 있는지 확인하는 복수개의 필드
 			}
 		};
-		body.query.bool.filter.push(query_stting);
+		body.query.bool.should = query_stting;
 	}
-	/*
-	body.sort = {
-        "startTime" : "desc" // 파라미터로 받아서 정렬하기 
-    }
-    */
 	
     client.search({
         index ,
